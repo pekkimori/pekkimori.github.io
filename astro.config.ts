@@ -18,9 +18,12 @@ import react from "@astrojs/react";
 // https://astro.build/config
 export default defineConfig({
   site: SITE.website,
-  integrations: [sitemap({
-    filter: page => SITE.showArchives || !page.endsWith("/archives"),
-  }), react()],
+  integrations: [
+    sitemap({
+      filter: page => SITE.showArchives || !page.endsWith("/archives"),
+    }),
+    react(),
+  ],
   markdown: {
     remarkPlugins: [
       remarkMath,
@@ -32,7 +35,7 @@ export default defineConfig({
       // For more themes, visit https://shiki.style/themes
       themes: { light: "catppuccin-latte", dark: "catppuccin-macchiato" },
       defaultColor: false,
-      wrap: false,
+      wrap: true,
       transformers: [
         transformerFileName({ style: "v2", hideDot: false }),
         transformerNotationHighlight(),
