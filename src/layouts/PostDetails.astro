@@ -1,5 +1,6 @@
 ---
 import { render, type CollectionEntry } from "astro:content";
+import Comments from "@/components/Comments";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
@@ -64,7 +65,7 @@ const layoutProps = {
   modDatetime,
   canonicalURL,
   ogImage,
-  scrollSmooth: true,
+  scrollSmooth: false,
 };
 
 /* ========== Prev/Next Posts ========== */
@@ -162,6 +163,20 @@ const nextPost =
         )
       }
     </div>
+
+    <hr class="my-6 border-dashed" />
+
+    <Comments client:only="react" />
+
+    <style>
+      .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+      }
+      .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+    </style>
   </main>
   <Footer />
 </Layout>
