@@ -126,6 +126,9 @@ const nextPost =
       {tags.map(tag => <Tag tag={slugifyStr(tag)} tagName={tag} />)}
     </ul>
 
+    <hr class="my-6 border-dashed" />
+    <Comments client:only="react" />
+    <hr class="my-6 border-dashed" />
     <BackToTopButton />
 
     <ShareLinks />
@@ -163,20 +166,6 @@ const nextPost =
         )
       }
     </div>
-
-    <hr class="my-6 border-dashed" />
-
-    <Comments client:only="react" />
-
-    <style>
-      .scrollbar-hide::-webkit-scrollbar {
-        display: none;
-      }
-      .scrollbar-hide {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-      }
-    </style>
   </main>
   <Footer />
 </Layout>

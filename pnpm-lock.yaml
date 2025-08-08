@@ -17,6 +17,15 @@ importers:
       '@astrojs/sitemap':
         specifier: ^3.4.1
         version: 3.4.1
+      '@fontsource-variable/eb-garamond':
+        specifier: ^5.2.6
+        version: 5.2.6
+      '@fontsource-variable/jetbrains-mono':
+        specifier: ^5.2.6
+        version: 5.2.6
+      '@fontsource/libertinus-math':
+        specifier: ^5.2.1
+        version: 5.2.1
       '@giscus/react':
         specifier: ^3.1.0
         version: 3.1.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
@@ -41,6 +50,9 @@ importers:
       katex:
         specifier: ^0.16.22
         version: 0.16.22
+      lenis:
+        specifier: ^1.3.8
+        version: 1.3.8(react@19.1.1)
       lodash.kebabcase:
         specifier: ^4.1.1
         version: 4.1.1
@@ -50,6 +62,9 @@ importers:
       react-dom:
         specifier: ^19.1.1
         version: 19.1.1(react@19.1.1)
+      react-github-calendar:
+        specifier: ^4.5.9
+        version: 4.5.9(react@19.1.1)
       rehype-katex:
         specifier: ^7.0.1
         version: 7.0.1
@@ -500,6 +515,15 @@ packages:
   '@eslint/plugin-kit@0.3.1':
     resolution: {integrity: sha512-0J+zgWxHN+xXONWIyPWKFMgVuJoZuGiIFu8yxk7RJjxkzpGmyja5wRFqZIVtjDVOQpV+Rw0iOAjYPE2eQyjr0w==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@fontsource-variable/eb-garamond@5.2.6':
+    resolution: {integrity: sha512-7WNOTFudWYYSiTmaRlTQO0GwS8UQeCVzrluVsRQY5ueDlrUzCwlCQdbGJ4IxGchYqgqB4ehOqX3jjTxBpJyNeA==}
+
+  '@fontsource-variable/jetbrains-mono@5.2.6':
+    resolution: {integrity: sha512-1pvtyK6H1paBOixbtZ9xfQgArVQ4SJMW3WSGZPOd5PiW3yg0t8umwKnjDMzW2ofb7qSdiXnsnIaHPT36vEOdlg==}
+
+  '@fontsource/libertinus-math@5.2.1':
+    resolution: {integrity: sha512-vw43s1n3gHWJ+xgtDlW09pC++/Z2GBzPmhgkA9bho2JgqrRbEos598KA7JncXUAYmt+zk/YCHPRbYmEbp0Vz7Q==}
 
   '@giscus/react@3.1.0':
     resolution: {integrity: sha512-0TCO2TvL43+oOdyVVGHDItwxD1UMKP2ZYpT6gXmhFOqfAJtZxTzJ9hkn34iAF/b6YzyJ4Um89QIt9z/ajmAEeg==}
@@ -1574,6 +1598,9 @@ packages:
   csstype@3.1.3:
     resolution: {integrity: sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw==}
 
+  date-fns@4.1.0:
+    resolution: {integrity: sha512-Ukq0owbQXxa/U3EGtsdVBkR1w7KOQ5gIBqdH2hkvknzZPYvBxb/aa6E8L7tmjFtkwZBu3UXBbjIgPo/Ez4xaNg==}
+
   dayjs@1.11.13:
     resolution: {integrity: sha512-oaMBel6gjolK862uaPQOVTA7q3TZhuSvuMQAAglQDOWYO9A91IrAOUJEyKVlqJlHE0vq5p5UXxzdPfMH/x6xNg==}
 
@@ -2042,6 +2069,20 @@ packages:
   kleur@4.1.5:
     resolution: {integrity: sha512-o+NO+8WrRiQEE4/7nwRJhN1HWpVmJm511pBHUxPLtp0BUISzlBplORYSmTclCnJvQq2tKu/sgl3xVpkc7ZWuQQ==}
     engines: {node: '>=6'}
+
+  lenis@1.3.8:
+    resolution: {integrity: sha512-LVeoMs6jZE1eu3gPsexndm+vk01pLFeq7P00vjIpI17saD52IYu8nPA4gX43elz8tp/TTCXcX6Em1MEjDl9NTw==}
+    peerDependencies:
+      '@nuxt/kit': '>=3.0.0'
+      react: '>=17.0.0'
+      vue: '>=3.0.0'
+    peerDependenciesMeta:
+      '@nuxt/kit':
+        optional: true
+      react:
+        optional: true
+      vue:
+        optional: true
 
   levn@0.4.1:
     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==}
@@ -2576,10 +2617,20 @@ packages:
   radix3@1.1.2:
     resolution: {integrity: sha512-b484I/7b8rDEdSDKckSSBA8knMpcdsXudlE/LNL639wFoHKwLbEkQFZHWEYwDC0wa0FKUcCY+GAF73Z7wxNVFA==}
 
+  react-activity-calendar@2.7.13:
+    resolution: {integrity: sha512-1ZHVgK8QJxtwG52EmcQrxhUQyN1Bv+819IPTTDAGp7Hme3h9IX2thDZJG+KnVbNQ3cjh8DQdfX4wWsTHIw75ug==}
+    peerDependencies:
+      react: ^18.0.0 || ^19.0.0
+
   react-dom@19.1.1:
     resolution: {integrity: sha512-Dlq/5LAZgF0Gaz6yiqZCf6VCcZs1ghAJyrsu84Q/GT0gV+mCxbfmKNoGRKBYMJ8IEdGPqu49YWXD02GCknEDkw==}
     peerDependencies:
       react: ^19.1.1
+
+  react-github-calendar@4.5.9:
+    resolution: {integrity: sha512-5Ks2vGbR4KieM0vO49hJKy6hLKpFo7kbtOg+Z67qz83VeJy094okTGLt9+k2oryN5PKfjn5sJr0UObXSvNgcNw==}
+    peerDependencies:
+      react: ^18.0.0 || ^19.0.0
 
   react-refresh@0.17.0:
     resolution: {integrity: sha512-z6F7K9bV85EfseRCp2bzrpyQ0Gkw1uLoCel9XBVWPg/TjRj94SkJzUTGfOa4bs7iJvBWtQG0Wq7wnI0syw3EBQ==}
@@ -3677,6 +3728,12 @@ snapshots:
       '@eslint/core': 0.14.0
       levn: 0.4.1
 
+  '@fontsource-variable/eb-garamond@5.2.6': {}
+
+  '@fontsource-variable/jetbrains-mono@5.2.6': {}
+
+  '@fontsource/libertinus-math@5.2.1': {}
+
   '@giscus/react@3.1.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)':
     dependencies:
       giscus: 1.6.0
@@ -4755,6 +4812,8 @@ snapshots:
 
   csstype@3.1.3: {}
 
+  date-fns@4.1.0: {}
+
   dayjs@1.11.13: {}
 
   debug@4.4.0:
@@ -5265,6 +5324,10 @@ snapshots:
   kleur@3.0.3: {}
 
   kleur@4.1.5: {}
+
+  lenis@1.3.8(react@19.1.1):
+    optionalDependencies:
+      react: 19.1.1
 
   levn@0.4.1:
     dependencies:
@@ -5925,10 +5988,20 @@ snapshots:
 
   radix3@1.1.2: {}
 
+  react-activity-calendar@2.7.13(react@19.1.1):
+    dependencies:
+      date-fns: 4.1.0
+      react: 19.1.1
+
   react-dom@19.1.1(react@19.1.1):
     dependencies:
       react: 19.1.1
       scheduler: 0.26.0
+
+  react-github-calendar@4.5.9(react@19.1.1):
+    dependencies:
+      react: 19.1.1
+      react-activity-calendar: 2.7.13(react@19.1.1)
 
   react-refresh@0.17.0: {}
 

@@ -3,6 +3,7 @@ import { ClientRouter } from "astro:transitions";
 import { PUBLIC_GOOGLE_SITE_VERIFICATION } from "astro:env/client";
 import { SITE } from "@/config";
 import "@/styles/global.css";
+import "@fontsource-variable/jetbrains-mono";
 
 export interface Props {
   title?: string;
@@ -150,3 +151,7 @@ const structuredData = {
     height: 100%;
   }
 </style>
+
+<script>
+  import "@/assets/scripts/lenisSmoothScroll.js";
+</script>
