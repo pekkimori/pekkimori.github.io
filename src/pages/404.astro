@@ -8,10 +8,9 @@ import { SITE } from "@/config";
 
 <Layout title={`404 Not Found | ${SITE.title}`}>
   <Header />
-
   <main
     id="main-content"
-    class="mx-auto flex max-w-app flex-1 items-center justify-center"
+    class="mx-auto mt-20 flex max-w-app flex-1 items-center justify-center"
   >
     <div class="mb-14 flex flex-col items-center justify-center">
       <h1 class="text-9xl font-bold text-accent">404</h1>
@@ -19,12 +18,16 @@ import { SITE } from "@/config";
       <p class="mt-4 text-2xl sm:text-3xl">Page Not Found</p>
       <LinkButton
         href="/"
-        class="my-6 text-lg underline decoration-dashed underline-offset-8"
+        class="my-6 mb-20 text-lg underline decoration-dashed underline-offset-8"
       >
         Go back home
       </LinkButton>
+      <iframe
+        src="http://www.staggeringbeauty.com/"
+        style="border: 1px inset #ddd"
+        width=""
+        height="1000"></iframe>
     </div>
   </main>
-
   <Footer />
 </Layout>
