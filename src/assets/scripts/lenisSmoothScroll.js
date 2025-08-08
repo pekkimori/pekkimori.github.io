@@ -1,13 +1,35 @@
 // src/assets/scripts/lenisSmoothScroll.js
 import "@/styles/lenis.css";
-
 import Lenis from "lenis";
 
-const lenis = new Lenis();
+// Store the lenis instance globally to manage it properly
+let lenis;
+let rafId;
 
-function raf(time) {
-  lenis.raf(time);
-  requestAnimationFrame(raf);
+function initLenis() {
+  // Destroy existing instance if it exists
+  if (lenis) {
+    lenis.destroy();
+  }
+  if (rafId) {
+    cancelAnimationFrame(rafId);
+  }
+
+  // Create new instance
+  lenis = new Lenis();
+
+  function raf(time) {
+    lenis.raf(time);
+    rafId = requestAnimationFrame(raf);
+  }
+
+  rafId = requestAnimationFrame(raf);
 }
 
-requestAnimationFrame(raf);
+// Initialize on first load
+initLenis();
+
+// Reinitialize on page transitions
+document.addEventListener("astro:after-swap", () => {
+  initLenis();
+});

@@ -159,6 +159,14 @@ const structuredData = {
 <script is:inline data-astro-rerun>
   /** Create a progress indicator at the top */
   function createProgressBar() {
+    // Remove existing progress bar if it exists
+    const existingProgressContainer = document.querySelector(
+      ".progress-container"
+    );
+    if (existingProgressContainer) {
+      existingProgressContainer.remove();
+    }
+
     // Create the main container div
     const progressContainer = document.createElement("div");
     progressContainer.className =
@@ -175,25 +183,34 @@ const structuredData = {
     // Append the progress container to the document body
     document.body.appendChild(progressContainer);
   }
-  createProgressBar();
 
   /** Update the progress bar when user scrolls */
   function updateScrollProgress() {
-    document.addEventListener("scroll", () => {
+    // Remove existing scroll listeners to prevent duplicates
+    if (window.scrollProgressHandler) {
+      document.removeEventListener("scroll", window.scrollProgressHandler);
+    }
+
+    // Create the scroll handler function
+    window.scrollProgressHandler = () => {
       const winScroll =
         document.body.scrollTop || document.documentElement.scrollTop;
       const height =
         document.documentElement.scrollHeight -
         document.documentElement.clientHeight;
       const scrolled = (winScroll / height) * 100;
-      if (document) {
-        const myBar = document.getElementById("myBar");
-        if (myBar) {
-          myBar.style.width = scrolled + "%";
-        }
+      const myBar = document.getElementById("myBar");
+      if (myBar) {
+        myBar.style.width = scrolled + "%";
       }
-    });
+    };
+
+    // Add the event listener
+    document.addEventListener("scroll", window.scrollProgressHandler);
   }
+
+  // Initialize everything
+  createProgressBar();
   updateScrollProgress();
 
   /* Go to page start after page swap */
