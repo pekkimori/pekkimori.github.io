@@ -41,9 +41,18 @@ git diff --cached --name-status | while read -r status old_path new_path; do
             git add "$file_to_process"
             ;;
           M)
-            echo "Updating modDatetime for modified file: $file_to_process"
-            # For modified files, only update modDatetime
-            sed -i "/---.*/,/---.*/s/^modDatetime:.*$/modDatetime: $current_time/" "$file_to_process"
+            # If the post was a draft and is now being published, update pubDatetime
+            if grep -q "pubDatetime: 0000-00-00T00:00:00Z" "$file_to_process"; then
+              echo "Updating pubDatetime and modDatetime for published draft: $file_to_process"
+              sed -i \
+                -e "/---.*/,/---.*/s/^pubDatetime:.*$/pubDatetime: $current_time/" \
+                -e "/---.*/,/---.*/s/^modDatetime:.*$/modDatetime: $current_time/" \
+                "$file_to_process"
+            else
+              echo "Updating modDatetime for modified file: $file_to_process"
+              # For other modified files, only update modDatetime
+              sed -i "/---.*/,/---.*/s/^modDatetime:.*$/modDatetime: $current_time/" "$file_to_process"
+            fi
             git add "$file_to_process"
             ;;
         esac

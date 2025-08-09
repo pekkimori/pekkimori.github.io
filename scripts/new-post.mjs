@@ -37,7 +37,7 @@ const main = () => {
   // --- Frontmatter definition ---
   const frontmatter = `---
 author: Rafael Mori
-pubDatetime:
+pubDatetime: 0000-00-00T00:00:00Z
 modDatetime:
 title: ${title}
 slug: ${slug}
