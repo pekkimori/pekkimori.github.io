@@ -25,5 +25,3 @@ git diff --cached --name-status | while read -r status file; do
     esac
   fi
 done
-
-pnpm run build
