@@ -1,0 +1,179 @@
+---
+author: Rafael Mori
+pubDatetime: 2025-08-09T06:01:23Z
+modDatetime: 2025-08-09T06:01:23Z
+title: An in-depth critique of MBTI/personality typology theories
+slug: in-depth-critique-of-personality-typology-theories
+featured: true
+draft: false
+tags:
+  - mbti
+  - personality
+  - philosophy
+  - psychology
+  - pseudoscience
+  - critique
+description:
+  Kind of self-explanatory, but I go through the whole thing. I love to share my thoughts on this topic. I hope you enjoy reading it.
+---
+
+## Table of contents
+
+## Introduction
+
+MBTI became something rather popular. I've known some people who worship this kind of holy knowledge, the perfect missing puzzle piece for dating apps, for it is the best heuristic to determine who is a good partner or not. *(INFJ and INFP are good, INTJ and ESTJ are not. I totally disagree, as I am a very charming INTJ. With caveats.)*
+
+Once, I brought this topic to class, how MBTI — however popular, used even in some corporations to determine the cultural fit of a potential new colleague with the company — It's not science, it cannot be treated like science, it has no empirical measure. It has no scientific proof like the <a href="https://bigfive-test.com/" target="_blank">Big Five</a>.
+
+And on top of that, they claim premises that seem rather out of their own belly buttons. For example, you have only one personality throughout your whole life. (Existentialists are angry right now.) We have proof that people's <a href="https://doi.org/10.1037/bul0000365" target="_blank">personalities change over time</a>, which makes the theory inconsistent. Not only that, but you can take a test now, and it's ENFP. Take it some months later, and it might say you are INTP.[^1]
+
+The types are vague and may apply to anyone: you can say you are an INFP because you find yourself in your head often and have feelings, well, so does any human being without a specific disorder. The same applies to astrology, and we call it the <a href="https://www.britannica.com/science/Barnum-Effect" target="_blank">Barnum effect</a>.
+
+Despite this despite, I am quite a fan of MBTI. From personal experience, it made me reflect more on people, and therefore on myself, which actually improved my life significantly. So it's quite unfair to state that to be a pseudoscience means to have no real value, but it is also hard to say it does, as we might be wrong and have no concrete way to know it. *Maybe it's just a placebo or an incentive to introspect.*
+
+## Contrasting
+
+To make some contrasts and explain this more deeply, let's look at psychology. We can't deny the importance and benefit of a therapist in a person's life. Freud made significant discoveries in psychology, talking about the unconscious; the examples are infinite.
+
+However, he also claims that *"a boy develops an unconscious infatuation towards his mother, and simultaneously fears his father to be a rival"* and that women have a thing called ***"penis envy"***, which obviously raises some concerns.
+
+How exactly do you measure that passion for the mother, and how do you say that *thing* isn't something inside his peculiar head, but everyone else's head too?
+
+That is an extrapolated example -- and maybe unfair to modern neuroscientists -- but unfortunately, similar questions can still be asked about a great portion of psychology discoveries and papers, and have no definite answer. For example, what is your intelligence? Take an IQ test? Well, nor it yields the same value every time you take it, even if there is no significant difference between you now and later, nor it takes into account all of the other type of intelligence that are essential to human beings, nor it represents your true intelligence as it takes many extraneous factors like your current health into account. And of course as any test, you can prepare for it!
+
+## What is science?
+
+But then why is psychology a science, and typology a pseudoscience, if they have similar struggles and talk about tangent topics?
+
+In simple terms, psychology is faulty, but typology does not try to be scientific at all. *(Even if people want it to be perceived like that...)*
+
+In formal terms, science is empirical; it is based on observation and experimentation.
+
+To make empirical evaluations, it must be testable, i.e., able to collect evidence to validate or contradict. That ties to how it must be falsifiable, i.e., able to find evidence that contradicts it. It does not mean that it is false, let me exemplify:
+
+- Claiming all oranges are orange is science, because it takes one green orange to appear to falsify it, this is falsifiable and obviously false;
+- Claiming Earth is reasonably round is science, because it takes a look and see that it is flat to falsify it, but after the look we saw it is very roundy, this is falsifiable and true;
+- Claiming a god exists is not science, because there is no way to prove it is not real — anyone can justify it is true. And in the same way, no one can say it is true for sure; there is still a possibility that there is a scientific reason you don't know yet, and you can only rely on faith.
+
+That last example also shows how it is crucial for science to be verifiable, i.e., able to find evidence that validates it.
+
+That is sufficient to be considered science. And psychology follows it, while MBTI doesn't.
+
+## What is good science?
+
+The confusion arises when we start to question what makes good science. And that's when psychology starts getting attacked.
+
+We need methodological rigor, transparency, and honesty to make sure the argument makes sense and is true, given that the experiment or observation results are correct, giving the study validity. Along with this, we must make sure the premises we are considering are also true and that the results yielded from the experiment or observation are actually correct, giving the study soundness.
+
+It means nothing if evidence validates something once and only once; it should be consistent, we need to make sure it was not a lucky result, and there is a correlation or causation, and an underlying principle. That's why people must be able to reproduce the study (i.e., do the EXACT same thing and get the EXACT same results), giving the study reliability.
+
+Most of the time, we aim to be able to replicate a study (i.e., do something VERY SIMILAR and get VERY SIMILAR results), giving the study generalization.
+
+***My friend wouldn't be gay if he kissed a man once; it could be the drink. I need to make sure that a man kissing another man and liking it means that that person is gay (valid), he should feel something nice for the man he kissed (sound), it should be consistent (reliable), and even when he's not drunk!!! (generalizable) — There is no problem giving your homie a little kissy once my gang. (but it is a good indicator, so someone can make a case study of it, generate more indicators, and then make more generalizable experiments afterwards)***
+
+xoxo,\
+Tiago and Marcel.
+
+## The problem with psychology.
+
+So the problem with psychology is that a human is never the same as the other, not only that, but they change with time, they are never exactly the same as the younger version of them, even a few minutes ago, therefore, it's quite challenging to generalize one finding to a whole group — or even to the same person through its lifetime.
+
+~My Xs loved tickling, but my brother hates tickling to the point that he would kick my face. Furthermore, notice how my Xs only loved my tickling when they were my girlfriend; today, me tickling them would give me a sexual assault sentence straight to jail.~
+
+We also have no way to objectively measure what is happening inside one's head, so we have to always work with proxies. Some examples are standardized tests, facial expressions, and fMRI scans. Still, those are all subject to extraneous variables, like your mood today or a recent event, which often make proper measurements inaccurate. So as you can see, humans are so complex that it is tremendously difficult to indicate the cause or correlation of one action and an event.
+
+*Psychology is a science that finds itself in a <a href="https://www.psychologytoday.com/us/basics/replication-crisis" target="_blank">replication crisis</a>.*
+
+*MBTI is not science at all, but sometimes lies to people, saying it's science, hence pseudoscience.*
+
+## A second contrast.
+
+But, does it truly matter? Does this fact diminish its value? As I exemplified, gods aren't science; however, its benefits are evident. Religion is what changed my father's life, from a drug addict to a well-established, forgiven dad. And it's undeniable how much it changed other people's perceptions, behaviors, and attitudes, for better (agape) or worse (wars.)
+
+In a smaller scale, the same goes for typology. I hate that it tries to trick people into thinking it has scientific backing, but it made me understand people and myself better, changed my attitudes, and made me more empathetic. Interestingly, here is when I tell you that typology actually has its foundations in philosophy and religion. lol
+
+But clearly, there is a distinction between religion and typology, regardless of lying or not.
+
+Religion is, to a great extent, normative; it tries to say how things should be. How you should behave, what sort of procedures, rituals, and choices one should take throughout their lives.
+
+And like science, typology is descriptive; it tries to say how things are. It doesn't care how you should behave; even if you infer better ways to live from that crude information, it is your interpretation of the reality it provides.
+
+That is why typology is so appealing: because it feels scientific and, of course, sounds cool; it describes all of the mysterious things that occur inside our heads while cleverly and sneakily throwing away all of the complexity of the matter.
+
+Imagine the consequences of your company assessing how you are with such a thing, and your potential partner putting you in a labeled box called "INFP" and thinking that's how you behave, a good way to be misrepresented and generate delusions.
+
+## Second round.
+
+But now that I have broken your perception of analytical psychology, I will beat it again.
+
+ᕙﾉ•̀ʖ•́ﾉ୨
+
+If you sat for a while and reflected on the contrasts, you would probably have asked:
+- *Well, if both are descriptive, but typology is not exactly trying to be scientific, what is it trying to be?*
+- *Why is it not trying to get empirical evidence if it is the way of proving its validity?*
+- *What is the purpose and intention of such a theory?*
+
+(ノ ﾟДﾟ)ノ　＝＝＝　┻━━┻
+
+And now, I question you:
+- *Is it possible to answer every question, to argue everything, through the lens of science? Is reality entirely objective?*\
+- *In other words, does identical measurements yield identical observations that are independent of the subject? What do we do when we don't have a deterministic answer?*\
+- *Is it reasonable to neglect a theory because its underlying principles are probably wrong, if the results are tangible and useful?*
+
+┬──┬ ノ( ゜-゜ノ)
+
+## Objective vs Subjective
+
+The problem is, when we deal with human beings, some questions don't have an objective answer, for our nature presumes we have subjective aspects. Even if I look at a painting from the same distance, height, luminosity, time of the day, season of the year, wearing the same clothes as another person, doing everything exactly the same, the interpretation I will have from that work of art will never be precisely the same as someone else's.
+
+That is some of humanity's beauty and complication, and reasons why a machine can never replicate our critical/creative thinking.
+
+Psychology can only be studied objectively to a certain extent. There are questions in your life for which the answer is subjective, probably incorrect, partially unverifiable, and unexplainable to the fullest. Furthermore, that answer only lies in *you*, and for *you*.
+
+And to say it is not objective does not mean it cannot be true; a lover can't put their love in words, but that never made their feelings false.
+
+## Why subjective?
+
+Funnily, knowing all that, we humans try to express and communicate all those incommunicable feelings to the world through something we like to call "art". We try to justify, explain, and describe the world with our subjective and deductive lens through something we like to call "philosophy". And even in real-world applications, or in daily situations, for various reasons, we consciously and unconsciously simplify reality through something we like to call "modelling".[^2]
+
+So cast the first stone who dares to say this beauty never once changed, guided, or defined your life. And if you do have this audacity, either you are blind to its influence in your life, you didn't get what I said, you are rage-baiting, or you are under some weird influences. (I would like to hear your thoughts anyway.)
+
+With that in mind, typology is a philosophical love letter that models human cognitive processes. A stack of many authors' collective knowledge, gathered from their own subjective experiences, that communicates something intrinsically inexplicable by simplifying each person's subjectivity. In other words, generations of wise bald white-bearded men are trying their best to employ magic words to explain the tools your head uses to answer and ask subjective questions, aka your personality.
+
+## Conclusion
+
+Still, I would never trust anyone to define who I am subjectively (be damned, MBTI in corporations), because I am the one able to best judge and represent myself -- I am the subject! ~(I still value lawyers tho.)~ Charlie Chaplin once lost a Charlie Chaplin lookalike contest; no need to explain, right?
+
+Fortunately or unfortunately, we live in a society. Being able to portray ourselves properly, show people who we are, communicate effectively, solve disputes, navigate social encounters, yadayada, are all crucial skills, and to do so, we must understand both ourselves and other people to some extent.
+
+Therefore, typology can be a useful mega blaster heuristic for you as an individual, when your best bet would be hunches because the scientific models available aren't sufficient. For example, it helped me understand that different perspectives have different approaches; if talking either logically, emotionally, pragmatically, or abstractly was best for the person in front of me.[^3]
+
+Take it with a grain of salt, as a complement to your own thinking and knowledge, as if someone were giving their personal advice to you, and juxtapose it with different ideas; after all, we can get pretty close to the truth with the amalgamate of all subjective views.[^4] (That's one reason why discussing those things is so valuable and interesting!)
+
+Finally, when you look deeply into the actual theory, you'll see how INTJs are truly charming, as well as any other type!
+
+---
+
+[^1]: One argument says that people don't "change", but "grow" within their innate personality, as there is some stability to their personality traits, and the changes are due to age maturity -- saying it is an indicator of people having innate personality types.
+
+    Yes, people can get more mature over the course of their lives. In fact, you can see that some traits clearly develop over time, like emotional stability.
+
+    However, all traits can also change due to external factors such as life experiences, traumas, relationships, difficult choices, and societal influences. Not every change is necessarily maturity, people actually change, and differently among individuals.
+
+    Not to say that if there wasn't any stability to personality traits, it would be saying that people have some sort of dissociative identity disorder. So of course there is some staiblity and it takes some time.
+
+    Furthermore, this stability is very low in young individuals and they grow stronger after the thirties. Which may indicate that the young ones might still be in a formative stage, with their personalities not yet fully defined.
+
+[^2]: Citing a few comments from **Eliclax** on **Reddit**:
+
+    > [...] Deleuze said that there are three primary creative acts that humans do: art, science, and philosophy. Philosophy is important because, as he says, it is the art of concept creation. Science doesn't create any concepts, it just studies the relationship between concepts that already exist. If you look back through history, almost every branch of science today started out as part of philosophy before becoming a field of study in its own right. Importantly, Deleuze says that philosophy is "pre-empirical".
+
+    > Personally, I think that every discipline goes through a qualitative stage (the philosophy, where we try to define the concepts we're going to study), and then moves to a quantitative stage (science, where we make specific claims that can actually be falsified). The problem with natural language is that it's far too vague to falsify, and the problem with mathematics is that it's too rigid to accommodate new ideas. So begins the necessary interplay between the qualitative and the quantitative.
+
+    > So where does MBTI fall in all of this then? Personally I think that it started off well in the hands of Freud, Jung, and even Myers-Briggs, but it became embroiled in popular and corporate psychology and has failed to develop into a real science. [...]
+
+[^3]: Citing a comment from **TypeCurious2** on **Reddit**:
+
+    > MBTI to me is a language for describing differences in the ways people experience things. [...]
+
+[^4]: A very interesting topic to deep-dive into. Edmund Husserl with *Lebenswelt*, Friedrich Hegel with the Absolute Spirit... One of the major topics in philosophy. It deserves its own post if I'm going to talk about it, so I'll not talk about it here.
