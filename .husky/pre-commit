@@ -1,27 +1,53 @@
 #!/bin/sh
 
 # Process staged files
-git diff --cached --name-status | while read -r status file; do
-  # Check if the file is a blog post
-  if echo "$file" | grep -qE '^src/data/blog/.*\.(md|mdx)$'; then
-    current_time=$(date -u "+%Y-%m-%dT%H:%M:%SZ")
+git diff --cached --name-status | while read -r status old_path new_path; do
+  file_to_process=""
+  operation_type=""
 
-    case "$status" in
-      A)
-        echo "Updating pubDatetime and modDatetime for new file: $file"
-        # For new files, set both pubDatetime and modDatetime
-        sed -i \
-          -e "/---.*/,/---.*/s/^pubDatetime:.*$/pubDatetime: $current_time/" \
-          -e "/---.*/,/---.*/s/^modDatetime:.*$/modDatetime: $current_time/" \
-          "$file"
-        git add "$file"
-        ;;
-      M)
-        echo "Updating modDatetime for modified file: $file"
-        # For modified files, only update modDatetime
-        sed -i "/---.*/,/---.*/s/^modDatetime:.*$/modDatetime: $current_time/" "$file"
-        git add "$file"
-        ;;
-    esac
+  # Determine the file path and operation type from the status
+  case "$status" in
+    A)
+      file_to_process="$old_path"
+      operation_type="A"
+      ;;
+    M)
+      file_to_process="$old_path"
+      operation_type="M"
+      ;;
+    R*) # Handle rename statuses like R100
+      file_to_process="$new_path"
+      # Treat a rename as a modification for updating timestamps
+      operation_type="M"
+      ;;
+  esac
+
+  # Proceed if we have a file to process
+  if [ -n "$file_to_process" ]; then
+    # Check if the file is a blog post
+    if echo "$file_to_process" | grep -qE '^src/data/blog/.*\.(md|mdx)$'; then
+      # Check if the post is not a draft by looking for "draft: false"
+      if grep -q "draft: false" "$file_to_process"; then
+        current_time=$(date -u "+%Y-%m-%dT%H:%M:%SZ")
+
+        case "$operation_type" in
+          A)
+            echo "Updating pubDatetime and modDatetime for new file: $file_to_process"
+            # For new files, set both pubDatetime and modDatetime
+            sed -i \
+              -e "/---.*/,/---.*/s/^pubDatetime:.*$/pubDatetime: $current_time/" \
+              -e "/---.*/,/---.*/s/^modDatetime:.*$/modDatetime: $current_time/" \
+              "$file_to_process"
+            git add "$file_to_process"
+            ;;
+          M)
+            echo "Updating modDatetime for modified file: $file_to_process"
+            # For modified files, only update modDatetime
+            sed -i "/---.*/,/---.*/s/^modDatetime:.*$/modDatetime: $current_time/" "$file_to_process"
+            git add "$file_to_process"
+            ;;
+        esac
+      fi
+    fi
   fi
 done

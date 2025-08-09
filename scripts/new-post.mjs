@@ -33,16 +33,16 @@ const main = () => {
   }
 
   const slug = slugify(title);
-  const pubDatetime = new Date().toISOString();
 
   // --- Frontmatter definition ---
   const frontmatter = `---
 author: Rafael Mori
-pubDatetime: ${pubDatetime}
+pubDatetime:
+modDatetime:
 title: ${title}
 slug: ${slug}
 featured: false
-draft: false
+draft: true
 tags:
   - others
 description: ${description}
