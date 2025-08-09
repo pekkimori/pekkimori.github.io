@@ -23,12 +23,15 @@ importers:
       '@fontsource-variable/eb-garamond':
         specifier: ^5.2.6
         version: 5.2.6
-      '@fontsource-variable/jetbrains-mono':
+      '@fontsource-variable/victor-mono':
         specifier: ^5.2.6
         version: 5.2.6
       '@fontsource/libertinus-math':
         specifier: ^5.2.1
         version: 5.2.1
+      '@fontsource/victor-mono':
+        specifier: ^5.0.8
+        version: 5.2.6
       '@giscus/react':
         specifier: ^3.1.0
         version: 3.1.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
@@ -558,11 +561,14 @@ packages:
   '@fontsource-variable/eb-garamond@5.2.6':
     resolution: {integrity: sha512-7WNOTFudWYYSiTmaRlTQO0GwS8UQeCVzrluVsRQY5ueDlrUzCwlCQdbGJ4IxGchYqgqB4ehOqX3jjTxBpJyNeA==}
 
-  '@fontsource-variable/jetbrains-mono@5.2.6':
-    resolution: {integrity: sha512-1pvtyK6H1paBOixbtZ9xfQgArVQ4SJMW3WSGZPOd5PiW3yg0t8umwKnjDMzW2ofb7qSdiXnsnIaHPT36vEOdlg==}
+  '@fontsource-variable/victor-mono@5.2.6':
+    resolution: {integrity: sha512-0UPLrQzT67pcuxeRSz9UAmSTKkjNUE6WJp90U6h+q0t9QC2+/kVHCj83nqdst6fKqUftgXrYn5Izpu+nzQ4tpw==}
 
   '@fontsource/libertinus-math@5.2.1':
     resolution: {integrity: sha512-vw43s1n3gHWJ+xgtDlW09pC++/Z2GBzPmhgkA9bho2JgqrRbEos598KA7JncXUAYmt+zk/YCHPRbYmEbp0Vz7Q==}
+
+  '@fontsource/victor-mono@5.2.6':
+    resolution: {integrity: sha512-+R0K61MmVbsFInNmPrRgLKqnZdhkHgrnr5aiLww0rpaNlDReddJTjabKndYuBnLimyyBSQZd6ouPYCGIizsUeA==}
 
   '@giscus/react@3.1.0':
     resolution: {integrity: sha512-0TCO2TvL43+oOdyVVGHDItwxD1UMKP2ZYpT6gXmhFOqfAJtZxTzJ9hkn34iAF/b6YzyJ4Um89QIt9z/ajmAEeg==}
@@ -4010,9 +4016,11 @@ snapshots:
 
   '@fontsource-variable/eb-garamond@5.2.6': {}
 
-  '@fontsource-variable/jetbrains-mono@5.2.6': {}
+  '@fontsource-variable/victor-mono@5.2.6': {}
 
   '@fontsource/libertinus-math@5.2.1': {}
+
+  '@fontsource/victor-mono@5.2.6': {}
 
   '@giscus/react@3.1.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)':
     dependencies:
