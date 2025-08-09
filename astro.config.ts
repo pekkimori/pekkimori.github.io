@@ -19,13 +19,7 @@ import react from "@astrojs/react";
 // https://astro.build/config
 export default defineConfig({
   site: SITE.website,
-  integrations: [
-    sitemap({
-      filter: page => SITE.showArchives || !page.endsWith("/archives"),
-    }),
-    react(),
-    mdx(),
-  ],
+  integrations: [sitemap(), react(), mdx()],
   markdown: {
     remarkPlugins: [
       remarkMath,
