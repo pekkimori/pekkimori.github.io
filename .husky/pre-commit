@@ -1,3 +1,5 @@
+pnpm run build
+
 git diff --cached --name-status |
 grep -i '^M.*\.md$' |
 while read _ file; do
