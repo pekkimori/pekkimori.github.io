@@ -4,7 +4,7 @@ export const SITE = {
   profile: "https://pekkimori.github.io/",
   desc: "My personal webpage.",
   title: "PEKKIMORI",
-  ogImage: "astropaper-og.jpg",
+  ogImage: "blog-og.png",
   lightAndDarkMode: true,
   postPerIndex: 4,
   postPerPage: 4,
