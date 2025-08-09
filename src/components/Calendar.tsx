@@ -1,6 +1,7 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import gsap from "gsap";
 import GitHubCalendar from "react-github-calendar";
+import { useTheme } from "@/utils/useTheme";
 
 interface Theme {
   light: string[];
@@ -17,37 +18,7 @@ export default function Calendar({
     dark: ["#24273a", "#eed49f"],
   },
 }: CalendarProps) {
-  const [theme, setTheme] = useState(() => {
-    const currentTheme = localStorage.getItem("theme");
-    const browserTheme = window.matchMedia("(prefers-color-scheme: dark)")
-      .matches
-      ? "dark"
-      : "light";
-
-    return currentTheme || browserTheme;
-  });
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const handleChange = ({ matches }: MediaQueryListEvent) => {
-      setTheme(matches ? "dark" : "light");
-    };
-
-    mediaQuery.addEventListener("change", handleChange);
-
-    return () => mediaQuery.removeEventListener("change", handleChange);
-  }, []);
-
-  useEffect(() => {
-    const themeButton = document.querySelector("#theme-btn");
-    const handleClick = () => {
-      setTheme(prevTheme => (prevTheme === "dark" ? "light" : "dark"));
-    };
-
-    themeButton?.addEventListener("click", handleClick);
-
-    return () => themeButton?.removeEventListener("click", handleClick);
-  }, []);
+  const theme = useTheme();
 
   const calendarContainerRef = useRef<HTMLDivElement>(null);
   const isAnimatingRef = useRef<boolean>(false);

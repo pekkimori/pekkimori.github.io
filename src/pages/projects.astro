@@ -1,0 +1,65 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import LinkButton from "@/components/LinkButton.astro";
+import Hr from "@/components/Hr.astro";
+
+import TextPressure from "@/components/TextPressure";
+import FallingText from "@/components/FallingText";
+import DecryptedText from "@/components/DecryptedText";
+---
+
+<Layout>
+  <Header />
+  <main id="main-content" data-layout="index">
+    <section id="hero" class="pt-8 pb-8">
+      <div class="items-center">
+        <TextPressure
+          text="My Projects"
+          flex={true}
+          alpha={false}
+          width={true}
+          weight={false}
+          italic={true}
+          minFontSize={36}
+          client:only="react"
+        />
+      </div>
+    </section>
+    <Hr />
+    <section id="projects" class="pt-8 pb-8">
+      <DecryptedText
+        text="This text animates when in view"
+        animateOn="view"
+        sequential={true}
+        client:only="react"
+      />
+    </section>
+    <Hr />
+    <section id="all-skills" class="h-96">
+      <FallingText
+        text={`React Bits is a library of animated and interactive React components designed to streamline UI development and simplify your workflow.`}
+        highlightWords={["React", "Bits", "animated", "components", "simplify"]}
+        trigger="scroll"
+        backgroundColor="transparent"
+        wireframes={false}
+        gravity={0.56}
+        fontSize="2rem"
+        mouseConstraintStiffness={0.9}
+        client:only="react"
+      />
+    </section>
+  </main>
+  <Footer />
+</Layout>
+
+<script>
+  document.addEventListener("astro:page-load", () => {
+    const indexLayout = (document.querySelector("#main-content") as HTMLElement)
+      ?.dataset?.layout;
+    if (indexLayout) {
+      sessionStorage.setItem("backUrl", "/");
+    }
+  });
+</script>
