@@ -14,7 +14,7 @@ interface CalendarProps {
 
 export default function Calendar({
   themeScheme = {
-    light: ["#eff1f5", "#1e66f5"],
+    light: ["#e6e9ef", "#1e66f5"],
     dark: ["#24273a", "#eed49f"],
   },
 }: CalendarProps) {

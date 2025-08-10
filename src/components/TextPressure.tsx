@@ -159,7 +159,7 @@ const TextPressure: React.FC<TextPressureProps> = ({
     return () => cancelAnimationFrame(rafId);
   }, [width, weight, italic, alpha, chars.length]);
 
-  const textColor = theme === "dark" ? "#FFFFFF" : "#000000";
+  const textColor = theme === "dark" ? "#cdd6f4" : "#4c4f69";
   const strokeColor = theme === "dark" ? "#FF0000" : "#0000FF";
 
   return (
