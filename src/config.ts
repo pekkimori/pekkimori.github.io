@@ -1,6 +1,6 @@
 export const SITE = {
   website: "https://pekkimori.github.io/", // replace this with your deployed domain
-  author: "Rafael H. M. Belmonte",
+  author: "Rafael Mori",
   profile: "https://pekkimori.github.io/",
   desc: "My personal webpage.",
   title: "PEKKIMORI",
