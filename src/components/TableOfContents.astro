@@ -45,7 +45,9 @@ const toc = generateToc(headings);
 
     constructor() {
       super();
+    }
 
+    initializeToc() {
       // Initialize the headings and tocLinks
       this.headings = Array.from(
         document.querySelectorAll(
@@ -123,6 +125,44 @@ const toc = generateToc(headings);
     };
 
     connectedCallback() {
+      // Listen for the headings-ready event first
+      const handleHeadingsReady = () => {
+        this.initializeToc();
+        this.setupEventListeners();
+      };
+
+      document.addEventListener("headings-ready", handleHeadingsReady, {
+        once: true,
+      });
+
+      // Fallback: Wait for content to be ready
+      const waitForContent = () => {
+        const article = document.querySelector("#article");
+        const headings = document.querySelectorAll(
+          "#article h2, #article h3, #article h4, #article h5, #article h6"
+        );
+
+        if (article && headings.length > 0) {
+          // Remove the event listener since we're initializing now
+          document.removeEventListener("headings-ready", handleHeadingsReady);
+          this.initializeToc();
+          this.setupEventListeners();
+        } else {
+          // Try again after a short delay
+          setTimeout(waitForContent, 100);
+        }
+      };
+
+      // Check if content is already ready
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", waitForContent);
+      } else {
+        // Small delay to allow headings-ready event to fire first
+        setTimeout(waitForContent, 50);
+      }
+    }
+
+    setupEventListeners() {
       // Smooth scroll
       this.tocLinks.forEach(link => {
         link.element.addEventListener("click", e => {

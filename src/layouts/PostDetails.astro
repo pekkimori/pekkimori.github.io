@@ -115,7 +115,7 @@ const nextPost =
     <div class="flex flex-row-reverse justify-between gap-8">
       <TableOfContents
         headings={headings}
-        class="hidden shrink-0 lg:sticky lg:top-20 lg:block lg:h-screen"
+        class="hidden shrink-0 lg:sticky lg:top-5 lg:block lg:max-h-[calc(100vh-5rem)] lg:overflow-y-auto"
       />
       <article
         id="article"
@@ -182,7 +182,9 @@ const nextPost =
    *  allowing sharing of sections easily */
   function addHeadingLinks() {
     const headings = Array.from(
-      document.querySelectorAll("h2, h3, h4, h5, h6")
+      document.querySelectorAll(
+        "#article h2, #article h3, #article h4, #article h5, #article h6"
+      )
     );
     for (const heading of headings) {
       heading.classList.add("group");
@@ -198,7 +200,29 @@ const nextPost =
       heading.appendChild(link);
     }
   }
-  addHeadingLinks();
+
+  function initializeHeadingFeatures() {
+    const article = document.querySelector("#article");
+    const headings = document.querySelectorAll(
+      "#article h2, #article h3, #article h4, #article h5, #article h6"
+    );
+
+    if (article && headings.length > 0) {
+      addHeadingLinks();
+      // Dispatch custom event to signal headings are ready
+      document.dispatchEvent(new CustomEvent("headings-ready"));
+    } else {
+      // Retry after a short delay if content isn't ready
+      setTimeout(initializeHeadingFeatures, 100);
+    }
+  }
+
+  // Initialize when DOM is ready
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initializeHeadingFeatures);
+  } else {
+    initializeHeadingFeatures();
+  }
 
   /** Attaches copy buttons to code blocks in the document,
    * allowing users to copy code easily. */
