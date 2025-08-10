@@ -15,6 +15,53 @@ const { headings, class: className, ...props } = Astro.props;
 const toc = generateToc(headings);
 ---
 
+<!-- Mobile TOC Button -->
+<div
+  id="toc-btn-container"
+  class:list={[
+    "fixed end-4 bottom-24 z-50 lg:hidden",
+    "translate-y-14 opacity-0 transition duration-500",
+  ]}
+>
+  <button
+    id="toc-mobile-btn"
+    class="group relative flex size-14 items-center justify-center rounded-full bg-background shadow-xl"
+    aria-label="Show Table of Contents"
+    type="button"
+  >
+    <svg class="size-6 text-accent" viewBox="0 0 24 24" fill="none">
+      <rect x="4" y="6" width="16" height="2" rx="1" fill="currentColor"></rect>
+      <rect x="4" y="11" width="16" height="2" rx="1" fill="currentColor"
+      ></rect>
+      <rect x="4" y="16" width="16" height="2" rx="1" fill="currentColor"
+      ></rect>
+    </svg>
+    <span class="sr-only text-sm group-hover:text-accent"
+      >Table of Contents</span
+    >
+  </button>
+</div>
+
+<!-- Mobile TOC Overlay -->
+<div
+  id="toc-mobile-overlay"
+  class="pointer-events-none fixed end-4 bottom-36 z-50 opacity-0 transition-opacity duration-300 lg:hidden"
+  style="max-width: 22rem;"
+>
+  <div
+    class="relative flex w-full flex-col rounded-2xl bg-background/90 p-4 shadow-2xl backdrop-blur-lg"
+    style="max-height: 70vh; overflow-y: auto;"
+  >
+    <toc-heading class="w-full" {...props}>
+      <h2 class="mb-4 text-center font-semibold">TABLE OF CONTENTS</h2>
+      <ul class="text-card-foreground">
+        {toc.map(heading => <TOCHeading heading={heading} />)}
+      </ul>
+    </toc-heading>
+  </div>
+</div>
+
+<!-- Desktop TOC -->
 <toc-heading class={className} {...props}>
   <h2 class="font-semibold">TABLE OF CONTENTS</h2>
   <ul class="text-card-foreground mt-4">
@@ -213,6 +260,83 @@ const toc = generateToc(headings);
   }
 
   customElements.define("toc-heading", TOC);
+
+  // Mobile TOC toggle logic
+  const btn = document.getElementById("toc-mobile-btn");
+  const overlay = document.getElementById("toc-mobile-overlay");
+  const tocBtnContainer = document.getElementById("toc-btn-container");
+
+  let tocOpen = false;
+
+  function toggleTOC() {
+    tocOpen = !tocOpen;
+    if (tocOpen) {
+      overlay?.classList.add("opacity-100");
+      overlay?.classList.remove("opacity-0", "pointer-events-none");
+      overlay?.classList.add("pointer-events-auto");
+      document.body.style.overflow = "hidden";
+    } else {
+      overlay?.classList.remove("opacity-100", "pointer-events-auto");
+      overlay?.classList.add("opacity-0", "pointer-events-none");
+      document.body.style.overflow = "";
+    }
+  }
+
+  btn?.addEventListener("click", toggleTOC);
+
+  // Hide overlay if user clicks outside the modal
+  overlay?.addEventListener("click", e => {
+    if (e.target === overlay) toggleTOC();
+  });
+
+  // Sync TOC button visibility/animation with Back to Top button
+  function handleTocBtnScroll() {
+    const rootElement = document.documentElement;
+    const scrollTotal = rootElement.scrollHeight - rootElement.clientHeight;
+    const scrollTop = rootElement.scrollTop;
+    const isVisible = scrollTop / scrollTotal > 0.1;
+
+    if (tocBtnContainer) {
+      if (isVisible) {
+        // Add a delay before showing the TOC button
+        setTimeout(() => {
+          tocBtnContainer.classList.add("opacity-100");
+          tocBtnContainer.classList.add("translate-y-0");
+          tocBtnContainer.classList.remove("opacity-0");
+          tocBtnContainer.classList.remove("translate-y-14");
+        }, 200); // 200ms delay
+      } else {
+        // Hide immediately
+        tocBtnContainer.classList.remove("opacity-100");
+        tocBtnContainer.classList.remove("translate-y-0");
+        tocBtnContainer.classList.add("opacity-0");
+        tocBtnContainer.classList.add("translate-y-14");
+        // Also hide the overlay if open, with a 200ms delay
+        if (overlay?.classList.contains("opacity-100")) {
+          setTimeout(() => {
+            overlay.classList.remove("opacity-100", "pointer-events-auto");
+            overlay.classList.add("opacity-0", "pointer-events-none");
+            document.body.style.overflow = "";
+            tocOpen = false;
+          }, 200);
+        }
+      }
+    }
+  }
+
+  let tocBtnTicking = false;
+  document.addEventListener("scroll", () => {
+    if (!tocBtnTicking) {
+      window.requestAnimationFrame(() => {
+        handleTocBtnScroll();
+        tocBtnTicking = false;
+      });
+      tocBtnTicking = true;
+    }
+  });
+
+  // Initial state
+  handleTocBtnScroll();
 </script>
 
 <style>
