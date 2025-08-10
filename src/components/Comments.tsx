@@ -9,7 +9,7 @@ interface CommentsProps {
 
 export default function Comments({
   lightTheme = "catppuccin_latte",
-  darkTheme = "catppuccin_macchiato",
+  darkTheme = "catppuccin_mocha",
 }: CommentsProps) {
   const theme = useTheme();
 
