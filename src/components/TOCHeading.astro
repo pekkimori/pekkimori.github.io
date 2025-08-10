@@ -1,0 +1,30 @@
+---
+import { type TocItem } from "@/utils/generateToc";
+import { cn } from "@/utils/stars";
+
+interface Props {
+  heading: TocItem;
+}
+
+const {
+  heading: { depth, slug, text: rawText },
+} = Astro.props;
+// TODO: Temporary fix for the issue with the headings that end with link reference text
+const text = rawText.endsWith("#") ? rawText.slice(0, -1) : rawText;
+---
+
+<li>
+  <div class="relative">
+    <span
+      class="absolute top-[5%] w-[2px] rounded transition-colors duration-300 [&.highlight-bg]:bg-accent [&.is-read]:bg-muted"
+    ></span>
+    <a
+      aria-label={`Scroll to section: ${text}`}
+      class={cn(
+        "toc-item line-clamp-2 px-3 py-1 ms-2 text-foreground/75 transition-all hover:text-foreground [&.highlight]:font-medium [&.highlight]:text-accent [&.is-read]:text-muted [&.highlight-bg-translucent]:bg-accent/10",
+        depth > 2 && "ps-7"
+      )}
+      href={`#${slug}`}>{text}</a
+    >
+  </div>
+</li>

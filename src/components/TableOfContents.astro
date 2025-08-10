@@ -1,0 +1,182 @@
+---
+import type { MarkdownHeading } from "astro";
+
+import { generateToc } from "@/utils/generateToc";
+import TOCHeading from "@/components/TOCHeading.astro";
+
+interface Props {
+  headings: MarkdownHeading[];
+  class?: string;
+  id?: string;
+}
+
+const { headings, class: className, ...props } = Astro.props;
+
+const toc = generateToc(headings);
+---
+
+<toc-heading class={className} {...props}>
+  <h2 class="font-semibold">TABLE OF CONTENTS</h2>
+  <ul class="text-card-foreground mt-4">
+    {toc.map(heading => <TOCHeading heading={heading} />)}
+  </ul>
+</toc-heading>
+
+<script>
+  // This script tag is useful only if you want to display the TOC alongside the blog post...
+  // ... and highlight the section that the user is currently reading through.
+  // Feel free to remove this tag if you don't need this type of functionality.
+
+  interface TOCLink {
+    element: HTMLAnchorElement;
+    progressBar: HTMLElement;
+    slug: string;
+  }
+
+  interface HeadingProgress {
+    inView: boolean;
+    progress: number;
+  }
+
+  class TOC extends HTMLElement {
+    headings: HTMLElement[] = [];
+    tocLinks: TOCLink[] = [];
+    headingProgress: Record<string, HeadingProgress> = {};
+
+    constructor() {
+      super();
+
+      // Initialize the headings and tocLinks
+      this.headings = Array.from(
+        document.querySelectorAll(
+          "#article h2, #article h3, #article h4, #article h5, #article h6"
+        )
+      );
+      this.tocLinks = Array.from(this.querySelectorAll('a[href^="#"]')).map(
+        link => ({
+          element: link as HTMLAnchorElement,
+          progressBar: link.previousElementSibling as HTMLElement,
+          slug: (link.getAttribute("href") || "").substring(1),
+        })
+      );
+    }
+
+    updatePositionAndStyle = () => {
+      const windowHeight = window.innerHeight;
+      const articleElement = document.querySelector("#article") as HTMLElement;
+      const articleTop = articleElement?.offsetTop || 0;
+      const scrollTop = window.scrollY;
+
+      this.headings.forEach((el, index) => {
+        const nextHeading = this.headings[index + 1];
+        const nextHeadingTop = nextHeading
+          ? nextHeading.offsetTop
+          : articleElement.offsetHeight + articleTop;
+
+        // Calculate section boundaries relative to viewport
+        const headingTop = el.offsetTop;
+        const headingBottom = headingTop + el.offsetHeight;
+        const sectionEnd = nextHeadingTop;
+
+        // Check if section is in viewport (allows multiple sections to be active)
+        const headingInViewport = headingTop <= scrollTop + windowHeight;
+        const sectionStillVisible = sectionEnd > scrollTop;
+        const inView = headingInViewport && sectionStillVisible;
+
+        // Calculate progress: section is 100% when its end reaches bottom of viewport
+        const sectionHeight = sectionEnd - headingTop;
+        const viewportBottom = scrollTop + windowHeight;
+        const progressDistance = Math.max(0, viewportBottom - headingTop);
+        const progress = Math.min(
+          1,
+          Math.max(0, progressDistance / sectionHeight)
+        );
+
+        this.headingProgress[el.id] = {
+          inView,
+          progress,
+        };
+      });
+
+      this.tocLinks.forEach(({ element: el, progressBar: bar, slug }, i) => {
+        const { inView, progress } = this.headingProgress[slug];
+        if (this.headingProgress[slug]) {
+          el.classList.toggle("highlight", inView);
+          el.classList.toggle("highlight-bg-translucent", inView);
+          el.classList.toggle(
+            "rounded-t-2xl",
+            inView &&
+              (i == 0 ||
+                !this.headingProgress[this.tocLinks[i - 1]?.slug].inView)
+          );
+          el.classList.toggle(
+            "rounded-b-2xl",
+            inView &&
+              (i == this.tocLinks.length - 1 ||
+                !this.headingProgress[this.tocLinks[i + 1]?.slug].inView)
+          );
+          bar.classList.toggle("is-read", !inView && progress == 1);
+          bar.classList.toggle("highlight-bg", inView);
+          bar.style.setProperty("height", `${progress * 90}%`);
+        }
+      });
+    };
+
+    connectedCallback() {
+      // Smooth scroll
+      this.tocLinks.forEach(link => {
+        link.element.addEventListener("click", e => {
+          e.preventDefault();
+          const directHeading = this.headings.find(
+            heading => heading.id === link.slug
+          );
+          if (directHeading) {
+            // Temporarily disable CSS smooth scrolling to avoid conflicts
+            document.documentElement.style.scrollBehavior = "auto";
+
+            directHeading.scrollIntoView({ behavior: "smooth" });
+
+            // Update URL after scroll starts
+            setTimeout(() => {
+              history.pushState(
+                null,
+                directHeading.textContent || "",
+                link.element.getAttribute("href")
+              );
+              // Re-enable CSS smooth scrolling
+              document.documentElement.style.scrollBehavior = "";
+            }, 50);
+          } else {
+            console.warn(`No heading found for slug: ${link.slug}`);
+          }
+        });
+      });
+
+      // Initial call and listen to scroll event
+      this.updatePositionAndStyle();
+
+      // Use requestAnimationFrame for better performance
+      let ticking = false;
+      const scrollHandler = () => {
+        if (!ticking) {
+          requestAnimationFrame(() => {
+            this.updatePositionAndStyle();
+            ticking = false;
+          });
+          ticking = true;
+        }
+      };
+
+      window.addEventListener("scroll", scrollHandler);
+      window.addEventListener("resize", scrollHandler);
+    }
+  }
+
+  customElements.define("toc-heading", TOC);
+</script>
+
+<style>
+  toc-heading :global(.toc-item) {
+    display: flow-root;
+  }
+</style>
