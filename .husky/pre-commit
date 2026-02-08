@@ -1,58 +1,52 @@
 #!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
 
-# Process staged files
-git diff --cached --name-status | while read -r status old_path new_path; do
-  file_to_process=""
-  operation_type=""
+# Get current time (UTC)
+current_time=$(date -u "+%Y-%m-%dT%H:%M:%SZ")
 
-  # Determine the file path and operation type from the status
-  case "$status" in
-    A)
-      file_to_process="$old_path"
-      operation_type="A"
-      ;;
-    M)
-      file_to_process="$old_path"
-      operation_type="M"
-      ;;
-    R*) # Handle rename statuses like R100
-      file_to_process="$new_path"
-      # Treat a rename as a modification for updating timestamps
-      operation_type="M"
-      ;;
-  esac
+git status --porcelain | while IFS= read -r line; do
+  # Get the status (M, A, D, etc.) and file path
+  status=$(echo "$line" | awk '{print $1}')
+  file=$(echo "$line" | awk '{print $2}')
+  
+  # Check if the file is in the correct directory (src/data/blog)
+  if [[ "$file" == src/data/blog/* ]]; then
+    
+    # Process only .md or .mdx files
+    if [[ "$file" == *.md ]] || [[ "$file" == *.mdx ]]; then
+      file_to_process="$file"
 
-  # Proceed if we have a file to process
-  if [ -n "$file_to_process" ]; then
-    # Check if the file is a blog post
-    if echo "$file_to_process" | grep -qE '^src/data/blog/.*\.(md|mdx)$'; then
-      # Check if the post is not a draft by looking for "draft: false"
-      if grep -q "draft: false" "$file_to_process"; then
-        current_time=$(date -u "+%Y-%m-%dT%H:%M:%SZ")
-
-        case "$operation_type" in
-          A)
-            echo "Updating pubDatetime and modDatetime for new file: $file_to_process"
-            # For new files, set both pubDatetime and modDatetime
-            sed -i \
-              -e "/---.*/,/---.*/s/^pubDatetime:.*$/pubDatetime: $current_time/" \
-              -e "/---.*/,/---.*/s/^modDatetime:.*$/modDatetime: $current_time/" \
-              "$file_to_process"
+      # Ensure the file exists (it hasn't been deleted)
+      if [ -f "$file_to_process" ]; then
+        
+        # Get current draft status
+        is_draft=$(grep "^draft:" "$file_to_process" | sed 's/^draft: *//;s/ *$//')
+        
+        case "$status" in
+          A|AM)
+            # New file found
+            echo "Updating modDatetime for new file: $file_to_process"
+            sed -i '' "/---.*/,/---.*/s/^modDatetime:.*$/modDatetime: $current_time/" "$file_to_process"
             git add "$file_to_process"
             ;;
-          M)
-            # If the post was a draft and is now being published, update pubDatetime
-            if grep -q "pubDatetime: 0000-00-00T00:00:00Z" "$file_to_process"; then
-              echo "Updating pubDatetime and modDatetime for published draft: $file_to_process"
-              sed -i \
-                -e "/---.*/,/---.*/s/^pubDatetime:.*$/pubDatetime: $current_time/" \
-                -e "/---.*/,/---.*/s/^modDatetime:.*$/modDatetime: $current_time/" \
-                "$file_to_process"
+            
+          M|MM)
+            # Modified file
+            
+            # Check previous draft status from HEAD
+            was_draft=$(git show HEAD:"$file" 2>/dev/null | grep "^draft:" | sed 's/^draft: *//;s/ *$//')
+            
+            if [ "$was_draft" == "true" ] && [ "$is_draft" == "false" ]; then
+              echo "Publishing draft: $file_to_process"
+              # Update pubDatetime and modDatetime
+              sed -i '' "/---.*/,/---.*/s/^pubDatetime:.*$/pubDatetime: $current_time/" "$file_to_process"
+              sed -i '' "/---.*/,/---.*/s/^modDatetime:.*$/modDatetime: $current_time/" "$file_to_process"
             else
               echo "Updating modDatetime for modified file: $file_to_process"
-              # For other modified files, only update modDatetime
-              sed -i "/---.*/,/---.*/s/^modDatetime:.*$/modDatetime: $current_time/" "$file_to_process"
+              # Only update modDatetime
+              sed -i '' "/---.*/,/---.*/s/^modDatetime:.*$/modDatetime: $current_time/" "$file_to_process"
             fi
+            
             git add "$file_to_process"
             ;;
         esac
