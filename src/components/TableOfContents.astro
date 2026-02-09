@@ -124,7 +124,6 @@ const toc = generateToc(headings);
 
         // Calculate section boundaries relative to viewport
         const headingTop = el.offsetTop;
-        const headingBottom = headingTop + el.offsetHeight;
         const sectionEnd = nextHeadingTop;
 
         // Check if section is in viewport (allows multiple sections to be active)
@@ -233,8 +232,6 @@ const toc = generateToc(headings);
               // Re-enable CSS smooth scrolling
               document.documentElement.style.scrollBehavior = "";
             }, 50);
-          } else {
-            console.warn(`No heading found for slug: ${link.slug}`);
           }
         });
       });
