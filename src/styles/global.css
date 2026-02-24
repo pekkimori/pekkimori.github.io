@@ -60,6 +60,10 @@ html[data-theme="dark"] {
   @apply max-w-4xl;
 }
 
+@utility app-layout {
+  @apply mx-auto w-full max-w-app px-4;
+}
+
 .active-nav {
   @apply underline decoration-wavy decoration-2 underline-offset-4;
 }

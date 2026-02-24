@@ -8,7 +8,7 @@ import "@fontsource-variable/victor-mono/wght-italic.css";
 import { ShootingStars } from "@/components/ShootingStars";
 import { StarsBackground } from "@/components/Stars";
 
-export interface Props {
+type Props = {
   title?: string;
   author?: string;
   profile?: string;
@@ -18,7 +18,7 @@ export interface Props {
   pubDatetime?: Date;
   modDatetime?: Date | null;
   scrollSmooth?: boolean;
-}
+};
 
 const {
   title = SITE.title,
