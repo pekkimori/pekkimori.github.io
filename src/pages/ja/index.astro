@@ -18,7 +18,6 @@ const posts = await getCollection("blog", ({ data }) => data.language === "ja");
 
 const sortedPosts = getSortedPosts(posts);
 const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
-const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
 
 const words = [
   "(•◡•)",
@@ -101,7 +100,6 @@ const words = [
               ))}
             </ul>
           </section>
-          {recentPosts.length > 0 && <Hr />}
         </>
       )
     }

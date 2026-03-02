@@ -26,13 +26,6 @@ const { pathname } = Astro.url;
 const currentPath =
   pathname.endsWith("/") && pathname !== "/" ? pathname.slice(0, -1) : pathname;
 
-const isActive = (path: string) => {
-  // Strip language prefix before comparing so both /en/posts and /pt/posts highlight "Posts"
-  const normalisedArray = pathWithoutPrefix.split("/").filter(p => p.trim());
-  const pathArray = path.split("/").filter(p => p.trim());
-  return pathWithoutPrefix === path || normalisedArray[0] === pathArray[0];
-};
-
 // Language prefixes
 const EN_PREFIX = "/en";
 const PT_PREFIX = "/pt";
@@ -49,6 +42,13 @@ const pathWithoutPrefix = isPt
     : isEn
       ? currentPath.slice(EN_PREFIX.length) || "/"
       : currentPath;
+
+const isActive = (path: string) => {
+  // Strip language prefix before comparing so both /en/posts and /pt/posts highlight "Posts"
+  const normalisedArray = pathWithoutPrefix.split("/").filter(p => p.trim());
+  const pathArray = path.split("/").filter(p => p.trim());
+  return pathWithoutPrefix === path || normalisedArray[0] === pathArray[0];
+};
 
 // Build language-prefixed equivalents
 const enPath = EN_PREFIX + (pathWithoutPrefix === "/" ? "" : pathWithoutPrefix);
