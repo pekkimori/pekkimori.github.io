@@ -33,6 +33,8 @@ const {
   pubDatetime,
   modDatetime,
   timezone,
+  language,
+  translationGroup,
   tags,
   hideEditPost,
 } = post.data;
@@ -82,10 +84,48 @@ const currentPostIndex = allPosts.findIndex(a => a.id === post.id);
 const prevPost = currentPostIndex !== 0 ? allPosts[currentPostIndex - 1] : null;
 const nextPost =
   currentPostIndex !== allPosts.length ? allPosts[currentPostIndex + 1] : null;
+
+const languageLabels = {
+  pt: "pt",
+  en: "en",
+} as const;
+
+const languageOrder = ["pt", "en"] as const;
+
+const translatedPosts = translationGroup
+  ? posts
+      .filter(candidate => candidate.data.translationGroup === translationGroup)
+      .filter(candidate => candidate.data.language)
+      .sort(
+        (a, b) =>
+          languageOrder.indexOf(a.data.language as (typeof languageOrder)[number]) -
+          languageOrder.indexOf(b.data.language as (typeof languageOrder)[number])
+      )
+  : [];
+
+const shouldShowLanguageSelector = translatedPosts.length > 1;
+const hasLanguageSwitch = shouldShowLanguageSelector && Boolean(language);
+const languageOptions = shouldShowLanguageSelector
+  ? translatedPosts.map(translatedPost => ({
+      href: getPath(translatedPost.id, translatedPost.filePath),
+      isActive: translatedPost.id === post.id,
+      label:
+        languageLabels[
+          translatedPost.data.language as keyof typeof languageLabels
+        ],
+    }))
+  : [];
+
+const titleTransitionName = hasLanguageSwitch
+  ? "translated-post-title"
+  : slugifyStr(title);
+const contentTransitionName = hasLanguageSwitch
+  ? "translated-post-content"
+  : undefined;
 ---
 
 <Layout {...layoutProps}>
-  <Header />
+  <Header languageOptions={languageOptions} />
   <BackButton />
   <main
     id="main-content"
@@ -93,7 +133,7 @@ const nextPost =
     data-pagefind-body
   >
     <h1
-      transition:name={slugifyStr(title)}
+      transition:name={titleTransitionName}
       class="inline-block text-2xl font-bold text-accent sm:text-3xl"
     >
       {title}
@@ -116,6 +156,7 @@ const nextPost =
       />
       <article
         id="article"
+        transition:name={contentTransitionName}
         class="app-prose w-full max-w-none prose-pre:bg-(--shiki-light-bg) dark:prose-pre:bg-(--shiki-dark-bg)"
       >
         <Content />
@@ -277,3 +318,17 @@ const nextPost =
     window.scrollTo({ left: 0, top: 0, behavior: "instant" })
   );
 </script>
+
+<style is:global>
+  ::view-transition-old(translated-post-title),
+  ::view-transition-new(translated-post-title) {
+    animation-duration: 260ms;
+    animation-timing-function: ease;
+  }
+
+  ::view-transition-old(translated-post-content),
+  ::view-transition-new(translated-post-content) {
+    animation-duration: 340ms;
+    animation-timing-function: ease;
+  }
+</style>

@@ -1,5 +1,5 @@
-#!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
+echo "Running lint..."
+pnpm lint || { echo "ESLint failed. Commit aborted."; exit 1; }
 
 # Get current time (UTC)
 current_time=$(date -u "+%Y-%m-%dT%H:%M:%SZ")
@@ -26,7 +26,7 @@ git status --porcelain | while IFS= read -r line; do
           A|AM)
             # New file found
             echo "Updating modDatetime for new file: $file_to_process"
-            sed -i '' "/---.*/,/---.*/s/^modDatetime:.*$/modDatetime: $current_time/" "$file_to_process"
+            sed -i "/---.*/,/---.*/s/^modDatetime:.*$/modDatetime: $current_time/" "$file_to_process"
             git add "$file_to_process"
             ;;
             
@@ -39,12 +39,12 @@ git status --porcelain | while IFS= read -r line; do
             if [ "$was_draft" == "true" ] && [ "$is_draft" == "false" ]; then
               echo "Publishing draft: $file_to_process"
               # Update pubDatetime and modDatetime
-              sed -i '' "/---.*/,/---.*/s/^pubDatetime:.*$/pubDatetime: $current_time/" "$file_to_process"
-              sed -i '' "/---.*/,/---.*/s/^modDatetime:.*$/modDatetime: $current_time/" "$file_to_process"
+              sed -i "/---.*/,/---.*/s/^pubDatetime:.*$/pubDatetime: $current_time/" "$file_to_process"
+              sed -i "/---.*/,/---.*/s/^modDatetime:.*$/modDatetime: $current_time/" "$file_to_process"
             else
               echo "Updating modDatetime for modified file: $file_to_process"
               # Only update modDatetime
-              sed -i '' "/---.*/,/---.*/s/^modDatetime:.*$/modDatetime: $current_time/" "$file_to_process"
+              sed -i "/---.*/,/---.*/s/^modDatetime:.*$/modDatetime: $current_time/" "$file_to_process"
             fi
             
             git add "$file_to_process"

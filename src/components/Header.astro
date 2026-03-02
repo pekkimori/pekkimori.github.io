@@ -5,7 +5,20 @@ import IconSearch from "@/assets/icons/IconSearch.svg";
 import IconSunHigh from "@/assets/icons/IconSunHigh.svg";
 import IconMenuDeep from "@/assets/icons/IconMenuDeep.svg";
 import LinkButton from "./LinkButton.astro";
+import LanguageSwitch from "./LanguageSwitch.astro";
 import { SITE } from "@/config";
+
+type LanguageOption = {
+  label: string;
+  href: string;
+  isActive: boolean;
+};
+
+type Props = {
+  languageOptions?: LanguageOption[];
+};
+
+const { languageOptions = [] } = Astro.props;
 
 const { pathname } = Astro.url;
 
@@ -103,6 +116,13 @@ const isActive = (path: string) => {
               <span class="sr-only">Search</span>
             </LinkButton>
           </li>
+          {
+            languageOptions.length > 1 && (
+              <li class="col-span-2 flex items-center justify-center sm:col-span-1">
+                <LanguageSwitch languageOptions={languageOptions} />
+              </li>
+            )
+          }
           {
             SITE.lightAndDarkMode && (
               <li class="col-span-1 flex items-center justify-center">
