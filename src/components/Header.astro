@@ -18,7 +18,7 @@ type Props = {
   languageOptions?: LanguageOption[];
 };
 
-const { languageOptions = [] } = Astro.props;
+const { languageOptions: explicitLanguageOptions = [] } = Astro.props;
 
 const { pathname } = Astro.url;
 
@@ -27,11 +27,62 @@ const currentPath =
   pathname.endsWith("/") && pathname !== "/" ? pathname.slice(0, -1) : pathname;
 
 const isActive = (path: string) => {
-  const currentPathArray = currentPath.split("/").filter(p => p.trim());
+  // Strip language prefix before comparing so both /en/posts and /pt/posts highlight "Posts"
+  const normalisedArray = pathWithoutPrefix.split("/").filter(p => p.trim());
   const pathArray = path.split("/").filter(p => p.trim());
-
-  return currentPath === path || currentPathArray[0] === pathArray[0];
+  return pathWithoutPrefix === path || normalisedArray[0] === pathArray[0];
 };
+
+// Language prefixes
+const EN_PREFIX = "/en";
+const PT_PREFIX = "/pt";
+const JA_PREFIX = "/ja";
+const isEn = currentPath.startsWith(EN_PREFIX + "/") || currentPath === EN_PREFIX;
+const isPt = currentPath.startsWith(PT_PREFIX + "/") || currentPath === PT_PREFIX;
+const isJa = currentPath.startsWith(JA_PREFIX + "/") || currentPath === JA_PREFIX;
+
+// Strip the language prefix to get the canonical path segment
+const pathWithoutPrefix = isPt
+  ? currentPath.slice(PT_PREFIX.length) || "/"
+  : isJa
+    ? currentPath.slice(JA_PREFIX.length) || "/"
+    : isEn
+      ? currentPath.slice(EN_PREFIX.length) || "/"
+      : currentPath;
+
+// Build language-prefixed equivalents
+const enPath = EN_PREFIX + (pathWithoutPrefix === "/" ? "" : pathWithoutPrefix);
+const ptPath = PT_PREFIX + (pathWithoutPrefix === "/" ? "" : pathWithoutPrefix);
+const jaPath = JA_PREFIX + (pathWithoutPrefix === "/" ? "" : pathWithoutPrefix);
+
+// Paths that exist under /en/, /pt/, and /ja/
+const knownPaths = ["/", "/posts", "/tags", "/projects", "/search"];
+const equivalentExists = knownPaths.some(
+  p => pathWithoutPrefix === p || pathWithoutPrefix.startsWith(p + "/")
+);
+
+const resolvedEnPath = equivalentExists ? (enPath || `${EN_PREFIX}/`) : `${EN_PREFIX}/posts`;
+const resolvedPtPath = equivalentExists ? ptPath : `${PT_PREFIX}/posts`;
+const resolvedJaPath = equivalentExists ? (jaPath || `${JA_PREFIX}/`) : `${JA_PREFIX}/posts`;
+
+const autoLanguageOptions = [
+  { label: "en", href: resolvedEnPath, isActive: !isPt && !isJa },
+  { label: "pt", href: resolvedPtPath, isActive: isPt },
+  { label: "ja", href: resolvedJaPath, isActive: isJa },
+];
+
+// Explicit options from PostDetails (translated post slugs) take priority
+const languageOptions =
+  explicitLanguageOptions.length > 1 ? explicitLanguageOptions : autoLanguageOptions;
+
+// Nav links and logo stay within the active language tree
+const base = isPt ? PT_PREFIX : isJa ? JA_PREFIX : EN_PREFIX;
+
+const navLabels = isPt
+  ? { posts: "Posts", tags: "Tags", projects: "Projetos", search: "Buscar" }
+  : isJa
+    ? { posts: "投稿", tags: "タグ", projects: "プロジェクト", search: "検索" }
+    : { posts: "Posts", tags: "Tags", projects: "Projects", search: "Search" };
 ---
 
 <a
@@ -39,7 +90,7 @@ const isActive = (path: string) => {
   href="#main-content"
   class="absolute start-16 -top-full z-50 bg-background px-3 py-2 text-accent backdrop-blur-lg transition-all focus:top-4"
 >
-  Skip to content
+  {isPt ? "Pular para o conteúdo" : isJa ? "コンテンツへスキップ" : "Skip to content"}
 </a>
 
 <header
@@ -55,7 +106,7 @@ const isActive = (path: string) => {
     ]}
   >
       <a
-        href="/"
+        href={`${base}/`}
         class="absolute py-1 text-xl leading-8 font-semibold whitespace-nowrap sm:static sm:my-auto sm:text-2xl sm:leading-none"
       >
         {SITE.title}
@@ -84,36 +135,36 @@ const isActive = (path: string) => {
           ]}
         >
           <li class="col-span-2">
-            <a href="/posts" class:list={{ "active-nav": isActive("/posts") }}>
-              Posts
+            <a href={`${base}/posts`} class:list={{ "active-nav": isActive("/posts") }}>
+              {navLabels.posts}
             </a>
           </li>
           <li class="col-span-2">
-            <a href="/tags" class:list={{ "active-nav": isActive("/tags") }}>
-              Tags
+            <a href={`${base}/tags`} class:list={{ "active-nav": isActive("/tags") }}>
+              {navLabels.tags}
             </a>
           </li>
           <li class="col-span-2">
             <a
-              href="/projects"
+              href={`${base}/projects`}
               class:list={{ "active-nav": isActive("/projects") }}
             >
-              Projects
+              {navLabels.projects}
             </a>
           </li>
 
           <li class="col-span-1 flex items-center justify-center">
             <LinkButton
-              href="/search"
+              href={`${base}/search`}
               class:list={[
                 "focus-outline flex p-3 sm:p-1",
                 { "[&>svg]:stroke-accent": isActive("/search") },
               ]}
-              aria-label="search"
-              title="Search"
+              aria-label={navLabels.search}
+              title={navLabels.search}
             >
               <IconSearch />
-              <span class="sr-only">Search</span>
+              <span class="sr-only">{navLabels.search}</span>
             </LinkButton>
           </li>
           {
@@ -169,4 +220,16 @@ const isActive = (path: string) => {
 
   // Runs on view transitions navigation
   document.addEventListener("astro:after-swap", toggleNav);
+
+  // Snap theme-btn icons to their correct state instantly on mount
+  // so they don't play the scale/rotate animation on every page swap
+  function snapThemeIcons() {
+    const icons = document.querySelectorAll<HTMLElement>("#theme-btn svg");
+    icons.forEach(icon => {
+      icon.classList.remove("transition-all");
+      requestAnimationFrame(() => icon.classList.add("transition-all"));
+    });
+  }
+  snapThemeIcons();
+  document.addEventListener("astro:after-swap", snapThemeIcons);
 </script>

@@ -2,6 +2,28 @@
 import IconChevronLeft from "@/assets/icons/IconChevronLeft.svg";
 import LinkButton from "./LinkButton.astro";
 import { SITE } from "@/config";
+
+type Props = {
+  lang?: string;
+};
+
+const { lang } = Astro.props;
+
+const goBackLabels: Record<string, string> = {
+  en: "Go back",
+  pt: "Voltar",
+  ja: "戻る",
+};
+
+const goBackLabel = goBackLabels[lang ?? "en"] ?? "Go back";
+
+const langHome: Record<string, string> = {
+  en: "/en/",
+  pt: "/pt/",
+  ja: "/ja/",
+};
+
+const fallbackHref = langHome[lang ?? "en"] ?? "/en/";
 ---
 
 {
@@ -9,18 +31,18 @@ import { SITE } from "@/config";
     <div class="app-layout flex items-center justify-start">
       <LinkButton
         id="back-button"
-        href="/"
+        href={fallbackHref}
         class="focus-outline -ms-2 mt-8 mb-2 hover:text-foreground/75"
       >
         <IconChevronLeft class="inline-block size-6 rtl:rotate-180" />
-        <span>Go back</span>
+        <span>{goBackLabel}</span>
       </LinkButton>
     </div>
   )
 }
 
 <script>
-  /* Update Search Praam */
+  /* Update Back Button URL */
   function updateGoBackUrl() {
     const backButton: HTMLAnchorElement | null =
       document.querySelector("#back-button");
@@ -28,7 +50,16 @@ import { SITE } from "@/config";
     const backUrl = sessionStorage.getItem("backUrl");
 
     if (backUrl && backButton) {
-      backButton.href = backUrl;
+      // Adjust backUrl to always match the current page's language,
+      // so switching language on a post page doesn't send the user back
+      // to the previous language's listing.
+      const currentLangMatch = location.pathname.match(/^\/(en|pt|ja)\//);
+      if (currentLangMatch) {
+        const currentLang = currentLangMatch[1];
+        backButton.href = backUrl.replace(/^\/(en|pt|ja)\//, `/${currentLang}/`);
+      } else {
+        backButton.href = backUrl;
+      }
     }
   }
 

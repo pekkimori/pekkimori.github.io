@@ -1,5 +1,5 @@
 ---
-import { render, type CollectionEntry } from "astro:content";
+import { render, type CollectionEntry, getCollection } from "astro:content";
 import Comments from "@/components/Comments";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
@@ -24,6 +24,9 @@ type Props = {
 
 const { post, posts } = Astro.props;
 
+// All posts (unfiltered by language) – used only for cross-language translation lookup
+const allBlogPosts = await getCollection("blog");
+
 const {
   title,
   author,
@@ -34,7 +37,6 @@ const {
   modDatetime,
   timezone,
   language,
-  translationGroup,
   tags,
   hideEditPost,
 } = post.data;
@@ -69,14 +71,16 @@ const layoutProps = {
   canonicalURL,
   ogImage,
   scrollSmooth: false,
+  lang: language ?? SITE.lang ?? "en",
 };
 
 /* ========== Prev/Next Posts ========== */
 
-const allPosts = posts.map(({ data: { title }, id, filePath }) => ({
+const allPosts = posts.map(({ data: { title, language }, id, filePath }) => ({
   id,
   title,
   filePath,
+  language,
 }));
 
 const currentPostIndex = allPosts.findIndex(a => a.id === post.id);
@@ -88,13 +92,16 @@ const nextPost =
 const languageLabels = {
   pt: "pt",
   en: "en",
+  ja: "ja",
 } as const;
 
-const languageOrder = ["pt", "en"] as const;
+const languageOrder = ["en", "pt", "ja"] as const;
 
-const translatedPosts = translationGroup
-  ? posts
-      .filter(candidate => candidate.data.translationGroup === translationGroup)
+// Posts are siblings if they share the same filename (last segment of id) and have a language set
+const baseSlug = post.id.split("/").pop();
+const translatedPosts = post.data.language
+  ? allBlogPosts
+      .filter(candidate => candidate.id.split("/").pop() === baseSlug)
       .filter(candidate => candidate.data.language)
       .sort(
         (a, b) =>
@@ -107,7 +114,7 @@ const shouldShowLanguageSelector = translatedPosts.length > 1;
 const hasLanguageSwitch = shouldShowLanguageSelector && Boolean(language);
 const languageOptions = shouldShowLanguageSelector
   ? translatedPosts.map(translatedPost => ({
-      href: getPath(translatedPost.id, translatedPost.filePath),
+      href: getPath(translatedPost.id, translatedPost.filePath, true, translatedPost.data.language),
       isActive: translatedPost.id === post.id,
       label:
         languageLabels[
@@ -116,9 +123,7 @@ const languageOptions = shouldShowLanguageSelector
     }))
   : [];
 
-const titleTransitionName = hasLanguageSwitch
-  ? "translated-post-title"
-  : slugifyStr(title);
+const titleTransitionName = slugifyStr(title);
 const contentTransitionName = hasLanguageSwitch
   ? "translated-post-content"
   : undefined;
@@ -126,7 +131,7 @@ const contentTransitionName = hasLanguageSwitch
 
 <Layout {...layoutProps}>
   <Header languageOptions={languageOptions} />
-  <BackButton />
+  <BackButton lang={language} />
   <main
     id="main-content"
     class:list={["app-layout pb-12", { "mt-8": !SITE.showBackButton }]}
@@ -139,7 +144,7 @@ const contentTransitionName = hasLanguageSwitch
       {title}
     </h1>
     <div class="my-2 flex items-center gap-2">
-      <Datetime {pubDatetime} {modDatetime} {timezone} size="lg" />
+      <Datetime {pubDatetime} {modDatetime} {timezone} lang={language} size="lg" />
       <span
         aria-hidden="true"
         class:list={[
@@ -152,6 +157,7 @@ const contentTransitionName = hasLanguageSwitch
     <div class="flex flex-row-reverse justify-between gap-8">
       <TableOfContents
         headings={headings}
+        lang={language}
         class="hidden shrink-0 lg:sticky lg:top-5 lg:block lg:max-h-[calc(100vh-5rem)] lg:overflow-y-auto"
       />
       <article
@@ -168,7 +174,7 @@ const contentTransitionName = hasLanguageSwitch
     <EditPost class="sm:hidden" {hideEditPost} {post} />
 
     <ul class="mt-4 mb-8 flex flex-wrap gap-4 sm:my-8">
-      {tags.map(tag => <Tag tag={slugifyStr(tag)} tagName={tag} size="sm" />)}
+      {tags.map(tag => <Tag tag={slugifyStr(tag)} tagName={tag} size="sm" lang={language} />)}
     </ul>
 
     <hr class="my-6 border-dashed" />
@@ -185,7 +191,7 @@ const contentTransitionName = hasLanguageSwitch
       {
         prevPost && (
           <a
-            href={getPath(prevPost.id, prevPost.filePath)}
+            href={getPath(prevPost.id, prevPost.filePath, true, prevPost.language)}
             class="flex w-full gap-1 hover:opacity-75"
           >
             <IconChevronLeft class="inline-block flex-none rtl:rotate-180" />
@@ -199,7 +205,7 @@ const contentTransitionName = hasLanguageSwitch
       {
         nextPost && (
           <a
-            href={getPath(nextPost.id, nextPost.filePath)}
+            href={getPath(nextPost.id, nextPost.filePath, true, nextPost.language)}
             class="flex w-full justify-end gap-1 text-end hover:opacity-75 sm:col-start-2"
           >
             <div>
@@ -317,6 +323,23 @@ const contentTransitionName = hasLanguageSwitch
   document.addEventListener("astro:after-swap", () =>
     window.scrollTo({ left: 0, top: 0, behavior: "instant" })
   );
+
+  /* Translate the auto-generated footnotes heading */
+  const footnoteLabels: Record<string, string> = {
+    en: "Footnotes",
+    pt: "Notas de rodapé",
+    ja: "脚注",
+  };
+
+  function translateFootnoteLabel() {
+    const el = document.getElementById("footnote-label");
+    if (!el) return;
+    const lang = document.documentElement.lang ?? "en";
+    el.textContent = footnoteLabels[lang] ?? footnoteLabels["en"];
+  }
+
+  translateFootnoteLabel();
+  document.addEventListener("astro:after-swap", translateFootnoteLabel);
 </script>
 
 <style is:global>

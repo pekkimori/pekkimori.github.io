@@ -15,12 +15,16 @@ interface TextPressureProps {
   strokeWidth?: number;
   className?: string;
   minFontSize?: number;
+  /** Use CSS scaleX/skewX transforms for width & italic instead of font-variation-settings axes.
+   *  Set this to true for fonts that lack wdth/ital axes (e.g. most CJK variable fonts). */
+  useTransforms?: boolean;
 }
 
 const TextPressure: React.FC<TextPressureProps> = ({
   text = "Compressa",
   fontFamily = "Compress",
   fontUrl = "https://res.cloudinary.com/dr6lvwubh/raw/upload/v1529908256/CompressaPRO-GX.woff2",
+  /* fontUrl can be set to "" when the font is already loaded globally */
   width = true,
   weight = true,
   italic = true,
@@ -31,6 +35,7 @@ const TextPressure: React.FC<TextPressureProps> = ({
   strokeWidth = 2,
   className = "",
   minFontSize = 24,
+  useTransforms = false,
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const titleRef = useRef<HTMLHeadingElement | null>(null);
@@ -148,7 +153,14 @@ const TextPressure: React.FC<TextPressureProps> = ({
           const alphaVal = alpha ? getAttr(d, 0, 1).toFixed(2) : "1";
 
           span.style.opacity = alphaVal;
-          span.style.fontVariationSettings = `'wght' ${wght}, 'wdth' ${wdth}, 'ital' ${italVal}`;
+          if (useTransforms) {
+            const scaleXVal = width ? (wdth / 100).toFixed(3) : "1";
+            const skewXVal  = italic ? (-20 * parseFloat(italVal)).toFixed(2) : "0";
+            span.style.transform = `scaleX(${scaleXVal}) skewX(${skewXVal}deg)`;
+            span.style.fontVariationSettings = `'wght' ${wght}`;
+          } else {
+            span.style.fontVariationSettings = `'wght' ${wght}, 'wdth' ${wdth}, 'ital' ${italVal}`;
+          }
         });
       }
 
@@ -157,7 +169,7 @@ const TextPressure: React.FC<TextPressureProps> = ({
 
     animate();
     return () => cancelAnimationFrame(rafId);
-  }, [width, weight, italic, alpha, chars.length]);
+  }, [width, weight, italic, alpha, chars.length, useTransforms]);
 
   const textColor = theme === "dark" ? "#cdd6f4" : "#4c4f69";
   const strokeColor = theme === "dark" ? "#FF0000" : "#0000FF";
@@ -168,11 +180,11 @@ const TextPressure: React.FC<TextPressureProps> = ({
       className="relative h-full w-full overflow-hidden bg-transparent"
     >
       <style>{`
-        @font-face {
+        ${fontUrl ? `@font-face {
           font-family: '${fontFamily}';
           src: url('${fontUrl}');
           font-style: normal;
-        }
+        }` : ""}
         .stroke span {
           position: relative;
           color: ${textColor};

@@ -20,6 +20,9 @@ importers:
       '@astrojs/sitemap':
         specifier: ^3.6.0
         version: 3.7.0
+      '@fontsource-variable/m-plus-1-code':
+        specifier: ^5.2.9
+        version: 5.2.9
       '@fontsource-variable/victor-mono':
         specifier: ^5.2.6
         version: 5.2.6
@@ -725,6 +728,9 @@ packages:
   '@eslint/plugin-kit@0.4.1':
     resolution: {integrity: sha512-43/qtrDUokr7LJqoF2c3+RInu/t4zfrpYdoSDfYyhg52rwLV6TnOvdG4fXm7IkSB3wErkcmJS9iEhjVtOSEjjA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@fontsource-variable/m-plus-1-code@5.2.9':
+    resolution: {integrity: sha512-7dk5Rjy6cY8fdoas4y5dkBQf0lCZDaahIcBf70+0B5zgqSf/vy0y7wr9KbE4iOVkSBPzzwGOtdlZLEQUH9GwrQ==}
 
   '@fontsource-variable/victor-mono@5.2.6':
     resolution: {integrity: sha512-0UPLrQzT67pcuxeRSz9UAmSTKkjNUE6WJp90U6h+q0t9QC2+/kVHCj83nqdst6fKqUftgXrYn5Izpu+nzQ4tpw==}
@@ -4246,6 +4252,8 @@ snapshots:
     dependencies:
       '@eslint/core': 0.17.0
       levn: 0.4.1
+
+  '@fontsource-variable/m-plus-1-code@5.2.9': {}
 
   '@fontsource-variable/victor-mono@5.2.6': {}
 

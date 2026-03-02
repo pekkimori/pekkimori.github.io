@@ -77,6 +77,10 @@ document.addEventListener("astro:before-swap", event => {
   event.newDocument
     .querySelector("meta[name='theme-color']")
     ?.setAttribute("content", bgColor);
+
+  // Apply the current theme to the incoming document before it paints,
+  // preventing a flash of light-mode colors on dark mode navigations.
+  event.newDocument.documentElement.setAttribute("data-theme", themeValue);
 });
 
 // sync with system changes

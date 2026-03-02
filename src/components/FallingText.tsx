@@ -10,6 +10,8 @@ interface FallingTextProps {
   gravity?: number;
   mouseConstraintStiffness?: number;
   fontSize?: string;
+  /** Delimiter used to split text into falling units. Use "" to split by character (e.g. for Japanese). Default: " " */
+  wordSplit?: string;
 }
 
 const FallingText: React.FC<FallingTextProps> = ({
@@ -21,6 +23,7 @@ const FallingText: React.FC<FallingTextProps> = ({
   gravity = 1,
   mouseConstraintStiffness = 0.2,
   fontSize = "1rem",
+  wordSplit = " ",
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const textRef = useRef<HTMLDivElement | null>(null);
@@ -30,7 +33,7 @@ const FallingText: React.FC<FallingTextProps> = ({
 
   useEffect(() => {
     if (!textRef.current) return;
-    const words = text.split(" ");
+    const words = wordSplit === "" ? text.split("") : text.split(wordSplit);
 
     const newHTML = words
       .map(word => {
@@ -47,7 +50,7 @@ const FallingText: React.FC<FallingTextProps> = ({
       .join(" ");
 
     textRef.current.innerHTML = newHTML;
-  }, [text, highlightWords]);
+  }, [text, highlightWords, wordSplit]);
 
   useEffect(() => {
     if (trigger === "auto") {
@@ -84,7 +87,7 @@ const FallingText: React.FC<FallingTextProps> = ({
     if (width <= 0 || height <= 0) return;
 
     const engine = Engine.create();
-    engine.world.gravity.y = gravity;
+    engine.gravity.y = gravity;
 
     const render = Render.create({
       element: canvasContainerRef.current,

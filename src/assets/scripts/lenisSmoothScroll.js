@@ -18,6 +18,9 @@ function initLenis() {
   // Create new instance
   lenis = new Lenis();
 
+  // Expose globally so other components (e.g. TOC) can control it
+  window.__lenis = lenis;
+
   function raf(time) {
     lenis.raf(time);
     rafId = requestAnimationFrame(raf);

@@ -8,11 +8,32 @@ interface Props {
   headings: MarkdownHeading[];
   class?: string;
   id?: string;
+  lang?: string;
 }
 
-const { headings, class: className, ...props } = Astro.props;
+const { headings, class: className, lang, ...props } = Astro.props;
 
-const toc = generateToc(headings);
+const tocLabels: Record<string, string> = {
+  en: "TABLE OF CONTENTS",
+  pt: "ÍNDICE",
+  ja: "目次",
+};
+
+const tocLabel = tocLabels[lang ?? "en"] ?? "TABLE OF CONTENTS";
+
+const footnoteLabels: Record<string, string> = {
+  en: "Footnotes",
+  pt: "Notas de rodapé",
+  ja: "脚注",
+};
+
+const translatedHeadings = headings.map(h =>
+  h.slug === "footnote-label"
+    ? { ...h, text: footnoteLabels[lang ?? "en"] ?? h.text }
+    : h
+);
+
+const toc = generateToc(translatedHeadings);
 ---
 
 <!-- Mobile TOC Button -->
@@ -53,7 +74,7 @@ const toc = generateToc(headings);
     style="max-height: 70vh; overflow-y: auto;"
   >
     <toc-heading class="w-full" {...props}>
-      <h2 class="mb-4 text-center font-semibold">TABLE OF CONTENTS</h2>
+      <h2 class="mb-4 text-center font-semibold">{tocLabel}</h2>
       <ul class="text-card-foreground">
         {toc.map(heading => <TOCHeading heading={heading} />)}
       </ul>
@@ -63,7 +84,7 @@ const toc = generateToc(headings);
 
 <!-- Desktop TOC -->
 <toc-heading class={className} {...props}>
-  <h2 class="font-semibold">TABLE OF CONTENTS</h2>
+  <h2 class="font-semibold">{tocLabel}</h2>
   <ul class="text-card-foreground mt-4">
     {toc.map(heading => <TOCHeading heading={heading} />)}
   </ul>
@@ -217,21 +238,19 @@ const toc = generateToc(headings);
             heading => heading.id === link.slug
           );
           if (directHeading) {
-            // Temporarily disable CSS smooth scrolling to avoid conflicts
-            document.documentElement.style.scrollBehavior = "auto";
-
-            directHeading.scrollIntoView({ behavior: "smooth" });
-
-            // Update URL after scroll starts
-            setTimeout(() => {
-              history.pushState(
-                null,
-                directHeading.textContent || "",
-                link.element.getAttribute("href")
-              );
-              // Re-enable CSS smooth scrolling
-              document.documentElement.style.scrollBehavior = "";
-            }, 50);
+            const lenis = (window as any).__lenis;
+            if (lenis) {
+              // Stop current animation then smoothly scroll to new target
+              lenis.scrollTo(directHeading);
+            } else {
+              // Fallback smooth scroll without Lenis
+              directHeading.scrollIntoView({ behavior: "smooth" });
+            }
+            history.pushState(
+              null,
+              directHeading.textContent || "",
+              link.element.getAttribute("href")
+            );
           }
         });
       });

@@ -5,6 +5,7 @@ import { SITE } from "@/config";
 import "@/styles/global.css";
 import "@fontsource-variable/victor-mono";
 import "@fontsource-variable/victor-mono/wght-italic.css";
+import "@fontsource-variable/m-plus-1-code";
 import { ShootingStars } from "@/components/ShootingStars";
 import { StarsBackground } from "@/components/Stars";
 
@@ -18,6 +19,7 @@ type Props = {
   pubDatetime?: Date;
   modDatetime?: Date | null;
   scrollSmooth?: boolean;
+  lang?: string;
 };
 
 const {
@@ -30,6 +32,7 @@ const {
   pubDatetime,
   modDatetime,
   scrollSmooth = true,
+  lang = SITE.lang ?? "en",
 } = Astro.props;
 
 const socialImageURL = new URL(ogImage, Astro.url);
@@ -54,7 +57,7 @@ const structuredData = {
 <!doctype html>
 <html
   dir={SITE.dir}
-  lang=`${SITE.lang ?? "en"}`
+  lang={lang}
   class={`${scrollSmooth && "scroll-smooth"}`}
 >
   <head>
@@ -154,6 +157,8 @@ const structuredData = {
   <body>
     <slot />
     <div
+      transition:persist
+      transition:name="stars-background"
       style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1;"
     >
       <ShootingStars client:only="react" />
@@ -168,6 +173,19 @@ const structuredData = {
     margin: 0;
     width: 100%;
     height: 100%;
+  }
+
+  /* Instant exit so the old page never shows through the background */
+  ::view-transition-old(root) {
+    animation: none;
+  }
+  /* New page fades in cleanly over an opaque background */
+  ::view-transition-new(root) {
+    animation: 150ms ease-out both fade-in;
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
   }
 </style>
 
