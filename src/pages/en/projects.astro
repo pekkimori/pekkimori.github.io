@@ -3,58 +3,30 @@ import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import Hr from "@/components/Hr.astro";
-
 import TextPressure from "@/components/TextPressure";
-import FallingText from "@/components/FallingText";
-import DecryptedText from "@/components/DecryptedText";
+import ConstellationMap from "@/components/ConstellationMap";
 ---
 
 <Layout lang="en">
   <Header />
   <main id="main-content" data-layout="index">
-    <section id="hero" class="pt-8 pb-8">
-      <div class="items-center">
-        <TextPressure
-          text="My Projects"
-          flex={true}
-          alpha={false}
-          width={true}
-          weight={false}
-          italic={true}
-          minFontSize={36}
-          client:only="react"
-        />
-      </div>
-    </section>
-    <Hr />
-    <section id="projects" class="pt-8 pb-8">
-      <DecryptedText
-        text="This page is in progress."
-        animateOn="view"
-        sequential={true}
+    <section id="hero" class="pt-8 pb-6">
+      <TextPressure
+        text="My Projects"
+        flex={true}
+        alpha={false}
+        width={true}
+        weight={false}
+        italic={true}
+        minFontSize={36}
         client:only="react"
       />
     </section>
+
     <Hr />
-    <section id="all-skills" class="h-96">
-      <FallingText
-        text={`The reasonable man adapts himself to the world. The unreasonable one persists in trying to adapt the world to himself. Therefore all progress depends on the unreasonable man.`}
-        highlightWords={[
-          "world",
-          "adapts",
-          "unreasonable",
-          "progress",
-          "adapt",
-          "persist",
-        ]}
-        trigger="scroll"
-        backgroundColor="transparent"
-        wireframes={false}
-        gravity={0.56}
-        fontSize="2rem"
-        mouseConstraintStiffness={0.9}
-        client:only="react"
-      />
+
+    <section id="projects" class="pt-8 pb-16">
+      <ConstellationMap client:only="react" />
     </section>
   </main>
   <Footer />
