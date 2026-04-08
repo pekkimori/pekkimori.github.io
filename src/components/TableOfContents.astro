@@ -229,13 +229,21 @@ const toc = generateToc(translatedHeadings);
       }
     }
 
-    toggleSubheadings(linkEl: HTMLAnchorElement, force?: boolean) {
-      const li = linkEl.closest("li");
-      if (!li) return;
-      const childrenUl = li.querySelector(":scope > .toc-children");
-      if (!childrenUl) return;
+    // Cache DOM elements for toggleSubheadings to avoid per-frame queries
+    _toggleCache: Map<HTMLAnchorElement, { childrenUl: Element; chevron: Element | null }> = new Map();
 
-      const chevron = linkEl.querySelector(".toc-chevron");
+    toggleSubheadings(linkEl: HTMLAnchorElement, force?: boolean) {
+      let cached = this._toggleCache.get(linkEl);
+      if (!cached) {
+        const li = linkEl.closest("li");
+        if (!li) return;
+        const childrenUl = li.querySelector(":scope > .toc-children");
+        if (!childrenUl) return;
+        cached = { childrenUl, chevron: linkEl.querySelector(".toc-chevron") };
+        this._toggleCache.set(linkEl, cached);
+      }
+
+      const { childrenUl, chevron } = cached;
       const isExpanded = childrenUl.classList.contains("expanded");
       const shouldExpand = force !== undefined ? force : !isExpanded;
 
@@ -245,32 +253,52 @@ const toc = generateToc(translatedHeadings);
       chevron?.classList.toggle("rotated", shouldExpand);
     }
 
-    isAnyChildInView(linkEl: HTMLAnchorElement): boolean {
+    // Cache: parent slug -> child slugs[]
+    _childSlugCache: Map<string, string[]> = new Map();
+
+    getChildSlugs(linkEl: HTMLAnchorElement, slug: string): string[] {
+      let cached = this._childSlugCache.get(slug);
+      if (cached) return cached;
       const li = linkEl.closest("li");
-      if (!li) return false;
-      // Check all nested toc links within this parent's subtree
+      if (!li) { this._childSlugCache.set(slug, []); return []; }
       const childLinks = li.querySelectorAll(":scope > .toc-children a[href^=\"#\"]");
-      for (const child of childLinks) {
-        const childSlug = (child.getAttribute("href") || "").substring(1);
+      cached = Array.from(childLinks).map(c => (c.getAttribute("href") || "").substring(1));
+      this._childSlugCache.set(slug, cached);
+      return cached;
+    }
+
+    isAnyChildInView(linkEl: HTMLAnchorElement, slug: string): boolean {
+      const childSlugs = this.getChildSlugs(linkEl, slug);
+      for (const childSlug of childSlugs) {
         if (this.headingProgress[childSlug]?.inView) return true;
       }
       return false;
     }
 
+    // Cache which parent links have children (computed once)
+    _parentLinks: { element: HTMLAnchorElement; slug: string }[] | null = null;
+
+    getParentLinks() {
+      if (this._parentLinks) return this._parentLinks;
+      this._parentLinks = this.tocLinks
+        .filter(({ element: el }) => el.getAttribute("data-has-children") === "true")
+        .map(({ element, slug }) => ({ element, slug }));
+      return this._parentLinks;
+    }
+
     updateSubheadingVisibility() {
       // Auto-expand parent headings whose sections OR any child section is in view
-      this.tocLinks.forEach(({ element: el, slug }) => {
-        if (el.getAttribute("data-has-children") !== "true") return;
+      for (const { element: el, slug } of this.getParentLinks()) {
         const progress = this.headingProgress[slug];
         const parentInView = progress?.inView;
-        const childInView = this.isAnyChildInView(el);
+        const childInView = this.isAnyChildInView(el, slug);
 
         if (parentInView || childInView) {
           this.toggleSubheadings(el, true);
         } else if (progress && !parentInView && !childInView) {
           this.toggleSubheadings(el, false);
         }
-      });
+      }
     }
 
     setupEventListeners() {
@@ -305,9 +333,14 @@ const toc = generateToc(translatedHeadings);
       this.updatePositionAndStyle();
       this.updateSubheadingVisibility();
 
+      // Skip scroll work for mobile TOC when overlay is hidden
+      const isMobile = !!this.closest("#toc-mobile-overlay");
+
       // Use requestAnimationFrame for better performance
       let ticking = false;
       const scrollHandler = () => {
+        // Mobile TOC doesn't need live scroll tracking (it's a popup)
+        if (isMobile) return;
         if (!ticking) {
           requestAnimationFrame(() => {
             this.updatePositionAndStyle();
