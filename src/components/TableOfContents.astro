@@ -229,8 +229,52 @@ const toc = generateToc(translatedHeadings);
       }
     }
 
+    toggleSubheadings(linkEl: HTMLAnchorElement, force?: boolean) {
+      const li = linkEl.closest("li");
+      if (!li) return;
+      const childrenUl = li.querySelector(":scope > .toc-children");
+      if (!childrenUl) return;
+
+      const chevron = linkEl.querySelector(".toc-chevron");
+      const isExpanded = childrenUl.classList.contains("expanded");
+      const shouldExpand = force !== undefined ? force : !isExpanded;
+
+      if (shouldExpand === isExpanded) return;
+
+      childrenUl.classList.toggle("expanded", shouldExpand);
+      chevron?.classList.toggle("rotated", shouldExpand);
+    }
+
+    isAnyChildInView(linkEl: HTMLAnchorElement): boolean {
+      const li = linkEl.closest("li");
+      if (!li) return false;
+      // Check all nested toc links within this parent's subtree
+      const childLinks = li.querySelectorAll(":scope > .toc-children a[href^=\"#\"]");
+      for (const child of childLinks) {
+        const childSlug = (child.getAttribute("href") || "").substring(1);
+        if (this.headingProgress[childSlug]?.inView) return true;
+      }
+      return false;
+    }
+
+    updateSubheadingVisibility() {
+      // Auto-expand parent headings whose sections OR any child section is in view
+      this.tocLinks.forEach(({ element: el, slug }) => {
+        if (el.getAttribute("data-has-children") !== "true") return;
+        const progress = this.headingProgress[slug];
+        const parentInView = progress?.inView;
+        const childInView = this.isAnyChildInView(el);
+
+        if (parentInView || childInView) {
+          this.toggleSubheadings(el, true);
+        } else if (progress && !parentInView && !childInView) {
+          this.toggleSubheadings(el, false);
+        }
+      });
+    }
+
     setupEventListeners() {
-      // Smooth scroll
+      // Smooth scroll + toggle subheadings on click
       this.tocLinks.forEach(link => {
         link.element.addEventListener("click", e => {
           e.preventDefault();
@@ -240,10 +284,8 @@ const toc = generateToc(translatedHeadings);
           if (directHeading) {
             const lenis = (window as any).__lenis;
             if (lenis) {
-              // Stop current animation then smoothly scroll to new target
               lenis.scrollTo(directHeading);
             } else {
-              // Fallback smooth scroll without Lenis
               directHeading.scrollIntoView({ behavior: "smooth" });
             }
             history.pushState(
@@ -252,11 +294,16 @@ const toc = generateToc(translatedHeadings);
               link.element.getAttribute("href")
             );
           }
+          // Also toggle subheadings if this heading has children
+          if (link.element.getAttribute("data-has-children") === "true") {
+            this.toggleSubheadings(link.element);
+          }
         });
       });
 
       // Initial call and listen to scroll event
       this.updatePositionAndStyle();
+      this.updateSubheadingVisibility();
 
       // Use requestAnimationFrame for better performance
       let ticking = false;
@@ -264,6 +311,7 @@ const toc = generateToc(translatedHeadings);
         if (!ticking) {
           requestAnimationFrame(() => {
             this.updatePositionAndStyle();
+            this.updateSubheadingVisibility();
             ticking = false;
           });
           ticking = true;
@@ -358,5 +406,21 @@ const toc = generateToc(translatedHeadings);
 <style>
   toc-heading :global(.toc-item) {
     display: flow-root;
+  }
+
+  toc-heading :global(.toc-children) {
+    grid-template-rows: 0fr;
+  }
+
+  toc-heading :global(.toc-children.expanded) {
+    grid-template-rows: 1fr;
+  }
+
+  toc-heading :global(.toc-chevron) {
+    transform: rotate(0deg);
+  }
+
+  toc-heading :global(.toc-chevron.rotated) {
+    transform: rotate(180deg);
   }
 </style>

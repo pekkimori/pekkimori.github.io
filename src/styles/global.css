@@ -26,6 +26,7 @@ html[data-theme="dark"] {
   --color-accent: var(--accent);
   --color-muted: var(--muted);
   --color-border: var(--border);
+  --font-mono: "Victor Mono Variable", "M PLUS 1 Code Variable", monospace;
 }
 
 @layer base {

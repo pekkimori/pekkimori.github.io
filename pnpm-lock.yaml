@@ -23,6 +23,9 @@ importers:
       '@fontsource-variable/m-plus-1-code':
         specifier: ^5.2.9
         version: 5.2.9
+      '@fontsource-variable/playfair-display':
+        specifier: ^5.2.8
+        version: 5.2.8
       '@fontsource-variable/victor-mono':
         specifier: ^5.2.6
         version: 5.2.6
@@ -728,6 +731,9 @@ packages:
 
   '@fontsource-variable/m-plus-1-code@5.2.9':
     resolution: {integrity: sha512-7dk5Rjy6cY8fdoas4y5dkBQf0lCZDaahIcBf70+0B5zgqSf/vy0y7wr9KbE4iOVkSBPzzwGOtdlZLEQUH9GwrQ==}
+
+  '@fontsource-variable/playfair-display@5.2.8':
+    resolution: {integrity: sha512-ZzVIXPOrL85yyOvZYoBzUszIJM+xKkHqni4IYn2CVLaGQQdJR8sBeC8yFNgjxSJ7ludTwta8qpULeOFuk5X75A==}
 
   '@fontsource-variable/victor-mono@5.2.6':
     resolution: {integrity: sha512-0UPLrQzT67pcuxeRSz9UAmSTKkjNUE6WJp90U6h+q0t9QC2+/kVHCj83nqdst6fKqUftgXrYn5Izpu+nzQ4tpw==}
@@ -4246,6 +4252,8 @@ snapshots:
       levn: 0.4.1
 
   '@fontsource-variable/m-plus-1-code@5.2.9': {}
+
+  '@fontsource-variable/playfair-display@5.2.8': {}
 
   '@fontsource-variable/victor-mono@5.2.6': {}
 

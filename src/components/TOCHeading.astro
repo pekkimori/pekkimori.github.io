@@ -7,10 +7,11 @@ interface Props {
 }
 
 const {
-  heading: { depth, slug, text: rawText },
+  heading: { depth, slug, text: rawText, subheadings },
 } = Astro.props;
 // TODO: Temporary fix for the issue with the headings that end with link reference text
 const text = rawText.endsWith("#") ? rawText.slice(0, -1) : rawText;
+const hasChildren = subheadings.length > 0;
 ---
 
 <li>
@@ -24,7 +25,20 @@ const text = rawText.endsWith("#") ? rawText.slice(0, -1) : rawText;
         "toc-item line-clamp-2 px-3 py-1 ms-2 text-foreground/75 transition-all hover:text-foreground [&.highlight]:font-medium [&.highlight]:text-accent [&.is-read]:text-muted [&.highlight-bg-translucent]:bg-accent/10 max-w-50 break-words whitespace-normal",
         depth > 2 && "ps-7"
       )}
-      href={`#${slug}`}>{text}</a
+      href={`#${slug}`}
+      data-has-children={hasChildren ? "true" : undefined}
+      >{text}{hasChildren && <svg class="toc-chevron ml-1 inline-block size-3 shrink-0 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>}</a
     >
   </div>
+  {
+    hasChildren && (
+      <ul class="toc-children grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-in-out">
+        <div class="overflow-hidden">
+          {subheadings.map(sub => (
+            <Astro.self heading={sub} />
+          ))}
+        </div>
+      </ul>
+    )
+  }
 </li>
