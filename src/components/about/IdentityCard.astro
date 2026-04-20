@@ -1,0 +1,15 @@
+---
+import BentoCard from "./BentoCard.astro";
+import { IDENTITY } from "@/data/about";
+---
+
+<BentoCard prompt="$ stat rafael">
+  <dl class="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 font-mono text-sm">
+    <dt class="text-muted">MBTI</dt>
+    <dd>{IDENTITY.mbti}</dd>
+    <dt class="text-muted">TRITYPE</dt>
+    <dd>{IDENTITY.tritype}</dd>
+    <dt class="text-muted">CORE</dt>
+    <dd>{IDENTITY.core}</dd>
+  </dl>
+</BentoCard>

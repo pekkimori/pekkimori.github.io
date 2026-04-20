@@ -1,0 +1,24 @@
+---
+import BentoCard from "./BentoCard.astro";
+import { LEARNING } from "@/data/about";
+
+const BAR_CELLS = 10;
+function bar(percent: number) {
+  const filled = Math.round((percent / 100) * BAR_CELLS);
+  return "█".repeat(filled) + "░".repeat(BAR_CELLS - filled);
+}
+---
+
+<BentoCard prompt="$ crontab learning">
+  <ul class="space-y-2 font-mono text-sm">
+    {
+      LEARNING.map(item => (
+        <li class="flex items-center justify-between gap-4">
+          <span class="w-24 shrink-0">{item.name}</span>
+          <span class="text-accent">[{bar(item.percent)}]</span>
+          <span class="w-10 shrink-0 text-right text-muted">{item.percent}%</span>
+        </li>
+      ))
+    }
+  </ul>
+</BentoCard>
