@@ -1,0 +1,108 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import Hr from "@/components/Hr.astro";
+import AboutHeroTerminal from "@/components/about/AboutHeroTerminal";
+import Bookshelf from "@/components/about/Bookshelf";
+import KonamiCat from "@/components/about/KonamiCat";
+import BentoCard from "@/components/about/BentoCard.astro";
+import GamesCard from "@/components/about/GamesCard.astro";
+import MusicCard from "@/components/about/MusicCard.astro";
+import AnimeCard from "@/components/about/AnimeCard.astro";
+import ObsessionsCard from "@/components/about/ObsessionsCard.astro";
+import LanguagesCard from "@/components/about/LanguagesCard.astro";
+import PassportCard from "@/components/about/PassportCard.astro";
+import JoysCard from "@/components/about/JoysCard.astro";
+import IdentityCard from "@/components/about/IdentityCard.astro";
+import LearningCard from "@/components/about/LearningCard.astro";
+
+const buildDate = new Date().toISOString().slice(0, 10);
+---
+
+<Layout lang="en">
+  <Header />
+  <main id="main-content" data-layout="about">
+    <section id="hero" class="pt-8 pb-6">
+      <div class="grid grid-cols-1 items-center gap-6 md:grid-cols-[1fr_auto]">
+        <AboutHeroTerminal client:load />
+        <img
+          src="/gifs/about/hero-cat.gif"
+          alt="A contentedly looping cat."
+          class="hidden h-60 w-60 rounded-xl object-cover md:block"
+          loading="eager"
+          decoding="async"
+        />
+      </div>
+    </section>
+
+    <Hr />
+
+    <section id="bento" class="pt-8 pb-10">
+      <div
+        class="grid auto-rows-[minmax(12rem,auto)] grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+      >
+        <div class="sm:col-span-2 xl:col-span-2 xl:row-span-2">
+          <GamesCard />
+        </div>
+
+        <div class="sm:col-span-2 xl:col-span-2">
+          <MusicCard />
+        </div>
+
+        <div class="sm:col-span-2 xl:col-span-2 xl:row-span-2">
+          <BentoCard prompt="$ ls ~/bookshelf">
+            <Bookshelf client:visible />
+          </BentoCard>
+        </div>
+
+        <div class="sm:col-span-2 xl:col-span-2">
+          <AnimeCard />
+        </div>
+
+        <div>
+          <ObsessionsCard />
+        </div>
+
+        <div class="sm:col-span-2 xl:col-span-2">
+          <LanguagesCard />
+        </div>
+
+        <div class="sm:col-span-2 xl:col-span-2">
+          <PassportCard />
+        </div>
+
+        <div>
+          <JoysCard />
+        </div>
+
+        <div>
+          <IdentityCard />
+        </div>
+
+        <div>
+          <LearningCard />
+        </div>
+      </div>
+    </section>
+
+    <footer class="mt-8 border-t border-border pt-4 pb-10">
+      <p class="font-mono text-xs text-muted">
+        &gt; status: * caffeinated * — last updated: {buildDate}
+      </p>
+    </footer>
+
+    <KonamiCat client:idle />
+  </main>
+  <Footer />
+</Layout>
+
+<script>
+  document.addEventListener("astro:page-load", () => {
+    const layout = (document.querySelector("#main-content") as HTMLElement)
+      ?.dataset?.layout;
+    if (layout === "about") {
+      sessionStorage.setItem("backUrl", "/en/about");
+    }
+  });
+</script>
