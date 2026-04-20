@@ -1,0 +1,25 @@
+---
+import BentoCard from "./BentoCard.astro";
+import { ANIME } from "@/data/about";
+---
+
+<BentoCard prompt="$ cat ~/anime/favorites.txt">
+  <ul class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+    {
+      ANIME.map(item => (
+        <li
+          class:list={[
+            "group rounded-xl border border-border bg-background/40 p-3",
+            "transition-transform hover:-translate-y-1 hover:scale-[1.03]",
+            "motion-reduce:transform-none motion-reduce:transition-none",
+          ]}
+        >
+          <h3 class="font-mono text-sm font-semibold">{item.title}</h3>
+          <p class="mt-1 text-xs italic text-muted">
+            {item.tagline}
+          </p>
+        </li>
+      ))
+    }
+  </ul>
+</BentoCard>
