@@ -4,7 +4,7 @@
   /* ===== Override default Tailwind Typography styles ===== */
   .app-prose {
     @apply prose;
-    font-family: "Playfair Display Variable", Georgia, serif;
+    font-family: var(--font-serif);
     font-size: 1.15rem;
     line-height: 1.8;
 

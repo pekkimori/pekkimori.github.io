@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface Project {
   title: string;
@@ -91,21 +91,19 @@ const PROJECTS: Project[] = [
 ];
 
 const LINES: [number, number][] = [
-  [0, 1], // Minerva — Blog
-  [0, 3], // Minerva — MoodOS
-  [1, 2], // Blog — Neru-box
-  [3, 4], // MoodOS — Pixel Dungeon
-  [4, 5], // Pixel Dungeon — Lantern
-  [5, 2], // Lantern — Neru-box
-  [1, 5], // Blog — Lantern
-  [0, 4], // Minerva — Pixel Dungeon
+  [0, 1],
+  [0, 3],
+  [1, 2],
+  [3, 4],
+  [4, 5],
+  [5, 2],
+  [1, 5],
+  [0, 4],
 ];
 
-// 5-pointed star clip-path
 const STAR_CLIP =
   "polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)";
 
-// Tiny seeded PRNG for background stars
 function lcg(seed: number) {
   let s = seed;
   return () => {
@@ -120,25 +118,81 @@ const BG_STARS = Array.from({ length: 40 }, (_, i) => {
 });
 
 export default function ConstellationMap() {
-  const [selected, setSelected] = useState<number | null>(null);
-  const project = selected !== null ? PROJECTS[selected] : null;
+  const [hovered, setHovered] = useState<number | null>(null);
+  const [lastHovered, setLastHovered] = useState<number | null>(null);
+
+  const bubbleRef = useRef<HTMLDivElement>(null);
+  const targetRef = useRef({ x: 0, y: 0 });
+  const posRef = useRef({ x: 0, y: 0 });
+  const velRef = useRef({ x: 0, y: 0 });
+  const initRef = useRef(false);
+  const rafRef = useRef<number | null>(null);
 
   function isConnected(a: number, b: number) {
-    return selected === a || selected === b;
+    return hovered === a || hovered === b;
   }
+
+  useEffect(() => {
+    if (hovered !== null) setLastHovered(hovered);
+  }, [hovered]);
+
+  useEffect(() => {
+    if (hovered === null) {
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+      initRef.current = false;
+      return;
+    }
+
+    const stiffness = 0.18;
+    const damping = 0.72;
+    const offset = 16;
+
+    const step = () => {
+      if (!initRef.current) {
+        posRef.current = { x: targetRef.current.x, y: targetRef.current.y };
+        velRef.current = { x: 0, y: 0 };
+        initRef.current = true;
+      } else {
+        velRef.current.x =
+          (velRef.current.x + (targetRef.current.x - posRef.current.x) * stiffness) * damping;
+        velRef.current.y =
+          (velRef.current.y + (targetRef.current.y - posRef.current.y) * stiffness) * damping;
+        posRef.current.x += velRef.current.x;
+        posRef.current.y += velRef.current.y;
+      }
+      if (bubbleRef.current) {
+        bubbleRef.current.style.transform = `translate3d(${Math.round(posRef.current.x + offset)}px, ${Math.round(posRef.current.y + offset)}px, 0)`;
+      }
+      rafRef.current = requestAnimationFrame(step);
+    };
+    rafRef.current = requestAnimationFrame(step);
+
+    return () => {
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+    };
+  }, [hovered]);
+
+  const bubbleProject = lastHovered !== null ? PROJECTS[lastHovered] : null;
 
   return (
     <div className="w-full">
-      {/* Star field */}
       <div
         className="relative w-full overflow-hidden rounded-2xl border border-border"
         style={{ height: "clamp(380px, 58vh, 580px)" }}
+        onMouseMove={(e) => {
+          targetRef.current = { x: e.clientX, y: e.clientY };
+        }}
       >
         <svg
           className="absolute inset-0 h-full w-full pointer-events-none"
           aria-hidden="true"
         >
-          {/* Background star field */}
           {BG_STARS.map((s, i) => (
             <circle
               key={i}
@@ -149,7 +203,6 @@ export default function ConstellationMap() {
             />
           ))}
 
-          {/* Constellation lines */}
           {LINES.map(([a, b]) => {
             const active = isConnected(a, b);
             return (
@@ -171,9 +224,8 @@ export default function ConstellationMap() {
           })}
         </svg>
 
-        {/* Project stars */}
         {PROJECTS.map((p, i) => {
-          const isSelected = selected === i;
+          const isHovered = hovered === i;
           const size = (p.magnitude ?? 1.5) * 9;
           const hitArea = Math.max(size * 3.5, 48);
 
@@ -191,12 +243,16 @@ export default function ConstellationMap() {
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
+                cursor: p.link ? "pointer" : "default",
               }}
-              onClick={() => setSelected(isSelected ? null : i)}
+              onMouseEnter={() => setHovered(i)}
+              onMouseLeave={() => setHovered((h) => (h === i ? null : h))}
+              onClick={() => {
+                if (p.link) window.open(p.link, "_blank", "noopener,noreferrer");
+              }}
               title={p.title}
             >
-              {/* Glow halo when selected */}
-              {isSelected && (
+              {isHovered && (
                 <div
                   className="absolute rounded-full animate-ping"
                   style={{
@@ -208,21 +264,19 @@ export default function ConstellationMap() {
                 />
               )}
 
-              {/* Star */}
               <div
                 style={{
-                  width: isSelected ? size * 1.5 : size,
-                  height: isSelected ? size * 1.5 : size,
+                  width: isHovered ? size * 1.5 : size,
+                  height: isHovered ? size * 1.5 : size,
                   clipPath: STAR_CLIP,
                   background: "var(--accent)",
-                  filter: `drop-shadow(0 0 ${isSelected ? size * 0.7 : size * 0.35}px var(--accent))`,
+                  filter: `drop-shadow(0 0 ${isHovered ? size * 0.7 : size * 0.35}px var(--accent))`,
                   transition: "width 0.25s cubic-bezier(0.34,1.56,0.64,1), height 0.25s cubic-bezier(0.34,1.56,0.64,1), filter 0.25s ease",
                   animation: `twinkle ${2.6 + i * 0.38}s ease-in-out ${i * 0.42}s infinite`,
                   flexShrink: 0,
                 }}
               />
 
-              {/* Label */}
               <span
                 className="absolute whitespace-nowrap pointer-events-none"
                 style={{
@@ -233,7 +287,7 @@ export default function ConstellationMap() {
                   letterSpacing: "0.14em",
                   textTransform: "uppercase",
                   color: "var(--muted)",
-                  opacity: isSelected ? 0 : 0.6,
+                  opacity: isHovered ? 0 : 0.6,
                   transition: "opacity 0.2s ease",
                   fontFamily: "inherit",
                 }}
@@ -244,7 +298,6 @@ export default function ConstellationMap() {
           );
         })}
 
-        {/* Hint */}
         <div
           className="absolute bottom-4 left-1/2 -translate-x-1/2 pointer-events-none select-none whitespace-nowrap"
           style={{
@@ -252,7 +305,7 @@ export default function ConstellationMap() {
             letterSpacing: "0.18em",
             textTransform: "uppercase",
             color: "var(--muted)",
-            opacity: selected === null ? 0.45 : 0,
+            opacity: hovered === null ? 0.45 : 0,
             transition: "opacity 0.3s ease",
             fontFamily: "inherit",
           }}
@@ -268,128 +321,48 @@ export default function ConstellationMap() {
         `}</style>
       </div>
 
-      {/* Detail panel — slides in below */}
       <div
+        ref={bubbleRef}
+        className="fixed top-0 left-0 pointer-events-none"
         style={{
-          display: "grid",
-          gridTemplateRows: project ? "1fr" : "0fr",
-          transition: "grid-template-rows 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+          opacity: hovered !== null ? 1 : 0,
+          transition: "opacity 0.18s ease",
+          zIndex: 50,
+          willChange: "transform, opacity",
         }}
+        aria-hidden="true"
       >
-        <div style={{ overflow: "hidden" }}>
-          {project && (
-            <DetailPanel project={project} onClose={() => setSelected(null)} />
-          )}
-        </div>
+        {bubbleProject && <ProjectBubble project={bubbleProject} />}
       </div>
     </div>
   );
 }
 
-function DetailPanel({
-  project,
-  onClose,
-}: {
-  project: Project;
-  onClose: () => void;
-}) {
+function ProjectBubble({ project }: { project: Project }) {
   return (
     <div
-      className="mt-4 overflow-hidden rounded-xl border border-border"
-      style={{ animation: "fadeInUp 0.22s ease both" }}
+      className="overflow-hidden rounded-xl border border-border shadow-lg"
+      style={{
+        minWidth: 180,
+        maxWidth: 260,
+        background: "var(--background, #0b0b0f)",
+      }}
     >
-      {/* Gradient header */}
       <div
-        className="flex items-center gap-3 px-4 py-3"
+        className="flex items-center gap-2 px-3 py-2"
         style={{ background: project.previewColor }}
       >
-        <span className="text-3xl drop-shadow-md">{project.icon}</span>
+        <span className="text-xl drop-shadow-md">{project.icon}</span>
         <div className="min-w-0 flex-1">
-          <div className="text-sm font-bold leading-tight text-white/95">
+          <div className="text-xs font-bold leading-tight text-white/95 truncate">
             {project.title}
           </div>
           {project.category && (
-            <div className="mt-0.5 text-[10px] text-white/55">{project.category}</div>
+            <div className="mt-0.5 text-[9px] text-white/55 truncate">{project.category}</div>
           )}
         </div>
         <StatusBadge status={project.status ?? "wip"} />
-        <div className="ml-2 flex items-center gap-2">
-          {project.link && (
-            <a
-              href={project.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-white/60 transition-colors hover:text-white"
-              title="Visit site"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                <polyline points="15 3 21 3 21 9" />
-                <line x1="10" y1="14" x2="21" y2="3" />
-              </svg>
-            </a>
-          )}
-          {project.github && (
-            <a
-              href={project.github}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-white/60 transition-colors hover:text-white"
-              title="GitHub"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2z" />
-              </svg>
-            </a>
-          )}
-          <button
-            onClick={onClose}
-            className="ml-1 text-white/50 transition-colors hover:text-white"
-            title="Close"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
-        </div>
       </div>
-
-      {/* Body */}
-      <div className="flex flex-col gap-3 px-4 py-4">
-        <p className="text-xs leading-relaxed text-muted">{project.description}</p>
-
-        {project.highlights && project.highlights.length > 0 && (
-          <ul className="flex flex-col gap-2 border-t border-border pt-3">
-            {project.highlights.map(h => (
-              <li key={h} className="flex items-start gap-2 text-xs text-muted">
-                <span className="mt-0.5 shrink-0 text-accent">▸</span>
-                <span className="leading-relaxed">{h}</span>
-              </li>
-            ))}
-          </ul>
-        )}
-
-        {project.tags && project.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 border-t border-border pt-3">
-            {project.tags.map(tag => (
-              <span
-                key={tag}
-                className="rounded border border-border px-1.5 py-0.5 font-mono text-[9px] text-muted"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <style>{`
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(6px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
     </div>
   );
 }
@@ -397,7 +370,7 @@ function DetailPanel({
 function StatusBadge({ status }: { status: "live" | "wip" }) {
   if (status === "live") {
     return (
-      <span className="flex shrink-0 items-center gap-1.5 rounded-full border border-green-500/40 bg-green-500/10 px-2.5 py-0.5 text-xs text-green-400">
+      <span className="flex shrink-0 items-center gap-1 rounded-full border border-green-500/40 bg-green-500/10 px-2 py-0.5 text-[10px] text-green-400">
         <span className="relative flex h-1.5 w-1.5">
           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
           <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-green-500" />
@@ -407,7 +380,7 @@ function StatusBadge({ status }: { status: "live" | "wip" }) {
     );
   }
   return (
-    <span className="flex shrink-0 items-center gap-1.5 rounded-full border border-yellow-500/40 bg-yellow-500/10 px-2.5 py-0.5 text-xs text-yellow-400">
+    <span className="flex shrink-0 items-center gap-1 rounded-full border border-yellow-500/40 bg-yellow-500/10 px-2 py-0.5 text-[10px] text-yellow-400">
       <span className="h-1.5 w-1.5 rounded-full bg-yellow-500/60" />
       wip
     </span>

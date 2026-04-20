@@ -12,7 +12,7 @@ import ConstellationMap from "@/components/ConstellationMap";
   <main id="main-content" data-layout="index">
     <section id="hero" class="pt-8 pb-6">
       <TextPressure
-        text="My Projects"
+        text="My Portfolio"
         flex={true}
         alpha={false}
         width={true}
@@ -25,7 +25,7 @@ import ConstellationMap from "@/components/ConstellationMap";
 
     <Hr />
 
-    <section id="projects" class="pt-8 pb-16">
+    <section id="portfolio" class="pt-8 pb-16">
       <ConstellationMap client:only="react" />
     </section>
   </main>
@@ -37,7 +37,7 @@ import ConstellationMap from "@/components/ConstellationMap";
     const indexLayout = (document.querySelector("#main-content") as HTMLElement)
       ?.dataset?.layout;
     if (indexLayout) {
-      sessionStorage.setItem("backUrl", "/ja/projects");
+      sessionStorage.setItem("backUrl", "/ja/portfolio");
     }
   });
 </script>
