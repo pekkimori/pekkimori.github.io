@@ -1,0 +1,32 @@
+---
+import BentoCard from "./BentoCard.astro";
+import Bookshelf from "./Bookshelf";
+import { GOODREADS_URL } from "@/data/about";
+---
+
+<BentoCard prompt="$ ls ~/bookshelf">
+  <div class="flex flex-col gap-4">
+    <a
+      href={GOODREADS_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="flex items-center gap-3 rounded-xl border border-border bg-background/40 p-3 transition-colors hover:border-accent/60"
+    >
+      <div
+        class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-foreground/10 font-mono text-xs text-muted"
+        aria-hidden="true"
+      >
+        [GR]
+      </div>
+      <div class="min-w-0 flex-1">
+        <div class="font-mono text-sm font-semibold">pekkimori</div>
+        <div class="truncate text-xs text-muted">goodreads.com</div>
+      </div>
+      <span class="font-mono text-xs text-accent">→</span>
+    </a>
+
+    <div class="max-h-[18rem] overflow-auto">
+      <Bookshelf client:visible />
+    </div>
+  </div>
+</BentoCard>

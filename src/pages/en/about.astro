@@ -7,6 +7,7 @@ import AboutHeroTerminal from "@/components/about/AboutHeroTerminal";
 import Bookshelf from "@/components/about/Bookshelf";
 import KonamiCat from "@/components/about/KonamiCat";
 import BentoCard from "@/components/about/BentoCard.astro";
+import BookshelfCard from "@/components/about/BookshelfCard.astro";
 import NowCard from "@/components/about/NowCard.astro";
 import GamesCard from "@/components/about/GamesCard.astro";
 import MusicCard from "@/components/about/MusicCard.astro";
@@ -42,11 +43,7 @@ const buildDate = new Date().toISOString().slice(0, 10);
     <section id="archive" class="pb-10">
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <GamesCard />
-        <BentoCard prompt="$ ls ~/bookshelf">
-          <div class="max-h-[18rem] overflow-auto">
-            <Bookshelf client:visible />
-          </div>
-        </BentoCard>
+        <BookshelfCard />
         <MusicCard />
         <AnimeCard />
         <AtlasCard />
