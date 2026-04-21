@@ -20,6 +20,7 @@ export type NowEntry = {
   title: string;
   meta: string;
   progress?: { value: number; max: number };
+  unknownProgress?: boolean;
 };
 
 export type MusicTasteRow = {
@@ -122,7 +123,7 @@ export const NOW: {
   listening: NowEntry;
   watching: NowEntry;
 } = {
-  playing: { title: "osu!", meta: "global #93756 · send help" },
+  playing: { title: "osu!", meta: "global #93756 · send help", unknownProgress: true },
   reading: { title: "Thus Spoke Zarathustra", meta: "Nietzsche · pt. III", progress: { value: 3, max: 4 } },
   listening: { title: "rock n roll", meta: "volume: 11/10", progress: { value: 11, max: 10 } },
   watching: { title: "Frieren: Beyond Journey's End", meta: "ep 14", progress: { value: 14, max: 28 } },

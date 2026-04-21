@@ -31,6 +31,12 @@ const tiles: { key: string; label: string; entry: typeof NOW.playing }[] = [
               <ProgressBar value={entry.progress.value} max={entry.progress.max} />
             </div>
           )}
+          {entry.unknownProgress && (
+            <div class="mt-2 font-mono text-[11px]">
+              <span class="text-accent">▓▓▓▓▓▓▓▓▓▓</span>
+              <span class="ml-1 text-muted">???%</span>
+            </div>
+          )}
         </div>
       ))
     }
