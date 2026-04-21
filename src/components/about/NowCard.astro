@@ -1,0 +1,38 @@
+---
+import BentoCard from "./BentoCard.astro";
+import ProgressBar from "./ProgressBar.astro";
+import { NOW } from "@/data/about";
+
+const tiles: { key: string; label: string; entry: typeof NOW.playing }[] = [
+  { key: "playing", label: "playing", entry: NOW.playing },
+  { key: "reading", label: "reading", entry: NOW.reading },
+  { key: "listening", label: "listening", entry: NOW.listening },
+  { key: "watching", label: "watching", entry: NOW.watching },
+];
+---
+
+<BentoCard prompt="$ now --live">
+  <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
+    {
+      tiles.map(({ key, label, entry }) => (
+        <div
+          class="flex min-h-[6.5rem] flex-col justify-between rounded-xl border border-border/60 bg-background/40 p-3"
+          data-now-tile={key}
+        >
+          <div class="font-mono text-[10px] uppercase tracking-[0.15em] text-muted">
+            {label}
+          </div>
+          <div class="mt-1 text-sm font-semibold text-foreground line-clamp-2">
+            {entry.title}
+          </div>
+          <div class="font-mono text-[11px] text-muted line-clamp-1">{entry.meta}</div>
+          {entry.progress && (
+            <div class="mt-2">
+              <ProgressBar value={entry.progress.value} max={entry.progress.max} />
+            </div>
+          )}
+        </div>
+      ))
+    }
+  </div>
+</BentoCard>
