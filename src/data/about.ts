@@ -90,7 +90,7 @@ export const BOOKS: Book[] = [
   {
     title: "The Hitchhiker's Guide to the Galaxy",
     author: "Douglas Adams",
-    quote: "Don't Panic.",
+    quote: "The answer to life, the universe, and everything is 42.",
     asciiCover: [
       " _________________ ",
       "|  _____________  |",
