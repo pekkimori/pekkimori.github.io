@@ -5,13 +5,6 @@ export type Book = {
   asciiCover: string;
 };
 
-export type LanguageRow = {
-  code: string;
-  name: string;
-  level: "fluent" | "intermediate" | "queued";
-  greeting: string;
-};
-
 export type PinnedGame = {
   title: string;
   comment: string;
@@ -22,17 +15,42 @@ export type Anime = {
   tagline: string;
 };
 
-export type Joy = {
-  label: string;
-  gifPath: string;
-  alt: string;
+export type NowEntry = {
+  title: string;
+  meta: string;
+  progress?: { value: number; max: number };
+};
+
+export type MusicTasteRow = {
+  label: "on repeat" | "lately" | "forever";
+  value: string;
+};
+
+export type AtlasLanguage = {
+  code: string;
+  name: string;
+  level: 0 | 1 | 2 | 3 | 4;
+};
+
+export type AtlasPlace = {
+  code: string;
+  city: string;
+  note: string;
+  kind: "lived" | "visited";
+};
+
+export type Identity = {
+  oneLiner: string;
+  values: string[];
+  prose: string;
 };
 
 export const BOOKS: Book[] = [
   {
     title: "The Laws of Human Nature",
     author: "Robert Greene",
-    quote: "Your task as a student of human nature is to transform yourself into a calm and patient observer.",
+    quote:
+      "Your task as a student of human nature is to transform yourself into a calm and patient observer.",
     asciiCover: [
       " _________________ ",
       "|  _____________  |",
@@ -85,16 +103,6 @@ export const BOOKS: Book[] = [
   },
 ];
 
-export const LANGUAGES: LanguageRow[] = [
-  { code: "pt", name: "Portuguese", level: "fluent", greeting: "Olá" },
-  { code: "en", name: "English", level: "fluent", greeting: "Hello" },
-  { code: "es", name: "Spanish", level: "fluent", greeting: "Hola" },
-  { code: "ja", name: "Japanese", level: "intermediate", greeting: "こんにちは" },
-  { code: "ru", name: "Russian", level: "queued", greeting: "Привет" },
-  { code: "zh", name: "Chinese", level: "queued", greeting: "你好" },
-  { code: "de", name: "German", level: "queued", greeting: "Hallo" },
-];
-
 export const PINNED_GAMES: PinnedGame[] = [
   { title: "Hollow Knight", comment: "every corner of Hallownest deserves a moment of silence." },
   { title: "NieR: Automata", comment: "makes you feel things about androids and the end of the world." },
@@ -107,49 +115,56 @@ export const ANIME: Anime[] = [
   { title: "Bakemonogatari", tagline: "dialogue as architecture." },
 ];
 
-export const OBSESSIONS: string[] = [
-  "philosophy",
-  "neuroscience",
-  "mathematics",
-  "coding",
-  "ascii art",
-];
-
-export const STAMPED_COUNTRIES: { code: string; name: string }[] = [
-  { code: "br", name: "Brazil" },
-  { code: "pa", name: "Panama" },
-  { code: "us", name: "United States" },
-  { code: "co", name: "Colombia" },
-  { code: "qa", name: "Qatar" },
-  { code: "jp", name: "Japan" },
-  { code: "au", name: "Australia" },
-  { code: "cl", name: "Chile" },
-  { code: "ar", name: "Argentina" },
-  { code: "de", name: "Germany" },
-];
-
-export const NEXT_UP_COUNTRY_COUNT = 4;
-
-export const JOYS: Joy[] = [
-  { label: "cats", gifPath: "/gifs/about/joys/cats.gif", alt: "A cat looping gently." },
-  { label: "ice cream", gifPath: "/gifs/about/joys/ice-cream.gif", alt: "An animated ice cream." },
-  { label: "cheese", gifPath: "/gifs/about/joys/cheese.gif", alt: "Cheese, animated." },
-  { label: "coffee", gifPath: "/gifs/about/joys/coffee.gif", alt: "A steaming coffee cup." },
-  { label: "beer", gifPath: "/gifs/about/joys/beer.gif", alt: "A foaming beer mug." },
-  { label: "silly", gifPath: "/gifs/about/joys/silly.gif", alt: "Something goofy happening." },
-];
-
-export const IDENTITY = {
-  mbti: "INTJ",
-  tritype: "1-4-5",
-  core: "truth / energy / love",
+export const NOW: {
+  playing: NowEntry;
+  reading: NowEntry;
+  listening: NowEntry;
+  watching: NowEntry;
+} = {
+  playing: { title: "Hollow Knight", meta: "true ending run", progress: { value: 84, max: 112 } },
+  reading: { title: "The Laws of Human Nature", meta: "R. Greene", progress: { value: 142, max: 331 } },
+  listening: { title: "liminal lo-fi", meta: "for long coding nights" },
+  watching: { title: "Frieren: Beyond Journey's End", meta: "ep 14", progress: { value: 14, max: 28 } },
 };
 
-export const LEARNING: { name: string; percent: number }[] = [
-  { name: "styling", percent: 60 },
-  { name: "crochet", percent: 10 },
+export const MUSIC_TASTE: MusicTasteRow[] = [
+  { label: "on repeat", value: "Mitski — Nobody" },
+  { label: "lately", value: "boards of canada, cocteau twins, fishmans" },
+  { label: "forever", value: "Radiohead, Björk, Nine Inch Nails" },
 ];
 
-export const SPOTIFY_PLAYLIST_ID = "5X9BtccLFJs3ophR6tL5br";
+export const ATLAS: {
+  languages: AtlasLanguage[];
+  places: AtlasPlace[];
+} = {
+  languages: [
+    { code: "pt", name: "Portuguese", level: 4 },
+    { code: "en", name: "English", level: 4 },
+    { code: "es", name: "Spanish", level: 4 },
+    { code: "ja", name: "Japanese", level: 2 },
+    { code: "ru", name: "Russian", level: 1 },
+    { code: "zh", name: "Chinese", level: 1 },
+    { code: "de", name: "German", level: 1 },
+  ],
+  places: [
+    { code: "br", city: "São Paulo", note: "home base", kind: "lived" },
+    { code: "pa", city: "Panama City", note: "short stay", kind: "lived" },
+    { code: "jp", city: "Tokyo", note: "returns often", kind: "visited" },
+    { code: "us", city: "New York", note: "", kind: "visited" },
+    { code: "co", city: "Bogotá", note: "", kind: "visited" },
+    { code: "qa", city: "Doha", note: "", kind: "visited" },
+    { code: "au", city: "Sydney", note: "", kind: "visited" },
+    { code: "cl", city: "Santiago", note: "", kind: "visited" },
+    { code: "ar", city: "Buenos Aires", note: "", kind: "visited" },
+    { code: "de", city: "Berlin", note: "", kind: "visited" },
+  ],
+};
+
+export const IDENTITY: Identity = {
+  oneLiner: "Engineer, linguist, stubborn optimist.",
+  values: ["truth", "energy", "love", "craft", "play"],
+  prose:
+    "I build things that feel like they were made by a person. I read too much, sleep too little, and believe the best software has a sense of humor about itself.",
+};
 
 export const STEAM_PROFILE_URL = "https://steamcommunity.com/id/pekkimori/";
