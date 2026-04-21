@@ -56,7 +56,7 @@ const ptPath = PT_PREFIX + (pathWithoutPrefix === "/" ? "" : pathWithoutPrefix);
 const jaPath = JA_PREFIX + (pathWithoutPrefix === "/" ? "" : pathWithoutPrefix);
 
 // Paths that exist under /en/, /pt/, and /ja/
-const knownPaths = ["/", "/posts", "/tags", "/portfolio", "/search"];
+const knownPaths = ["/", "/posts", "/tags", "/portfolio", "/about", "/search"];
 const equivalentExists = knownPaths.some(
   p => pathWithoutPrefix === p || pathWithoutPrefix.startsWith(p + "/")
 );
@@ -79,10 +79,10 @@ const languageOptions =
 const base = isPt ? PT_PREFIX : isJa ? JA_PREFIX : EN_PREFIX;
 
 const navLabels = isPt
-  ? { posts: "Posts", tags: "Tags", projects: "Portfólio", search: "Buscar" }
+  ? { posts: "Posts", tags: "Tags", projects: "Portfólio", about: "Sobre", search: "Buscar" }
   : isJa
-    ? { posts: "投稿", tags: "タグ", projects: "ポートフォリオ", search: "検索" }
-    : { posts: "Posts", tags: "Tags", projects: "Portfolio", search: "Search" };
+    ? { posts: "投稿", tags: "タグ", projects: "ポートフォリオ", about: "自己紹介", search: "検索" }
+    : { posts: "Posts", tags: "Tags", projects: "Portfolio", about: "About", search: "Search" };
 ---
 
 <a
@@ -150,6 +150,14 @@ const navLabels = isPt
               class:list={{ "active-nav": isActive("/portfolio") }}
             >
               {navLabels.projects}
+            </a>
+          </li>
+          <li class="w-full">
+            <a
+              href={`${base}/about`}
+              class:list={{ "active-nav": isActive("/about") }}
+            >
+              {navLabels.about}
             </a>
           </li>
 

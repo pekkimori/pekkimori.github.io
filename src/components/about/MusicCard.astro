@@ -1,0 +1,19 @@
+---
+import BentoCard from "./BentoCard.astro";
+import { MUSIC_TASTE } from "@/data/about";
+---
+
+<BentoCard prompt="$ taste --music">
+  <ul class="space-y-3">
+    {
+      MUSIC_TASTE.map(row => (
+        <li class="grid grid-cols-[auto_1fr] items-baseline gap-3">
+          <span class="font-mono text-[10px] uppercase tracking-[0.15em] text-muted whitespace-nowrap">
+            {row.label}
+          </span>
+          <span class="text-sm text-foreground line-clamp-2">{row.value}</span>
+        </li>
+      ))
+    }
+  </ul>
+</BentoCard>

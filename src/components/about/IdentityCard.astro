@@ -1,0 +1,20 @@
+---
+import BentoCard from "./BentoCard.astro";
+import { IDENTITY } from "@/data/about";
+---
+
+<BentoCard prompt="$ whoami --verbose">
+  <div class="flex flex-col gap-3">
+    <p class="text-sm font-semibold text-foreground">{IDENTITY.oneLiner}</p>
+    <ul class="flex flex-wrap gap-1.5">
+      {
+        IDENTITY.values.map(v => (
+          <li class="rounded-full border border-border/70 bg-background/40 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.1em] text-muted">
+            {v}
+          </li>
+        ))
+      }
+    </ul>
+    <p class="text-sm leading-relaxed text-muted line-clamp-3">{IDENTITY.prose}</p>
+  </div>
+</BentoCard>

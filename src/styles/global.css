@@ -98,3 +98,12 @@ html[data-theme="dark"] {
 :target {
   scroll-margin-block: 1rem;
 }
+
+@keyframes konami-walk {
+  from {
+    transform: translateX(-10rem);
+  }
+  to {
+    transform: translateX(var(--konami-end, 100vw));
+  }
+}

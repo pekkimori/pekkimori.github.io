@@ -1,0 +1,23 @@
+---
+type Props = {
+  prompt: string;
+  class?: string;
+};
+
+const { prompt, class: className = "" } = Astro.props;
+---
+
+<article
+  class:list={[
+    "flex flex-col gap-3 rounded-2xl border border-border bg-background/60 p-5",
+    "transition-colors hover:border-accent/60",
+    className,
+  ]}
+>
+  <header class="font-mono text-xs uppercase tracking-wider text-accent">
+    {prompt}
+  </header>
+  <div class="flex-1">
+    <slot />
+  </div>
+</article>
