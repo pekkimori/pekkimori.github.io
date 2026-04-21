@@ -33,7 +33,15 @@ import { ANIME, MAL_URL } from "@/data/about";
             </code>
             <div>
               <div class="text-sm font-semibold">{item.title}</div>
-              <div class="font-mono text-[11px] text-muted">{item.tagline}</div>
+              {Array.isArray(item.tagline) ? (
+                <div class="flex flex-col gap-1 mt-0.5">
+                  {item.tagline.map((line: string) => (
+                    <div class="font-mono text-[11px] text-muted">{line}</div>
+                  ))}
+                </div>
+              ) : (
+                <div class="font-mono text-[11px] text-muted">{item.tagline}</div>
+              )}
             </div>
           </li>
         ))
