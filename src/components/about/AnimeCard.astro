@@ -1,22 +1,43 @@
 ---
 import BentoCard from "./BentoCard.astro";
-import { ANIME } from "@/data/about";
+import { ANIME, MAL_URL } from "@/data/about";
 ---
 
 <BentoCard prompt="$ cat ~/anime/favorites.txt">
-  <ul class="space-y-3">
-    {
-      ANIME.map((item, i) => (
-        <li class="grid grid-cols-[2rem_1fr] items-baseline gap-3">
-          <code class="font-mono text-[11px] text-accent">
-            {String(i + 1).padStart(2, "0")}
-          </code>
-          <div>
-            <div class="text-sm font-semibold">{item.title}</div>
-            <div class="font-mono text-[11px] text-muted">{item.tagline}</div>
-          </div>
-        </li>
-      ))
-    }
-  </ul>
+  <div class="flex flex-col gap-4">
+    <a
+      href={MAL_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="flex items-center gap-3 rounded-xl border border-border bg-background/40 p-3 transition-colors hover:border-accent/60"
+    >
+      <div
+        class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-foreground/10 font-mono text-xs text-muted"
+        aria-hidden="true"
+      >
+        [MAL]
+      </div>
+      <div class="min-w-0 flex-1">
+        <div class="font-mono text-sm font-semibold">PEKKIMORI_</div>
+        <div class="truncate text-xs text-muted">myanimelist.net/animelist/PEKKIMORI_</div>
+      </div>
+      <span class="font-mono text-xs text-accent">→</span>
+    </a>
+
+    <ul class="space-y-3">
+      {
+        ANIME.map((item, i) => (
+          <li class="grid grid-cols-[2rem_1fr] items-baseline gap-3">
+            <code class="font-mono text-[11px] text-accent">
+              {String(i + 1).padStart(2, "0")}
+            </code>
+            <div>
+              <div class="text-sm font-semibold">{item.title}</div>
+              <div class="font-mono text-[11px] text-muted">{item.tagline}</div>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
 </BentoCard>
