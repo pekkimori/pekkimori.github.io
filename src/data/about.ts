@@ -7,7 +7,8 @@ export type Book = {
 
 export type PinnedGame = {
   title: string;
-  comment: string;
+  label: string;
+  completion?: number; // 0–100
 };
 
 export type Anime = {
@@ -22,7 +23,7 @@ export type NowEntry = {
 };
 
 export type MusicTasteRow = {
-  label: "on repeat" | "lately" | "forever";
+  label: string;
   value: string;
 };
 
@@ -104,9 +105,9 @@ export const BOOKS: Book[] = [
 ];
 
 export const PINNED_GAMES: PinnedGame[] = [
-  { title: "Hollow Knight", comment: "every corner of Hallownest deserves a moment of silence." },
-  { title: "NieR: Automata", comment: "makes you feel things about androids and the end of the world." },
-  { title: "League of Legends", comment: "I know, I know. It's the cats of video games." },
+  { title: "Hollow Knight", label: "GOTY every year", completion: 98 },
+  { title: "NieR: Automata", label: "existential crisis simulator", completion: 73 },
+  { title: "League of Legends", label: "don't ask", completion: undefined },
 ];
 
 export const ANIME: Anime[] = [
@@ -128,9 +129,10 @@ export const NOW: {
 };
 
 export const MUSIC_TASTE: MusicTasteRow[] = [
-  { label: "on repeat", value: "Mitski — Nobody" },
-  { label: "lately", value: "boards of canada, cocteau twins, fishmans" },
+  { label: "2am", value: "Mitski, Sufjan Stevens, Phoebe Bridgers" },
+  { label: "focus", value: "boards of canada, fishmans, Arca" },
   { label: "forever", value: "Radiohead, Björk, Nine Inch Nails" },
+  { label: "guilty", value: "city pop, eurobeat, nightcore" },
 ];
 
 export const ATLAS: {
