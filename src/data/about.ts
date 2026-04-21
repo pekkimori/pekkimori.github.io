@@ -39,6 +39,8 @@ export type AtlasPlace = {
   city: string;
   note: string;
   kind: "lived" | "visited";
+  lng: number;
+  lat: number;
 };
 
 export type Identity = {
@@ -150,16 +152,16 @@ export const ATLAS: {
     { code: "de", name: "German", level: 1 },
   ],
   places: [
-    { code: "br", city: "São Paulo", note: "home base", kind: "lived" },
-    { code: "pa", city: "Panama City", note: "", kind: "visited" },
-    { code: "us", city: "San Francisco", note: "", kind: "lived" },
-    { code: "co", city: "Bogotá", note: "", kind: "visited" },
-    { code: "qa", city: "Doha", note: "", kind: "visited" },
-    { code: "jp", city: "Tokyo", note: "", kind: "lived" },
-    { code: "au", city: "Melbourne", note: "", kind: "visited" },
-    { code: "cl", city: "Santiago", note: "", kind: "visited" },
-    { code: "ar", city: "Buenos Aires", note: "", kind: "lived" },
-    { code: "de", city: "Berlin", note: "", kind: "lived" },
+    { code: "br", city: "São Paulo", note: "home base", kind: "lived", lng: -46.63, lat: -23.55 },
+    { code: "pa", city: "Panama City", note: "", kind: "visited", lng: -79.52, lat: 8.99 },
+    { code: "us", city: "San Francisco", note: "", kind: "lived", lng: -122.42, lat: 37.77 },
+    { code: "co", city: "Bogotá", note: "", kind: "visited", lng: -74.07, lat: 4.71 },
+    { code: "qa", city: "Doha", note: "", kind: "visited", lng: 51.53, lat: 25.29 },
+    { code: "jp", city: "Tokyo", note: "", kind: "lived", lng: 139.65, lat: 35.68 },
+    { code: "au", city: "Melbourne", note: "", kind: "visited", lng: 144.96, lat: -37.81 },
+    { code: "cl", city: "Santiago", note: "", kind: "visited", lng: -70.67, lat: -33.45 },
+    { code: "ar", city: "Buenos Aires", note: "", kind: "lived", lng: -58.38, lat: -34.60 },
+    { code: "de", city: "Berlin", note: "", kind: "lived", lng: 13.41, lat: 52.52 },
   ],
 };
 

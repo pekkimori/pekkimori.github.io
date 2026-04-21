@@ -1,0 +1,77 @@
+<h2>Which cards feel weakest?</h2>
+<p class="subtitle">Multi-select — click any that feel filler, redundant, or that you'd cut/merge. The current page has 10 cards; for hybrid direction, 6–8 well-structured cards usually reads better than 10 cramped ones. I'll suggest merges based on what you pick.</p>
+
+<div class="options" data-multiselect>
+  <div class="option" data-choice="games" onclick="toggleSelect(this)">
+    <div class="letter">🎮</div>
+    <div class="content">
+      <h3>Games <span style="opacity:0.6;font-weight:400">— $ steam --now-playing</span></h3>
+      <p>Steam profile link + pinned games list. Big card (2×2). Likely a keeper.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="music" onclick="toggleSelect(this)">
+    <div class="letter">♪</div>
+    <div class="content">
+      <h3>Music <span style="opacity:0.6;font-weight:400">— $ nowplaying</span></h3>
+      <p>Current listening / taste. 2 cols wide.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="books" onclick="toggleSelect(this)">
+    <div class="letter">□</div>
+    <div class="content">
+      <h3>Bookshelf <span style="opacity:0.6;font-weight:400">— $ ls ~/bookshelf</span></h3>
+      <p>Interactive bookshelf component. Big card (2×2). Keeper.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="anime" onclick="toggleSelect(this)">
+    <div class="letter">▶</div>
+    <div class="content">
+      <h3>Anime</h3>
+      <p>2 cols wide. Could merge with Music into a "media" card with tabs?</p>
+    </div>
+  </div>
+  <div class="option" data-choice="obsessions" onclick="toggleSelect(this)">
+    <div class="letter">✦</div>
+    <div class="content">
+      <h3>Obsessions</h3>
+      <p>Small card. Often overlaps with "Learning" and "Joys" thematically.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="languages" onclick="toggleSelect(this)">
+    <div class="letter">A文</div>
+    <div class="content">
+      <h3>Languages</h3>
+      <p>2 cols wide. Concrete, distinctive. Likely keeper.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="passport" onclick="toggleSelect(this)">
+    <div class="letter">✈</div>
+    <div class="content">
+      <h3>Passport</h3>
+      <p>2 cols wide. Places lived / travelled. Concrete, keeper.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="joys" onclick="toggleSelect(this)">
+    <div class="letter">☕</div>
+    <div class="content">
+      <h3>Joys</h3>
+      <p>Small card. Overlap with Obsessions — small, everyday pleasures.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="identity" onclick="toggleSelect(this)">
+    <div class="letter">◉</div>
+    <div class="content">
+      <h3>Identity</h3>
+      <p>Small card. Values / who-I-am prose. Often the hardest to write well.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="learning" onclick="toggleSelect(this)">
+    <div class="letter">⚙</div>
+    <div class="content">
+      <h3>Learning</h3>
+      <p>Small card. Current study topics. Overlaps with Obsessions.</p>
+    </div>
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top:20px"><strong>My hunch</strong>: Obsessions / Joys / Learning all circle the same idea ("what I'm into right now"). Identity is vague and hard. Anime could merge with Music into one "media pulse" card. Tell me what you'd cut, merge, or defend.</p>

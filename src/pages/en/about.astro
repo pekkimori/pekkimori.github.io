@@ -4,16 +4,16 @@ import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import Hr from "@/components/Hr.astro";
 import AboutHeroTerminal from "@/components/about/AboutHeroTerminal";
-import Bookshelf from "@/components/about/Bookshelf";
-import KonamiCat from "@/components/about/KonamiCat";
 import BentoCard from "@/components/about/BentoCard.astro";
+import KonamiCat from "@/components/about/KonamiCat";
 import BookshelfCard from "@/components/about/BookshelfCard.astro";
 import NowCard from "@/components/about/NowCard.astro";
 import GamesCard from "@/components/about/GamesCard.astro";
 import MusicCard from "@/components/about/MusicCard.astro";
 import AnimeCard from "@/components/about/AnimeCard.astro";
 import AtlasCard from "@/components/about/AtlasCard.astro";
-import IdentityCard from "@/components/about/IdentityCard.astro";
+import MapCard from "@/components/about/MapCard";
+import { ATLAS } from "@/data/about";
 
 const buildDate = new Date().toISOString().slice(0, 10);
 ---
@@ -47,7 +47,9 @@ const buildDate = new Date().toISOString().slice(0, 10);
         <MusicCard />
         <AnimeCard />
         <AtlasCard />
-        <IdentityCard />
+        <BentoCard prompt="$ atlas --places">
+          <MapCard client:visible places={ATLAS.places} />
+        </BentoCard>
       </div>
     </section>
 

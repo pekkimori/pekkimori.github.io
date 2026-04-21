@@ -1,0 +1,74 @@
+<style>
+  .mini-grid { display: grid; gap: 6px; background: #0b0f14; padding: 10px; border-radius: 10px; }
+  .mini-cell { background: #121923; border: 1px solid #223; border-radius: 6px; padding: 6px; color: #cbd5e1; font-family: ui-monospace, monospace; font-size: 9px; line-height: 1.3; min-height: 40px; }
+  .mini-cell.hero { background: linear-gradient(135deg,#0f172a,#1e293b); color: #9cf59c; }
+  .mini-cell.feat { background: #0f2535; border-color: #3a8fb7; color: #e2f2ff; }
+  .mini-label { font-size: 8px; color: #6b7a8c; letter-spacing: 1px; text-transform: uppercase; display:block; margin-bottom: 2px; }
+</style>
+
+<h2>Which layout rhythm works?</h2>
+<p class="subtitle">All three use the hybrid style (terminal hero + modern cards). They differ in how they arrange the 7 cards underneath. Mockups are desktop; mobile stacks to 1 column in all cases.</p>
+
+<div class="cards">
+  <div class="card" data-choice="flat" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:12px;background:#05080c">
+      <div class="mini-grid" style="grid-template-columns:repeat(4,1fr)">
+        <div class="mini-cell hero" style="grid-column:span 4;min-height:60px"><span class="mini-label">$ about rafael</span>terminal hero</div>
+        <div class="mini-cell" style="grid-column:span 2;grid-row:span 2"><span class="mini-label">games</span>steam + pinned</div>
+        <div class="mini-cell" style="grid-column:span 2;grid-row:span 2"><span class="mini-label">bookshelf</span>interactive</div>
+        <div class="mini-cell" style="grid-column:span 2"><span class="mini-label">music</span></div>
+        <div class="mini-cell" style="grid-column:span 2"><span class="mini-label">anime</span></div>
+        <div class="mini-cell" style="grid-column:span 2"><span class="mini-label">atlas</span>langs + places</div>
+        <div class="mini-cell" style="grid-column:span 2"><span class="mini-label">currently</span>into / learning</div>
+        <div class="mini-cell" style="grid-column:span 4"><span class="mini-label">identity</span>values prose, full-width</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A. Flat bento (balanced)</h3>
+      <p>Two equal "hero" cards on top (Games, Bookshelf), then pairs of mid-weight cards, then Identity as a full-width quiet closer. Reads like a well-organized pinboard. No single anchor — equal citizens.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="featured" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:12px;background:#05080c">
+      <div class="mini-grid" style="grid-template-columns:repeat(4,1fr)">
+        <div class="mini-cell hero" style="grid-column:span 4;min-height:60px"><span class="mini-label">$ about rafael</span>terminal hero + cat gif</div>
+        <div class="mini-cell feat" style="grid-column:span 4;min-height:80px"><span class="mini-label">★ featured — now</span>big "currently" card: what i'm playing / reading / listening to — live feeling</div>
+        <div class="mini-cell" style="grid-column:span 2"><span class="mini-label">games</span></div>
+        <div class="mini-cell" style="grid-column:span 2"><span class="mini-label">bookshelf</span></div>
+        <div class="mini-cell" style="grid-column:span 2"><span class="mini-label">music</span></div>
+        <div class="mini-cell" style="grid-column:span 2"><span class="mini-label">anime</span></div>
+        <div class="mini-cell" style="grid-column:span 2"><span class="mini-label">atlas</span></div>
+        <div class="mini-cell" style="grid-column:span 2"><span class="mini-label">identity</span></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B. Featured "Now" card (recommended)</h3>
+      <p>Hero → one full-width <strong>Now</strong> card showing current state (playing / reading / listening / obsessed-with) → uniform 2-wide grid of archives below. The Now card is the draw — feels alive, updated. The rest are reference. Natural hierarchy, easier to maintain.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="narrative" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:12px;background:#05080c">
+      <div class="mini-grid" style="grid-template-columns:repeat(4,1fr)">
+        <div class="mini-cell hero" style="grid-column:span 4;min-height:60px"><span class="mini-label">$ whoami</span>terminal hero — intro prose</div>
+        <div class="mini-cell" style="grid-column:span 4;background:transparent;border:none;padding:2px 4px;color:#6b7a8c;min-height:0"># 01 — what i make</div>
+        <div class="mini-cell" style="grid-column:span 2"><span class="mini-label">identity</span></div>
+        <div class="mini-cell" style="grid-column:span 2"><span class="mini-label">atlas</span></div>
+        <div class="mini-cell" style="grid-column:span 4;background:transparent;border:none;padding:2px 4px;color:#6b7a8c;min-height:0"># 02 — what i'm into</div>
+        <div class="mini-cell" style="grid-column:span 2"><span class="mini-label">currently</span></div>
+        <div class="mini-cell" style="grid-column:span 2"><span class="mini-label">music</span></div>
+        <div class="mini-cell" style="grid-column:span 4;background:transparent;border:none;padding:2px 4px;color:#6b7a8c;min-height:0"># 03 — worlds i return to</div>
+        <div class="mini-cell" style="grid-column:span 2"><span class="mini-label">games</span></div>
+        <div class="mini-cell" style="grid-column:span 2"><span class="mini-label">bookshelf</span></div>
+        <div class="mini-cell" style="grid-column:span 2"><span class="mini-label">anime</span></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C. Narrative sections</h3>
+      <p>Three named "chapters" (e.g., <em>what i make · what i'm into · worlds i return to</em>) with 2–3 cards each. Adds rhythm and meaning. More editorial, more to maintain, risks feeling over-organized for a personal page.</p>
+    </div>
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top:20px">B is my pick — the "Now" card solves a real UX problem (it's the thing visitors actually want) and the rest becomes low-maintenance reference.</p>

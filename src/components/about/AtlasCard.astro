@@ -1,9 +1,21 @@
 ---
 import BentoCard from "./BentoCard.astro";
-import AtlasTabs from "./AtlasTabs";
 import { ATLAS } from "@/data/about";
 ---
 
-<BentoCard prompt="$ atlas">
-  <AtlasTabs client:visible languages={ATLAS.languages} places={ATLAS.places} />
+<BentoCard prompt="$ atlas --languages">
+  <ul class="space-y-1.5">
+    {
+      ATLAS.languages.map(l => {
+        const filled = "▓".repeat(l.level) + "░".repeat(4 - l.level);
+        return (
+          <li class="grid grid-cols-[2.5rem_1fr_auto] items-center gap-2 text-sm">
+            <span class="font-mono text-[10px] uppercase text-muted">{l.code}</span>
+            <span class="truncate">{l.name}</span>
+            <span class="font-mono text-[11px] text-accent">{filled}</span>
+          </li>
+        );
+      })
+    }
+  </ul>
 </BentoCard>
