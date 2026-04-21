@@ -7,15 +7,12 @@ import AboutHeroTerminal from "@/components/about/AboutHeroTerminal";
 import Bookshelf from "@/components/about/Bookshelf";
 import KonamiCat from "@/components/about/KonamiCat";
 import BentoCard from "@/components/about/BentoCard.astro";
+import NowCard from "@/components/about/NowCard.astro";
 import GamesCard from "@/components/about/GamesCard.astro";
 import MusicCard from "@/components/about/MusicCard.astro";
 import AnimeCard from "@/components/about/AnimeCard.astro";
-import ObsessionsCard from "@/components/about/ObsessionsCard.astro";
-import LanguagesCard from "@/components/about/LanguagesCard.astro";
-import PassportCard from "@/components/about/PassportCard.astro";
-import JoysCard from "@/components/about/JoysCard.astro";
+import AtlasCard from "@/components/about/AtlasCard.astro";
 import IdentityCard from "@/components/about/IdentityCard.astro";
-import LearningCard from "@/components/about/LearningCard.astro";
 
 const buildDate = new Date().toISOString().slice(0, 10);
 ---
@@ -38,51 +35,22 @@ const buildDate = new Date().toISOString().slice(0, 10);
 
     <Hr />
 
-    <section id="bento" class="pt-8 pb-10">
-      <div
-        class="grid auto-rows-[minmax(12rem,auto)] grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-      >
-        <div class="sm:col-span-2 xl:col-span-2 xl:row-span-2">
-          <GamesCard />
-        </div>
+    <section id="now" class="pt-8 pb-6">
+      <NowCard />
+    </section>
 
-        <div class="sm:col-span-2 xl:col-span-2">
-          <MusicCard />
-        </div>
-
-        <div class="sm:col-span-2 xl:col-span-2 xl:row-span-2">
-          <BentoCard prompt="$ ls ~/bookshelf">
+    <section id="archive" class="pb-10">
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <GamesCard />
+        <BentoCard prompt="$ ls ~/bookshelf">
+          <div class="max-h-[18rem] overflow-auto">
             <Bookshelf client:visible />
-          </BentoCard>
-        </div>
-
-        <div class="sm:col-span-2 xl:col-span-2">
-          <AnimeCard />
-        </div>
-
-        <div>
-          <ObsessionsCard />
-        </div>
-
-        <div class="sm:col-span-2 xl:col-span-2">
-          <LanguagesCard />
-        </div>
-
-        <div class="sm:col-span-2 xl:col-span-2">
-          <PassportCard />
-        </div>
-
-        <div>
-          <JoysCard />
-        </div>
-
-        <div>
-          <IdentityCard />
-        </div>
-
-        <div>
-          <LearningCard />
-        </div>
+          </div>
+        </BentoCard>
+        <MusicCard />
+        <AnimeCard />
+        <AtlasCard />
+        <IdentityCard />
       </div>
     </section>
 
