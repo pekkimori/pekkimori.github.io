@@ -122,9 +122,9 @@ export const NOW: {
   listening: NowEntry;
   watching: NowEntry;
 } = {
-  playing: { title: "Hollow Knight", meta: "true ending run", progress: { value: 84, max: 112 } },
-  reading: { title: "The Laws of Human Nature", meta: "R. Greene", progress: { value: 142, max: 331 } },
-  listening: { title: "liminal lo-fi", meta: "for long coding nights" },
+  playing: { title: "osu!", meta: "send help" },
+  reading: { title: "Thus Spoke Zarathustra", meta: "Nietzsche" },
+  listening: { title: "rock n roll", meta: "the classics" },
   watching: { title: "Frieren: Beyond Journey's End", meta: "ep 14", progress: { value: 14, max: 28 } },
 };
 
