@@ -148,15 +148,15 @@ export const ATLAS: {
   ],
   places: [
     { code: "br", city: "São Paulo", note: "home base", kind: "lived" },
-    { code: "pa", city: "Panama City", note: "short stay", kind: "lived" },
-    { code: "jp", city: "Tokyo", note: "returns often", kind: "visited" },
-    { code: "us", city: "New York", note: "", kind: "visited" },
+    { code: "pa", city: "Panama City", note: "", kind: "visited" },
+    { code: "us", city: "San Francisco", note: "", kind: "lived" },
     { code: "co", city: "Bogotá", note: "", kind: "visited" },
     { code: "qa", city: "Doha", note: "", kind: "visited" },
-    { code: "au", city: "Sydney", note: "", kind: "visited" },
+    { code: "jp", city: "Tokyo", note: "", kind: "lived" },
+    { code: "au", city: "Melbourne", note: "", kind: "visited" },
     { code: "cl", city: "Santiago", note: "", kind: "visited" },
-    { code: "ar", city: "Buenos Aires", note: "", kind: "visited" },
-    { code: "de", city: "Berlin", note: "", kind: "visited" },
+    { code: "ar", city: "Buenos Aires", note: "", kind: "lived" },
+    { code: "de", city: "Berlin", note: "", kind: "lived" },
   ],
 };
 
