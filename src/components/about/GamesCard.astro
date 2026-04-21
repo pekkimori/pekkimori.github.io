@@ -3,7 +3,7 @@ import BentoCard from "./BentoCard.astro";
 import { PINNED_GAMES, STEAM_PROFILE_URL } from "@/data/about";
 ---
 
-<BentoCard prompt="$ steam --now-playing">
+<BentoCard prompt="$ steam --pinned">
   <div class="flex flex-col gap-4">
     <a
       href={STEAM_PROFILE_URL}

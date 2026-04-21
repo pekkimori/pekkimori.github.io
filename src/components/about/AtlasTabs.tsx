@@ -14,7 +14,9 @@ export default function AtlasTabs({ languages, places }: Props) {
       <div role="tablist" className="flex gap-2 font-mono text-[10px] uppercase tracking-[0.15em]">
         <button
           role="tab"
+          id="atlas-tab-languages"
           aria-selected={tab === "languages"}
+          aria-controls="atlas-panel-languages"
           onClick={() => setTab("languages")}
           className={`rounded-md border px-2 py-1 transition-colors ${
             tab === "languages"
@@ -26,7 +28,9 @@ export default function AtlasTabs({ languages, places }: Props) {
         </button>
         <button
           role="tab"
+          id="atlas-tab-places"
           aria-selected={tab === "places"}
+          aria-controls="atlas-panel-places"
           onClick={() => setTab("places")}
           className={`rounded-md border px-2 py-1 transition-colors ${
             tab === "places"
@@ -39,7 +43,12 @@ export default function AtlasTabs({ languages, places }: Props) {
       </div>
 
       {tab === "languages" ? (
-        <ul className="space-y-1.5">
+        <ul
+          role="tabpanel"
+          id="atlas-panel-languages"
+          aria-labelledby="atlas-tab-languages"
+          className="space-y-1.5"
+        >
           {languages.map(l => {
             const filled = "▓".repeat(l.level) + "░".repeat(4 - l.level);
             return (
@@ -55,7 +64,12 @@ export default function AtlasTabs({ languages, places }: Props) {
           })}
         </ul>
       ) : (
-        <ul className="space-y-1.5">
+        <ul
+          role="tabpanel"
+          id="atlas-panel-places"
+          aria-labelledby="atlas-tab-places"
+          className="space-y-1.5"
+        >
           {places.map(p => (
             <li
               key={p.code + p.city}
