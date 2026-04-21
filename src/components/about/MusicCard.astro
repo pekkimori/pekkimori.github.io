@@ -1,17 +1,38 @@
 ---
 import BentoCard from "./BentoCard.astro";
-import { MUSIC_TASTE } from "@/data/about";
+import { MUSIC_TASTE, SPOTIFY_URL } from "@/data/about";
 ---
 
 <BentoCard prompt="$ taste --music">
-  <ul class="space-y-3">
-    {
-      MUSIC_TASTE.map(row => (
-        <li class="grid grid-cols-[3.5rem_1fr] items-baseline gap-3">
-          <code class="font-mono text-[11px] text-accent">{row.label}</code>
-          <span class="text-sm text-foreground">{row.value}</span>
-        </li>
-      ))
-    }
-  </ul>
+  <div class="flex flex-col gap-4">
+    <a
+      href={SPOTIFY_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="flex items-center gap-3 rounded-xl border border-border bg-background/40 p-3 transition-colors hover:border-accent/60"
+    >
+      <div
+        class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-foreground/10 font-mono text-xs text-muted"
+        aria-hidden="true"
+      >
+        [SPT]
+      </div>
+      <div class="min-w-0 flex-1">
+        <div class="font-mono text-sm font-semibold">pekkimori</div>
+        <div class="truncate text-xs text-muted">open.spotify.com</div>
+      </div>
+      <span class="font-mono text-xs text-accent">→</span>
+    </a>
+
+    <ul class="space-y-3">
+      {
+        MUSIC_TASTE.map(row => (
+          <li class="grid grid-cols-[3.5rem_1fr] items-baseline gap-3">
+            <code class="font-mono text-[11px] text-accent">{row.label}</code>
+            <span class="text-sm text-foreground">{row.value}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
 </BentoCard>
