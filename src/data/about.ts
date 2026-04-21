@@ -116,7 +116,7 @@ export const PINNED_GAMES: PinnedGame[] = [
 export const ANIME: Anime[] = [
   { title: "Fullmetal Alchemist", tagline: "equivalent exchange, emotional devastation." },
   { title: "Steins;Gate", tagline: "el psy kongroo." },
-  { title: "Bakemonogatari", tagline: "dialogue as architecture." },
+  { title: "Monogatari Series", tagline: "i shall permit thee... to buy me donuts." },
 ];
 
 export const NOW: {
