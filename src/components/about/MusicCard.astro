@@ -1,6 +1,6 @@
 ---
 import BentoCard from "./BentoCard.astro";
-import { MUSIC_TASTE, SPOTIFY_URL } from "@/data/about";
+import { FAVORITE_SONGS, SPOTIFY_URL, FAVORITE_ARTISTS } from "@/data/about";
 ---
 
 <BentoCard prompt="$ taste --music">
@@ -9,7 +9,7 @@ import { MUSIC_TASTE, SPOTIFY_URL } from "@/data/about";
       href={SPOTIFY_URL}
       target="_blank"
       rel="noopener noreferrer"
-      class="flex items-center gap-3 rounded-xl border border-border bg-background/40 p-3 transition-colors hover:border-accent/60"
+      class="flex items-center gap-3 rounded-xl border border-border bg-background/40 p-3 hover:border-accent/60"
     >
       <div
         class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-foreground/10 font-mono text-xs text-muted"
@@ -24,15 +24,29 @@ import { MUSIC_TASTE, SPOTIFY_URL } from "@/data/about";
       <span class="font-mono text-xs text-accent">→</span>
     </a>
 
-    <ul class="space-y-3">
+    <ul class="grid grid-cols-2 gap-x-4 gap-y-2">
       {
-        MUSIC_TASTE.map(row => (
-          <li class="grid grid-cols-[3.5rem_1fr] items-baseline gap-3">
-            <code class="font-mono text-[11px] text-accent">{row.label}</code>
-            <span class="text-sm text-foreground">{row.value}</span>
+        FAVORITE_SONGS.map((song, i) => (
+          <li class="grid grid-cols-[2rem_1fr] items-baseline gap-2 min-w-0">
+            <code class="font-mono text-[11px] text-accent">{String(i + 1).padStart(2, "0")}</code>
+            <div class="min-w-0">
+              <div class="text-sm font-semibold truncate">{song.title}</div>
+              <div class="font-mono text-[11px] text-muted truncate">{song.artist}</div>
+            </div>
           </li>
         ))
       }
     </ul>
+
+    <div>
+      <div class="mb-1.5 font-mono text-[10px] uppercase tracking-[0.15em] text-muted">favorites</div>
+      <div class="flex flex-wrap gap-1.5">
+        {FAVORITE_ARTISTS.map(artist => (
+          <span class="flex-auto text-center rounded-md border border-border px-2 py-0.5 font-mono text-[10px] text-muted">
+            {artist}
+          </span>
+        ))}
+      </div>
+    </div>
   </div>
 </BentoCard>

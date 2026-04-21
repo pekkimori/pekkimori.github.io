@@ -34,10 +34,14 @@ export default function Bookshelf() {
 
       <div
         aria-hidden="true"
-        className="font-mono text-[10px] leading-none text-border"
+        className="overflow-hidden whitespace-nowrap font-mono text-[10px] leading-none text-border"
       >
-        {"=".repeat(40)}
+        {"=".repeat(200)}
       </div>
+
+      <p className="font-mono text-[10px] text-muted text-center">
+        # three books. three roberts. it was not intentional.
+      </p>
 
       <div className="min-h-[3rem] text-center">
         {activeIndex !== null ? (

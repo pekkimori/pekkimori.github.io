@@ -341,48 +341,30 @@ export default function ConstellationMap() {
 function ProjectBubble({ project }: { project: Project }) {
   return (
     <div
-      className="overflow-hidden rounded-xl border border-border shadow-lg"
-      style={{
-        minWidth: 180,
-        maxWidth: 260,
-        background: "var(--background, #0b0b0f)",
-      }}
+      className="overflow-hidden rounded-xl border border-border bg-background/95 px-3 py-2.5 shadow-lg backdrop-blur-sm"
+      style={{ minWidth: 180, maxWidth: 260 }}
     >
-      <div
-        className="flex items-center gap-2 px-3 py-2"
-        style={{ background: project.previewColor }}
-      >
-        <span className="text-xl drop-shadow-md">{project.icon}</span>
-        <div className="min-w-0 flex-1">
-          <div className="text-xs font-bold leading-tight text-white/95 truncate">
-            {project.title}
-          </div>
-          {project.category && (
-            <div className="mt-0.5 text-[9px] text-white/55 truncate">{project.category}</div>
-          )}
-        </div>
-        <StatusBadge status={project.status ?? "wip"} />
-      </div>
-    </div>
-  );
-}
-
-function StatusBadge({ status }: { status: "live" | "wip" }) {
-  if (status === "live") {
-    return (
-      <span className="flex shrink-0 items-center gap-1 rounded-full border border-green-500/40 bg-green-500/10 px-2 py-0.5 text-[10px] text-green-400">
-        <span className="relative flex h-1.5 w-1.5">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
-          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-green-500" />
+      <div className="flex items-center justify-between gap-2">
+        <span className="font-mono text-xs font-semibold text-foreground truncate">
+          {project.title}
         </span>
-        live
-      </span>
-    );
-  }
-  return (
-    <span className="flex shrink-0 items-center gap-1 rounded-full border border-yellow-500/40 bg-yellow-500/10 px-2 py-0.5 text-[10px] text-yellow-400">
-      <span className="h-1.5 w-1.5 rounded-full bg-yellow-500/60" />
-      wip
-    </span>
+        <span
+          className="shrink-0 font-mono text-[10px] uppercase tracking-[0.12em]"
+          style={{ color: project.status === "live" ? "var(--color-accent)" : "var(--color-muted)" }}
+        >
+          [{project.status ?? "wip"}]
+        </span>
+      </div>
+      {project.category && (
+        <div className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.15em] text-accent">
+          {project.category}
+        </div>
+      )}
+      {project.description && project.description !== "??" && (
+        <div className="mt-1.5 font-mono text-[11px] leading-relaxed text-muted line-clamp-2">
+          {project.description}
+        </div>
+      )}
+    </div>
   );
 }
