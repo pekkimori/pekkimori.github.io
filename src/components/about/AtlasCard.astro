@@ -1,0 +1,9 @@
+---
+import BentoCard from "./BentoCard.astro";
+import AtlasTabs from "./AtlasTabs";
+import { ATLAS } from "@/data/about";
+---
+
+<BentoCard prompt="$ atlas">
+  <AtlasTabs client:visible languages={ATLAS.languages} places={ATLAS.places} />
+</BentoCard>
