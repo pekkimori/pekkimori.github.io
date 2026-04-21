@@ -1,7 +1,6 @@
 ---
 import BentoCard from "./BentoCard.astro";
-import ProgressBar from "./ProgressBar.astro";
-import { PINNED_GAMES, STEAM_PROFILE_URL } from "@/data/about";
+import { STEAM_PROFILE_URL } from "@/data/about";
 ---
 
 <BentoCard prompt="$ steam --pinned">
@@ -25,24 +24,12 @@ import { PINNED_GAMES, STEAM_PROFILE_URL } from "@/data/about";
       <span class="font-mono text-xs text-accent">→</span>
     </a>
 
-    <ul class="space-y-2">
-      {
-        PINNED_GAMES.map(game => (
-          <li class="rounded-lg border border-border/60 p-3">
-            <div class="font-mono text-[10px] uppercase tracking-[0.15em] text-muted">
-              {game.label}
-            </div>
-            <div class="mt-1 text-sm font-semibold">{game.title}</div>
-            {game.completion !== undefined ? (
-              <div class="mt-2">
-                <ProgressBar value={game.completion} max={100} />
-              </div>
-            ) : (
-              <div class="mt-2 font-mono text-[11px] text-muted">▓▓▓▓▓▓▓▓▓▓ ???%</div>
-            )}
-          </li>
-        ))
-      }
-    </ul>
+    <img
+      src="/gifs/about/transport_stag_example.gif"
+      alt="The Stag transport beetle from Hollow Knight."
+      class="w-full rounded-xl object-cover"
+      loading="lazy"
+      decoding="async"
+    />
   </div>
 </BentoCard>
