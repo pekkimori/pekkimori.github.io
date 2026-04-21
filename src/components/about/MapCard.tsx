@@ -45,9 +45,9 @@ export default function MapCard({ places }: Props) {
                 key={geo.rsmKey}
                 geography={geo}
                 style={{
-                  default: { fill: "#1e2d3d", stroke: "#0b0f14", strokeWidth: 0.5, outline: "none" },
-                  hover:   { fill: "#1e2d3d", outline: "none" },
-                  pressed: { fill: "#1e2d3d", outline: "none" },
+                  default: { fill: "none", stroke: "#3a5068", strokeWidth: 0.6, outline: "none" },
+                  hover:   { fill: "none", outline: "none" },
+                  pressed: { fill: "none", outline: "none" },
                 }}
               />
             ))
@@ -66,15 +66,15 @@ export default function MapCard({ places }: Props) {
             onMouseLeave={() => setTooltip(null)}
           >
             <circle
-              r={place.kind === "lived" ? 5 : 3.5}
-              fill={place.kind === "lived" ? "#7dd3fc" : "#475569"}
+              r={place.kind === "lived" ? 7 : 5}
+              fill={place.kind === "lived" ? "#7dd3fc" : "#f97316"}
               stroke="#0b0f14"
-              strokeWidth={1}
+              strokeWidth={1.5}
               style={{ cursor: "pointer", transition: "fill 0.15s" }}
-              onMouseEnter={e => (e.currentTarget.style.fill = "#e2f2ff")}
+              onMouseEnter={e => (e.currentTarget.style.fill = "#ffffff")}
               onMouseLeave={e =>
                 (e.currentTarget.style.fill =
-                  place.kind === "lived" ? "#7dd3fc" : "#475569")
+                  place.kind === "lived" ? "#7dd3fc" : "#f97316")
               }
             />
           </Marker>
@@ -100,11 +100,11 @@ export default function MapCard({ places }: Props) {
 
       <div className="mt-2 flex gap-4 font-mono text-[10px] text-muted">
         <span className="flex items-center gap-1.5">
-          <span className="inline-block h-2 w-2 rounded-full bg-[#7dd3fc]" />
+          <span className="inline-block h-2.5 w-2.5 rounded-full bg-[#7dd3fc]" />
           lived
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="inline-block h-2 w-2 rounded-full bg-[#475569]" />
+          <span className="inline-block h-2.5 w-2.5 rounded-full bg-[#f97316]" />
           visited
         </span>
       </div>
