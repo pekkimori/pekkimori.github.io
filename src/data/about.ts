@@ -115,7 +115,7 @@ export const PINNED_GAMES: PinnedGame[] = [
 
 export const ANIME: Anime[] = [
   { title: "Fullmetal Alchemist", tagline: "A lesson without pain is meaningless. For you cannot gain anything without sacrificing something else in return, but once you have overcome it and made it your own...you will gain an irreplaceable fullmetal heart." },
-  { title: "Steins;Gate", tagline: "el psy kongroo." },
+  { title: "Steins;Gate", tagline: "No-one knows what the future holds. That's why its potential is infinite." },
   { title: "Monogatari Series", tagline: "i shall permit thee... to buy me donuts." },
 ];
 
