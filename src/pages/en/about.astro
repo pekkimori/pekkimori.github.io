@@ -15,7 +15,6 @@ import AtlasCard from "@/components/about/AtlasCard.astro";
 import GlobeCard from "@/components/about/GlobeCard";
 import { ATLAS } from "@/data/about";
 
-const buildDate = new Date().toISOString().slice(0, 10);
 ---
 
 <Layout lang="en">
@@ -52,12 +51,6 @@ const buildDate = new Date().toISOString().slice(0, 10);
         </BentoCard>
       </div>
     </section>
-
-    <footer class="mt-8 border-t border-border pt-4 pb-10">
-      <p class="font-mono text-xs text-muted">
-        &gt; status: * caffeinated * — last updated: {buildDate}
-      </p>
-    </footer>
 
     <KonamiCat client:idle />
   </main>
