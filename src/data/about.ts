@@ -171,3 +171,4 @@ export const IDENTITY: Identity = {
 
 export const STEAM_PROFILE_URL = "https://steamcommunity.com/id/pekkimori/";
 export const MAL_URL = "https://myanimelist.net/animelist/PEKKIMORI_";
+export const SPOTIFY_URL = "https://open.spotify.com/user/ihf9rp07w73vzy9efl6mrk04p";
