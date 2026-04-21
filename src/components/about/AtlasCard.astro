@@ -9,10 +9,15 @@ import { ATLAS } from "@/data/about";
       ATLAS.languages.map(l => {
         const filled = "▓".repeat(l.level) + "░".repeat(4 - l.level);
         return (
-          <li class="grid grid-cols-[2.5rem_1fr_auto] items-center gap-2 text-sm">
-            <span class="font-mono text-[10px] uppercase text-muted">{l.code}</span>
-            <span class="truncate">{l.name}</span>
-            <span class="font-mono text-[11px] text-accent">{filled}</span>
+          <li class="flex flex-col gap-0.5">
+            <div class="grid grid-cols-[2.5rem_1fr_auto] items-center gap-2 text-sm">
+              <span class="font-mono text-[10px] uppercase text-muted">{l.code}</span>
+              <span class="truncate">{l.name}</span>
+              <span class="font-mono text-[11px] text-accent">{filled}</span>
+            </div>
+            <div class="pl-[2.5rem] font-mono text-[10px] italic text-muted">
+              {l.love.join(" · ")}
+            </div>
           </li>
         );
       })

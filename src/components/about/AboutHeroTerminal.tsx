@@ -6,8 +6,7 @@ const LINES: { text: string; pauseAfterMs?: number }[] = [
   { text: "> polymath · INTJ 145 · truth · energy · love", pauseAfterMs: 400 },
   { text: "" },
   { text: "$ cat ~/intro.md" },
-  { text: "> building systems, exploring brains," },
-  { text: "> collecting countries, ranking cheeses.", pauseAfterMs: 300 },
+  { text: "> building systems, exploring brains.", pauseAfterMs: 300 },
   { text: "" },
   { text: "$ _" },
 ];
@@ -59,7 +58,7 @@ export default function AboutHeroTerminal() {
   }, []);
 
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-background/80 shadow-sm">
+    <div className="overflow-hidden rounded-xl border border-border bg-background/80">
       <div className="flex items-center gap-2 border-b border-border bg-foreground/5 px-3 py-2">
         <span className="inline-block h-3 w-3 rounded-full bg-[#ff5f56]" aria-hidden="true" />
         <span className="inline-block h-3 w-3 rounded-full bg-[#ffbd2e]" aria-hidden="true" />

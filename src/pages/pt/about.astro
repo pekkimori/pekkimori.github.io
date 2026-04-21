@@ -17,7 +17,7 @@ import { ATLAS } from "@/data/about";
 
 ---
 
-<Layout lang="en">
+<Layout lang="pt">
   <Header />
   <main id="main-content" data-layout="about">
     <section id="hero" class="pt-8 pb-6">
@@ -25,7 +25,7 @@ import { ATLAS } from "@/data/about";
         <AboutHeroTerminal client:load />
         <img
           src="/gifs/about/hero-cat.gif"
-          alt="A contentedly looping cat."
+          alt="Um gatinho em loop contente."
           class="hidden h-60 w-60 rounded-xl object-cover md:block"
           loading="eager"
           decoding="async"
@@ -62,7 +62,7 @@ import { ATLAS } from "@/data/about";
     const layout = (document.querySelector("#main-content") as HTMLElement)
       ?.dataset?.layout;
     if (layout === "about") {
-      sessionStorage.setItem("backUrl", "/en/about");
+      sessionStorage.setItem("backUrl", "/pt/about");
     }
   });
 </script>
