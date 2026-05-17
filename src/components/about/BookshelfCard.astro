@@ -1,26 +1,43 @@
 ---
 import BentoCard from "./BentoCard.astro";
 import Bookshelf from "./Bookshelf";
-import { GOODREADS_URL } from "@/data/about";
+import { getBookCounts } from "@/data/books";
+
+const path = Astro.url.pathname;
+const lang: "en" | "pt" | "ja" = path.startsWith("/pt")
+  ? "pt"
+  : path.startsWith("/ja")
+    ? "ja"
+    : "en";
+
+const labels = {
+  en: { link: "browse full shelf →", subtitle: (n: number, r: number) => `${n} books · ${r} reading` },
+  pt: { link: "ver estante completa →", subtitle: (n: number, r: number) => `${n} livros · ${r} lendo` },
+  ja: { link: "本棚を見る →", subtitle: (n: number, r: number) => `${n}冊 · ${r}冊読書中` },
+};
+
+const counts = getBookCounts();
+const labelSet = labels[lang];
+const href = `/${lang}/bookshelf`;
 ---
 
 <BentoCard prompt="$ ls ~/bookshelf">
   <div class="flex flex-col gap-4">
     <a
-      href={GOODREADS_URL}
-      target="_blank"
-      rel="noopener noreferrer"
+      href={href}
       class="flex items-center gap-3 rounded-xl border border-border bg-background/40 p-3 hover:border-accent/60"
     >
       <div
         class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-foreground/10 font-mono text-xs text-muted"
         aria-hidden="true"
       >
-        [GR]
+        [shelf]
       </div>
       <div class="min-w-0 flex-1">
-        <div class="font-mono text-sm font-semibold">pekkimori</div>
-        <div class="truncate text-xs text-muted">goodreads.com</div>
+        <div class="font-mono text-sm font-semibold">{labelSet.link}</div>
+        <div class="truncate text-xs text-muted">
+          {labelSet.subtitle(counts.total, counts.reading)}
+        </div>
       </div>
       <span class="font-mono text-xs text-accent">→</span>
     </a>
