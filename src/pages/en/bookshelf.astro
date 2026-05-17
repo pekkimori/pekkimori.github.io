@@ -1,0 +1,48 @@
+---
+import { getImage } from "astro:assets";
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import Hr from "@/components/Hr.astro";
+import BookshelfComponent from "@/components/bookshelf/Bookshelf";
+import { BOOKS, getBooksForLocale } from "@/data/books";
+import type { ResolvedCover } from "@/components/bookshelf/types";
+
+const lang = "en" as const;
+
+const localized = getBooksForLocale(lang);
+
+// Resolve each cover via Astro's image pipeline (server-side).
+const resolvedCovers = await Promise.all(
+  BOOKS.map(async (b): Promise<ResolvedCover> => {
+    if (!b.cover) return null;
+    const img = await getImage({
+      src: b.cover,
+      widths: [160, 320, 480],
+      formats: ["avif", "webp"],
+    });
+    return {
+      src: img.src,
+      srcSet: img.srcSet.attribute,
+      width: img.attributes.width as number,
+      height: img.attributes.height as number,
+    };
+  })
+);
+
+const books = localized.map((b, i) => ({ ...b, cover: resolvedCovers[i] }));
+---
+
+<Layout lang={lang} title="Bookshelf">
+  <Header />
+  <main id="main-content">
+    <section class="pt-8 pb-6">
+      <h1 class="text-3xl font-semibold">bookshelf</h1>
+    </section>
+    <Hr />
+    <section class="py-8">
+      <BookshelfComponent lang={lang} books={books} client:load />
+    </section>
+  </main>
+  <Footer />
+</Layout>
