@@ -1,0 +1,129 @@
+/* src/components/bookshelf/bookshelf.css */
+
+.bookshelf-row {
+  perspective: 1200px;
+  perspective-origin: 50% 60%;
+}
+
+.book-slot {
+  position: relative;
+  flex: 0 0 auto;
+  /* width/height set via inline style by the React component (responsive) */
+}
+
+.book-3d {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  will-change: transform;
+  /* Initial state: spine facing the viewer.
+     The spine face is on the +X edge of the book; rotating the whole
+     book -90deg around Y brings that edge to face the camera. */
+  transform: rotateY(-90deg);
+}
+
+.book-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.book-face-spine {
+  /* Lives on the right edge of the book block. We translate it out by
+     half the cover-width minus half the spine-width so its left edge
+     aligns with the book's right edge, then rotate it 90deg. */
+  /* Concrete transforms are applied via CSS custom properties set inline. */
+  transform: translateX(var(--spine-offset-x)) rotateY(90deg);
+  width: var(--spine-thickness);
+}
+
+.book-face-front {
+  /* Front face stays in the XY plane, pushed out by half the spine thickness. */
+  transform: translateZ(calc(var(--spine-thickness) / 2));
+}
+
+.book-face-back {
+  transform: translateZ(calc(var(--spine-thickness) / -2)) rotateY(180deg);
+  background: var(--background);
+}
+
+.book-face-top,
+.book-face-bottom {
+  height: 4px;
+  width: 100%;
+  background: linear-gradient(180deg, #d9c8a6, #b09a72);
+}
+
+.book-face-top {
+  top: 0;
+  transform: translateY(calc(var(--spine-thickness) / -2)) rotateX(90deg);
+  transform-origin: top center;
+}
+
+.book-face-bottom {
+  bottom: 0;
+  transform: translateY(calc(var(--spine-thickness) / 2)) rotateX(-90deg);
+  transform-origin: bottom center;
+}
+
+/* The spine's printed text. Default writing direction is set inline
+   per-locale: en/pt use vertical-rl + rotate to read top-down along the
+   spine; ja uses native vertical-rl. */
+.book-spine-label {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 2px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.92);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
+}
+
+.book-spine-label[data-orient="vertical-en"] {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+
+.book-spine-label[data-orient="vertical-ja"] {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+}
+
+.shelf-baseline {
+  height: 6px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--border) 80%, transparent), color-mix(in srgb, var(--border) 30%, transparent));
+  border-radius: 1px;
+  box-shadow: 0 6px 14px -8px color-mix(in srgb, var(--foreground) 40%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bookshelf-row {
+    perspective: none;
+  }
+  .book-3d {
+    transform: none !important;
+    position: relative;
+  }
+  .book-face {
+    position: relative;
+    inset: auto;
+  }
+  .book-face-spine,
+  .book-face-back,
+  .book-face-top,
+  .book-face-bottom {
+    display: none;
+  }
+  .book-face-front {
+    transform: none;
+  }
+}
