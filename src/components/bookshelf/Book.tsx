@@ -1,7 +1,7 @@
-// src/components/bookshelf/Book.tsx
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import type { Lang, LocalizedBook, ResolvedCover } from "./types";
+import HoverTooltip from "./HoverTooltip";
 
 const SPINE_WIDTH_DESKTOP = 32;
 const SPINE_WIDTH_MOBILE = 24;
@@ -10,11 +10,15 @@ const COVER_HEIGHT_MOBILE = 180;
 const COVER_WIDTH_DESKTOP = 160;
 const COVER_WIDTH_MOBILE = 110;
 
+const FLIGHT_SCALE = 1.6;
+
 type Props = {
   book: LocalizedBook & { cover: ResolvedCover };
   lang: Lang;
   showRating: boolean;
-  isLifted: boolean;
+  isHovered: boolean;
+  isClicked: boolean;
+  nudgeX: number;
   hasHover: boolean;
   isMobile: boolean;
   onPointerEnter: () => void;
@@ -29,7 +33,9 @@ export default function Book({
   book,
   lang,
   showRating,
-  isLifted,
+  isHovered,
+  isClicked,
+  nudgeX,
   hasHover,
   isMobile,
   onPointerEnter,
@@ -40,49 +46,151 @@ export default function Book({
   registerRef,
 }: Props) {
   const inner3DRef = useRef<HTMLDivElement | null>(null);
-  const timelineRef = useRef<gsap.core.Timeline | null>(null);
+  const slotRef = useRef<HTMLDivElement | null>(null);
+  const hoverTLRef = useRef<gsap.core.Timeline | null>(null);
+  const flightTLRef = useRef<gsap.core.Timeline | null>(null);
+  const savedRectRef = useRef<{ top: number; left: number; width: number; height: number } | null>(null);
 
   const spineWidth = isMobile ? SPINE_WIDTH_MOBILE : SPINE_WIDTH_DESKTOP;
   const coverWidth = isMobile ? COVER_WIDTH_MOBILE : COVER_WIDTH_DESKTOP;
   const coverHeight = isMobile ? COVER_HEIGHT_MOBILE : COVER_HEIGHT_DESKTOP;
   const spineOffsetX = (coverWidth - spineWidth) / 2;
 
-  // Create the GSAP timeline once. It runs forward on lift, reverses on settle.
+  // Hover timeline: tiny lift, no rotation. The book stays spine-on.
   useEffect(() => {
     if (!inner3DRef.current) return;
+    const el = inner3DRef.current;
     const tl = gsap.timeline({ paused: true });
-    tl.to(inner3DRef.current, {
-      rotateY: 0,
-      z: 40,
-      y: -12,
-      duration: 0.42,
-      ease: "power3.out",
-    }).to(
-      inner3DRef.current,
-      { scale: 1.04, duration: 0.18, ease: "power2.out" },
-      "-=0.12"
-    );
-    timelineRef.current = tl;
+    tl.to(el, {
+      y: -14,
+      z: 8,
+      scale: 1.02,
+      duration: 0.28,
+      ease: "power2.out",
+    });
+    hoverTLRef.current = tl;
     return () => {
       tl.kill();
-      timelineRef.current = null;
+      hoverTLRef.current = null;
     };
   }, []);
 
-  // Drive the timeline based on lifted state.
+  // Drive hover state. Suppressed when the book is in flight.
   useEffect(() => {
-    const tl = timelineRef.current;
+    const tl = hoverTLRef.current;
     if (!tl) return;
-    if (isLifted) {
-      tl.timeScale(1).play();
-    } else {
-      tl.timeScale(1.3).reverse();
+    if (isHovered && !isClicked) tl.timeScale(1).play();
+    else tl.timeScale(1.3).reverse();
+  }, [isHovered, isClicked]);
+
+  // Click flight: book detaches via position:fixed, animates to viewport center
+  // while rotating from spine to cover, scaling up, with a soft drop shadow.
+  useEffect(() => {
+    const el = inner3DRef.current;
+    if (!el) return;
+
+    if (isClicked) {
+      // Stop any running flight tween and snapshot the current rect.
+      flightTLRef.current?.kill();
+
+      // First reset any hover transforms so we start from a clean state.
+      gsap.set(el, { y: 0, z: 0, scale: 1 });
+
+      const rect = el.getBoundingClientRect();
+      savedRectRef.current = {
+        top: rect.top,
+        left: rect.left,
+        width: rect.width,
+        height: rect.height,
+      };
+
+      // Anchor the element at its current viewport position, then animate to center.
+      gsap.set(el, {
+        position: "fixed",
+        top: rect.top,
+        left: rect.left,
+        right: "auto",
+        width: rect.width,
+        height: rect.height,
+        margin: 0,
+        zIndex: 60,
+        // Re-establish perspective on the flying element since it's now positioned
+        // independently of the .bookshelf-row that originally provided it.
+        perspective: 1200,
+        transformOrigin: `${rect.width / 2}px ${rect.height / 2}px`,
+      });
+
+      const endWidth = rect.width * FLIGHT_SCALE;
+      const endHeight = rect.height * FLIGHT_SCALE;
+      const endLeft = window.innerWidth / 2 - endWidth / 2;
+      const endTop = window.innerHeight / 2 - endHeight / 2;
+
+      const tl = gsap.timeline();
+      tl.to(el, {
+        top: endTop,
+        left: endLeft,
+        width: endWidth,
+        height: endHeight,
+        rotateY: 0,
+        rotateX: -6,
+        duration: 0.7,
+        ease: "power2.inOut",
+      }).to(
+        el,
+        {
+          filter: "drop-shadow(-12px 22px 36px rgba(0,0,0,0.45))",
+          duration: 0.5,
+          ease: "power1.out",
+        },
+        0.1
+      );
+      flightTLRef.current = tl;
+    } else if (savedRectRef.current) {
+      // Return flight: animate back to original viewport rect, then clear the
+      // inline overrides so the book settles into its shelf flow again.
+      flightTLRef.current?.kill();
+      const home = savedRectRef.current;
+      const tl = gsap.timeline({
+        onComplete: () => {
+          gsap.set(el, {
+            clearProps:
+              "position,top,left,right,width,height,margin,zIndex,perspective,transformOrigin,filter,rotateX,rotateY,scale,x,y,z",
+          });
+          savedRectRef.current = null;
+        },
+      });
+      tl.to(el, {
+        top: home.top,
+        left: home.left,
+        width: home.width,
+        height: home.height,
+        rotateY: -90,
+        rotateX: 0,
+        filter: "drop-shadow(0 0 0 rgba(0,0,0,0))",
+        duration: 0.55,
+        ease: "power2.inOut",
+      });
+      flightTLRef.current = tl;
     }
-  }, [isLifted]);
+    return () => {
+      // Don't kill on cleanup mid-flight — that strands the inline styles.
+    };
+  }, [isClicked]);
+
+  // Sibling nudge: slide the slot horizontally when a neighbor is hovered/clicked.
+  useEffect(() => {
+    const slot = slotRef.current;
+    if (!slot) return;
+    gsap.to(slot, {
+      x: nudgeX,
+      duration: 0.28,
+      ease: "power2.out",
+    });
+  }, [nudgeX]);
 
   const tinted = book.spineColor ?? "var(--accent)";
-  // Spine background uses spineColor at full strength so printed text reads white.
-  const spineBg = book.spineColor ?? "color-mix(in srgb, var(--accent) 70%, var(--background))";
+  const spineBg =
+    book.spineColor ?? "color-mix(in srgb, var(--accent) 70%, var(--background))";
 
   const orient = lang === "ja" ? "vertical-ja" : "vertical-en";
 
@@ -90,19 +198,22 @@ export default function Book({
     book.status === "reading" ? " (currently reading)" : ""
   }`;
 
-  // The slot reserves space at spine-width. The .book-3d inner div is absolutely
-  // positioned at the full cover dimensions, anchored to the slot's right edge so
-  // when it rotates to face the viewer, it grows leftward without overlapping the
-  // next book unless lifted (which we want — it visually pops over neighbors).
   return (
-    <div className="flex flex-col items-center">
+    <div className="relative flex flex-col items-center">
+      <HoverTooltip
+        title={book.title}
+        author={book.author}
+        visible={isHovered && !isClicked}
+      />
+
       <div
+        ref={slotRef}
         className="book-slot"
         style={{
           width: spineWidth,
           height: coverHeight,
           opacity: book.status === "want-to-read" ? 0.6 : 1,
-          // CSS custom props consumed by bookshelf.css faces.
+          zIndex: isClicked ? 60 : isHovered ? 5 : 1,
           ["--spine-thickness" as never]: `${spineWidth}px`,
           ["--spine-offset-x" as never]: `${spineOffsetX}px`,
         }}
@@ -116,16 +227,12 @@ export default function Book({
           style={{
             width: coverWidth,
             height: coverHeight,
-            // Anchor the inner block to the slot's right edge so the spine face
-            // (which sits on the +X side of the inner block after the rotateY(-90deg))
-            // visually lines up with the slot.
             right: 0,
             left: "auto",
             transformOrigin: `calc(100% - ${spineWidth / 2}px) 50%`,
           }}
           aria-hidden={true}
         >
-          {/* Front face (cover) */}
           <div
             className="book-face book-face-front"
             style={{
@@ -166,14 +273,10 @@ export default function Book({
             )}
           </div>
 
-          {/* Back face */}
           <div className="book-face book-face-back" />
-
-          {/* Top + bottom slivers */}
           <div className="book-face book-face-top" />
           <div className="book-face book-face-bottom" />
 
-          {/* Spine face */}
           <div
             className="book-face book-face-spine"
             style={{
@@ -195,7 +298,6 @@ export default function Book({
           </div>
         </div>
 
-        {/* The interactive button overlays the slot. Keeps semantics simple. */}
         <button
           type="button"
           aria-label={ariaLabel}
@@ -212,7 +314,8 @@ export default function Book({
         <div className="mt-2 font-mono text-[10px] text-accent">
           <span aria-label={`${book.rating} out of 5 stars`}>
             <span aria-hidden="true">
-              {"★".repeat(book.rating)}{"☆".repeat(5 - book.rating)}
+              {"★".repeat(book.rating)}
+              {"☆".repeat(5 - book.rating)}
             </span>
           </span>
         </div>

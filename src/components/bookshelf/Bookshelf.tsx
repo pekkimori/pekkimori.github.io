@@ -85,8 +85,8 @@ function partitionByStatus(books: BookForRender[]): BookForRender[] {
 export default function Bookshelf({ lang, books }: Props) {
   const s = STRINGS[lang];
   const [sort, setSort] = useState<SortMode>("alpha");
-  const [liftedSlug, setLiftedSlug] = useState<string | null>(null);
-  const [modalSlug, setModalSlug] = useState<string | null>(null);
+  const [hoveredSlug, setHoveredSlug] = useState<string | null>(null);
+  const [clickedSlug, setClickedSlug] = useState<string | null>(null);
 
   const hasHover = useHoverCapable();
   const isMobile = useIsMobile();
@@ -119,22 +119,21 @@ export default function Bookshelf({ lang, books }: Props) {
     return [{ items: partitionByStatus(sortAlpha(books, collator)) }];
   }, [books, collator, sort]);
 
-  const modalBook = useMemo(
-    () => books.find(b => b.slug === modalSlug) ?? null,
-    [books, modalSlug]
+  const clickedBook = useMemo(
+    () => books.find(b => b.slug === clickedSlug) ?? null,
+    [books, clickedSlug]
   );
 
   const handleBookClick = (slug: string) => {
     if (hasHover) {
-      setModalSlug(slug);
-      setLiftedSlug(slug);
+      setClickedSlug(slug);
       return;
     }
-    // Touch: first tap lifts, second tap opens modal.
-    if (liftedSlug === slug) {
-      setModalSlug(slug);
+    // Touch: first tap hovers, second tap launches the flight + modal.
+    if (hoveredSlug === slug) {
+      setClickedSlug(slug);
     } else {
-      setLiftedSlug(slug);
+      setHoveredSlug(slug);
     }
   };
 
@@ -209,27 +208,49 @@ export default function Bookshelf({ lang, books }: Props) {
                 </h2>
               )}
               <div className="bookshelf-row flex flex-wrap items-end gap-[6px] sm:gap-[6px]">
-                {shelf.items.map(book => (
-                  <Book
-                    key={book.slug}
-                    book={book}
-                    lang={lang}
-                    showRating={sort === "rating"}
-                    isLifted={liftedSlug === book.slug}
-                    hasHover={hasHover}
-                    isMobile={isMobile}
-                    onPointerEnter={() => setLiftedSlug(book.slug)}
-                    onPointerLeave={() => {
-                      if (modalSlug !== book.slug) setLiftedSlug(null);
-                    }}
-                    onFocus={() => setLiftedSlug(book.slug)}
-                    onBlur={() => {
-                      if (modalSlug !== book.slug) setLiftedSlug(null);
-                    }}
-                    onClick={() => handleBookClick(book.slug)}
-                    registerRef={() => {}}
-                  />
-                ))}
+                {(() => {
+                  const anchorSlug = clickedSlug ?? hoveredSlug;
+                  const anchorIdx = shelf.items.findIndex(
+                    b => b.slug === anchorSlug
+                  );
+                  return shelf.items.map((book, idx) => {
+                    let nudgeX = 0;
+                    if (anchorIdx >= 0 && idx !== anchorIdx) {
+                      const delta = idx - anchorIdx;
+                      const dir = Math.sign(delta);
+                      const abs = Math.abs(delta);
+                      if (abs === 1) nudgeX = dir * 8;
+                      else if (abs === 2) nudgeX = dir * 3;
+                    }
+                    return (
+                      <Book
+                        key={book.slug}
+                        book={book}
+                        lang={lang}
+                        showRating={sort === "rating"}
+                        isHovered={hoveredSlug === book.slug}
+                        isClicked={clickedSlug === book.slug}
+                        nudgeX={nudgeX}
+                        hasHover={hasHover}
+                        isMobile={isMobile}
+                        onPointerEnter={() => {
+                          if (clickedSlug === null) setHoveredSlug(book.slug);
+                        }}
+                        onPointerLeave={() => {
+                          if (hoveredSlug === book.slug) setHoveredSlug(null);
+                        }}
+                        onFocus={() => {
+                          if (clickedSlug === null) setHoveredSlug(book.slug);
+                        }}
+                        onBlur={() => {
+                          if (hoveredSlug === book.slug) setHoveredSlug(null);
+                        }}
+                        onClick={() => handleBookClick(book.slug)}
+                        registerRef={() => {}}
+                      />
+                    );
+                  });
+                })()}
               </div>
               <div className="shelf-baseline" aria-hidden="true" />
             </section>
@@ -245,12 +266,11 @@ export default function Bookshelf({ lang, books }: Props) {
       </p>
 
       <BookModal
-        book={modalBook}
+        book={clickedBook}
         lang={lang}
         onClose={() => {
-          setModalSlug(null);
-          // Settle the lifted book ~180ms after modal close (spec §3D animation).
-          window.setTimeout(() => setLiftedSlug(null), 180);
+          // Clearing clickedSlug triggers the return-flight in Book.tsx.
+          setClickedSlug(null);
         }}
       />
     </div>
