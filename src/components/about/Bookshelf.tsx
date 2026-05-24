@@ -1,5 +1,68 @@
+// src/components/about/Bookshelf.tsx
 import { useState } from "react";
-import { BOOKS } from "@/data/about";
+
+type AsciiBook = {
+  title: string;
+  author: string;
+  quote: string;
+  asciiCover: string;
+};
+
+const ASCII_BOOKS: AsciiBook[] = [
+  {
+    title: "The Laws of Human Nature",
+    author: "Robert Greene",
+    quote: "Not to become someone else, but to be more thoroughly yourself.",
+    asciiCover: [
+      "╔═════════════╗",
+      "║             ║",
+      "║  THE LAWS   ║",
+      "║     OF      ║",
+      "║   HUMAN     ║",
+      "║   NATURE    ║",
+      "║             ║",
+      "╠═════════════╣",
+      "║  R. GREENE  ║",
+      "╚═════════════╝",
+    ].join("\n"),
+  },
+  {
+    title: "The King in Yellow",
+    author: "Robert W. Chambers",
+    quote:
+      "His mind is a wonder chamber, from which he can extract treasures that you and I would give years of our life to acquire.",
+    asciiCover: [
+      "╔═════════════╗",
+      "║ * * * * * * ║",
+      "║             ║",
+      "║  THE KING   ║",
+      "║     IN      ║",
+      "║   YELLOW    ║",
+      "║             ║",
+      "╠═════════════╣",
+      "║  CHAMBERS   ║",
+      "╚═════════════╝",
+    ].join("\n"),
+  },
+  {
+    title: "Rich Dad, Poor Dad",
+    author: "Robert T. Kiyosaki",
+    quote:
+      "Winners are not afraid of losing. But losers are. Failure is part of the process of success. People who avoid failure also avoid success.",
+    asciiCover: [
+      "╔═════════════╗",
+      "║  RICH DAD   ║",
+      "║  POOR DAD   ║",
+      "║             ║",
+      "║  $ . . . $  ║",
+      "║             ║",
+      "║   what is   ║",
+      "╠═════════════╣",
+      "║ R. KIYOSAKI ║",
+      "╚═════════════╝",
+    ].join("\n"),
+  },
+];
 
 export default function Bookshelf() {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
@@ -7,7 +70,7 @@ export default function Bookshelf() {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-end justify-center gap-4 sm:gap-6">
-        {BOOKS.map((book, i) => {
+        {ASCII_BOOKS.map((book, i) => {
           const isActive = activeIndex === i;
           return (
             <button
@@ -47,10 +110,10 @@ export default function Bookshelf() {
         {activeIndex !== null ? (
           <figure>
             <blockquote className="font-mono text-sm italic">
-              "{BOOKS[activeIndex].quote}"
+              "{ASCII_BOOKS[activeIndex].quote}"
             </blockquote>
             <figcaption className="mt-1 font-mono text-xs text-muted">
-              — {BOOKS[activeIndex].title}, {BOOKS[activeIndex].author}
+              — {ASCII_BOOKS[activeIndex].title}, {ASCII_BOOKS[activeIndex].author}
             </figcaption>
           </figure>
         ) : (

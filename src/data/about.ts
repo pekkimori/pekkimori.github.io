@@ -1,10 +1,3 @@
-export type Book = {
-  title: string;
-  author: string;
-  quote: string;
-  asciiCover: string;
-};
-
 export type PinnedGame = {
   title: string;
   label: string;
@@ -54,63 +47,6 @@ export type Identity = {
   values: string[];
   prose: string;
 };
-
-export const BOOKS: Book[] = [
-  {
-    title: "The Laws of Human Nature",
-    author: "Robert Greene",
-    quote:
-      "Not to become someone else, but to be more thoroughly yourself.",
-    asciiCover: [
-      "╔═════════════╗",
-      "║             ║",
-      "║  THE LAWS   ║",
-      "║     OF      ║",
-      "║   HUMAN     ║",
-      "║   NATURE    ║",
-      "║             ║",
-      "╠═════════════╣",
-      "║  R. GREENE  ║",
-      "╚═════════════╝",
-    ].join("\n"),
-  },
-  {
-    title: "The King in Yellow",
-    author: "Robert W. Chambers",
-    quote:
-      "His mind is a wonder chamber, from which he can extract treasures that you and I would give years of our life to acquire.",
-    asciiCover: [
-      "╔═════════════╗",
-      "║ * * * * * * ║",
-      "║             ║",
-      "║  THE KING   ║",
-      "║     IN      ║",
-      "║   YELLOW    ║",
-      "║             ║",
-      "╠═════════════╣",
-      "║  CHAMBERS   ║",
-      "╚═════════════╝",
-    ].join("\n"),
-  },
-  {
-    title: "Rich Dad, Poor Dad",
-    author: "Robert T. Kiyosaki",
-    quote:
-      "Winners are not afraid of losing. But losers are. Failure is part of the process of success. People who avoid failure also avoid success.",
-    asciiCover: [
-      "╔═════════════╗",
-      "║  RICH DAD   ║",
-      "║  POOR DAD   ║",
-      "║             ║",
-      "║  $ . . . $  ║",
-      "║             ║",
-      "║   what is   ║",
-      "╠═════════════╣",
-      "║ R. KIYOSAKI ║",
-      "╚═════════════╝",
-    ].join("\n"),
-  },
-];
 
 export const PINNED_GAMES: PinnedGame[] = [
   { title: "Hollow Knight", label: "GOTY every year", completion: 98 },
@@ -218,4 +154,3 @@ export const FAVORITE_ARTISTS: string[] = [
 export const STEAM_PROFILE_URL = "https://steamcommunity.com/id/pekkimori/";
 export const MAL_URL = "https://myanimelist.net/animelist/PEKKIMORI_";
 export const SPOTIFY_URL = "https://open.spotify.com/user/ihf9rp07w73vzy9efl6mrk04p";
-export const GOODREADS_URL = "https://www.goodreads.com/review/list/181219238";
