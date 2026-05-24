@@ -16,10 +16,10 @@
   inset: 0;
   transform-style: preserve-3d;
   will-change: transform;
-  /* Initial state: spine facing the viewer.
-     The spine face is on the +X edge of the book; rotating the whole
-     book -90deg around Y brings that edge to face the camera. */
-  transform: rotateY(-90deg);
+    /* Initial state: spine facing the viewer.
+      The spine face is on the -X edge of the book; rotating the whole
+      book 90deg around Y brings that edge to face the camera. */
+  transform: rotateY(90deg);
 }
 
 .book-face {
@@ -31,11 +31,11 @@
 }
 
 .book-face-spine {
-  /* Lives on the right edge of the book block. We translate it out by
-     half the cover-width minus half the spine-width so its left edge
-     aligns with the book's right edge, then rotate it 90deg. */
+  /* Lives on the left edge of the book block. We translate it out by
+    half the spine width so it sits flush with the book's left edge,
+    then rotate it -90deg. */
   /* Concrete transforms are applied via CSS custom properties set inline. */
-  transform: translateX(var(--spine-offset-x)) rotateY(90deg);
+  transform: translateX(calc(var(--spine-offset-x) * -1)) rotateY(-90deg);
   width: var(--spine-thickness);
 }
 
@@ -96,6 +96,13 @@
 .book-spine-label[data-orient="vertical-ja"] {
   writing-mode: vertical-rl;
   text-orientation: upright;
+}
+
+.book-flight {
+  position: fixed;
+  transform-style: preserve-3d;
+  will-change: top, left, width, height, filter;
+  pointer-events: none;
 }
 
 .shelf-baseline {

@@ -36,9 +36,6 @@ const books = localized.map((b, i) => ({ ...b, cover: resolvedCovers[i] }));
 <Layout lang={lang} title="Bookshelf">
   <Header />
   <main id="main-content">
-    <section class="pt-8 pb-6">
-      <h1 class="text-3xl font-semibold">bookshelf</h1>
-    </section>
     <Hr />
     <section class="py-8">
       <BookshelfComponent lang={lang} books={books} client:load />

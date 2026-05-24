@@ -1,8 +1,10 @@
 // src/components/bookshelf/Bookshelf.tsx
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "./bookshelf.css";
 import Book from "./Book";
 import BookModal from "./BookModal";
+import FlyingBook from "./FlyingBook";
+import { getBookMetrics } from "./Book3D";
 import { STRINGS } from "./strings";
 import type {
   Lang,
@@ -12,6 +14,13 @@ import type {
 } from "./types";
 
 type BookForRender = LocalizedBook & { cover: ResolvedCover };
+
+type Rect = { top: number; left: number; width: number; height: number };
+
+type BookAnchor = {
+  slot: HTMLDivElement | null;
+  inner: HTMLDivElement | null;
+};
 
 type Props = {
   lang: Lang;
@@ -87,9 +96,14 @@ export default function Bookshelf({ lang, books }: Props) {
   const [sort, setSort] = useState<SortMode>("alpha");
   const [hoveredSlug, setHoveredSlug] = useState<string | null>(null);
   const [clickedSlug, setClickedSlug] = useState<string | null>(null);
+  const [flightBook, setFlightBook] = useState<BookForRender | null>(null);
+  const [flightFrom, setFlightFrom] = useState<Rect | null>(null);
+  const [flightOpen, setFlightOpen] = useState(false);
+  const bookRefs = useRef<Map<string, BookAnchor>>(new Map());
 
   const hasHover = useHoverCapable();
   const isMobile = useIsMobile();
+  const flightMetrics = useMemo(() => getBookMetrics(isMobile), [isMobile]);
 
   const collator = useMemo(
     () => new Intl.Collator(lang, { sensitivity: "base" }),
@@ -124,16 +138,66 @@ export default function Bookshelf({ lang, books }: Props) {
     [books, clickedSlug]
   );
 
-  const handleBookClick = (slug: string) => {
+  const setBookAnchor = (
+    slug: string,
+    next: Partial<BookAnchor>
+  ) => {
+    const current = bookRefs.current.get(slug) ?? { slot: null, inner: null };
+    const updated = { ...current, ...next };
+    if (!updated.slot && !updated.inner) bookRefs.current.delete(slug);
+    else bookRefs.current.set(slug, updated);
+  };
+
+  const registerSlotRef = (slug: string, el: HTMLDivElement | null) => {
+    setBookAnchor(slug, { slot: el });
+  };
+
+  const registerInnerRef = (slug: string, el: HTMLDivElement | null) => {
+    setBookAnchor(slug, { inner: el });
+  };
+
+  const getBookRect = (slug: string): Rect | null => {
+    const anchor = bookRefs.current.get(slug);
+    const target = anchor?.inner ?? anchor?.slot;
+    if (!target) return null;
+    const rect = target.getBoundingClientRect();
+    return {
+      top: rect.top,
+      left: rect.left,
+      width: flightMetrics.coverWidth,
+      height: flightMetrics.coverHeight,
+    };
+  };
+
+  const startFlight = (book: BookForRender) => {
+    const rect = getBookRect(book.slug);
+    if (rect) {
+      setFlightBook(book);
+      setFlightFrom(rect);
+      setFlightOpen(true);
+    } else {
+      setFlightBook(null);
+      setFlightFrom(null);
+      setFlightOpen(false);
+    }
+    setClickedSlug(book.slug);
+  };
+
+  const handleFlightRest = useCallback(() => {
+    setFlightBook(null);
+    setFlightFrom(null);
+  }, []);
+
+  const handleBookClick = (book: BookForRender) => {
     if (hasHover) {
-      setClickedSlug(slug);
+      startFlight(book);
       return;
     }
     // Touch: first tap hovers, second tap launches the flight + modal.
-    if (hoveredSlug === slug) {
-      setClickedSlug(slug);
+    if (hoveredSlug === book.slug) {
+      startFlight(book);
     } else {
-      setHoveredSlug(slug);
+      setHoveredSlug(book.slug);
     }
   };
 
@@ -230,6 +294,7 @@ export default function Bookshelf({ lang, books }: Props) {
                         showRating={sort === "rating"}
                         isHovered={hoveredSlug === book.slug}
                         isClicked={clickedSlug === book.slug}
+                        isGhosted={flightBook?.slug === book.slug}
                         nudgeX={nudgeX}
                         hasHover={hasHover}
                         isMobile={isMobile}
@@ -245,8 +310,9 @@ export default function Bookshelf({ lang, books }: Props) {
                         onBlur={() => {
                           if (hoveredSlug === book.slug) setHoveredSlug(null);
                         }}
-                        onClick={() => handleBookClick(book.slug)}
-                        registerRef={() => {}}
+                        onClick={() => handleBookClick(book)}
+                        registerSlotRef={el => registerSlotRef(book.slug, el)}
+                        registerInnerRef={el => registerInnerRef(book.slug, el)}
                       />
                     );
                   });
@@ -265,12 +331,27 @@ export default function Bookshelf({ lang, books }: Props) {
         {hasHover ? s.footerHover : s.footerTouch}
       </p>
 
+      {flightBook && flightFrom && (
+        <FlyingBook
+          book={flightBook}
+          lang={lang}
+          isMobile={isMobile}
+          fromRect={flightFrom}
+          open={flightOpen}
+          onRest={handleFlightRest}
+        />
+      )}
+
       <BookModal
         book={clickedBook}
         lang={lang}
         onClose={() => {
-          // Clearing clickedSlug triggers the return-flight in Book.tsx.
+          if (clickedSlug) {
+            const rect = getBookRect(clickedSlug);
+            if (rect) setFlightFrom(rect);
+          }
           setClickedSlug(null);
+          setFlightOpen(false);
         }}
       />
     </div>
