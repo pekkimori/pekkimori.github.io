@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+import type { CSSProperties, Ref } from "react";
 import type { Lang, LocalizedBook, ResolvedCover } from "./types";
 
 const SPINE_WIDTH_DESKTOP = 32;
@@ -27,7 +27,7 @@ type Props = {
   book: LocalizedBook & { cover: ResolvedCover };
   lang: Lang;
   metrics: BookMetrics;
-  innerRef?: (el: HTMLDivElement | null) => void;
+  innerRef?: Ref<HTMLDivElement>;
   className?: string;
   style?: CSSProperties;
 };

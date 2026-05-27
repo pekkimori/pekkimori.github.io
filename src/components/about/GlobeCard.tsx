@@ -166,7 +166,7 @@ export default function GlobeCard({ places }: Props) {
                 transition: "r 0.1s",
                 pointerEvents: isFront ? "auto" : "none",
               }}
-              onMouseEnter={e => {
+              onMouseEnter={() => {
                 if (isDragging.current || !isFront) return;
                 const svgEl = svgRef.current;
                 if (!svgEl) return;

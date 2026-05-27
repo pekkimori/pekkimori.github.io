@@ -158,12 +158,17 @@ export default function Bookshelf({ lang, books }: Props) {
 
   const getBookRect = (slug: string): Rect | null => {
     const anchor = bookRefs.current.get(slug);
-    const target = anchor?.inner ?? anchor?.slot;
-    if (!target) return null;
-    const rect = target.getBoundingClientRect();
+    const slot = anchor?.slot ?? null;
+    const inner = anchor?.inner ?? null;
+    if (!slot && !inner) return null;
+    const slotRect = slot?.getBoundingClientRect() ?? null;
+    const innerRect = inner?.getBoundingClientRect() ?? null;
+    const top = innerRect?.top ?? slotRect?.top ?? null;
+    const left = slotRect?.left ?? innerRect?.left ?? null;
+    if (top === null || left === null) return null;
     return {
-      top: rect.top,
-      left: rect.left,
+      top,
+      left,
       width: flightMetrics.coverWidth,
       height: flightMetrics.coverHeight,
     };

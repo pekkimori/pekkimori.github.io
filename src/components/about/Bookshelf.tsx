@@ -103,7 +103,7 @@ export default function Bookshelf() {
       </div>
 
       <p className="font-mono text-[10px] text-muted text-center">
-        # three books. three roberts. it was not intentional.
+        # three books. three roberts. it was very intentional.
       </p>
 
       <div className="min-h-[3rem] text-center">
