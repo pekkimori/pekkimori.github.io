@@ -310,7 +310,9 @@ const toc = generateToc(translatedHeadings);
             heading => heading.id === link.slug
           );
           if (directHeading) {
-            const lenis = (window as any).__lenis;
+            const lenis = (window as Window & {
+              __lenis?: { scrollTo: (target: Element) => void };
+            }).__lenis;
             if (lenis) {
               lenis.scrollTo(directHeading);
             } else {

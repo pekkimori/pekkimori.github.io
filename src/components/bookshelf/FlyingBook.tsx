@@ -174,7 +174,11 @@ export default function FlyingBook({
     tlRef.current = tl;
   }, [fromRect, metrics, mounted, onRest, open]);
 
-  useEffect(() => () => tlRef.current?.kill(), []);
+  useEffect(() => {
+    return () => {
+      tlRef.current?.kill();
+    };
+  }, []);
 
   if (!mounted || !fromRect) return null;
 

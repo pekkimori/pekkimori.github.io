@@ -1,15 +1,18 @@
 import type { Book, Lang, LocalizedBook } from "@/components/bookshelf/types";
+import lawsCover from "@/assets/books/humannaturelaws_cover.jpg";
+import kingCover from "@/assets/books/thekinginyellow_cover.jpg";
+import motesCover from "@/assets/books/motesandbeams_cover.jpg";
 
 export const BOOKS: Book[] = [
   {
     slug: "laws-of-human-nature",
-    cover: null,
+    cover: lawsCover,
     rating: 4,
     yearRead: 2024,
     originalYear: 2018,
     pageCount: 624,
     status: "read",
-    spineColor: "#3b2f2f",
+    spineColor: "#e80928",
     i18n: {
       en: {
         title: "The Laws of Human Nature",
@@ -41,13 +44,13 @@ export const BOOKS: Book[] = [
   },
   {
     slug: "king-in-yellow",
-    cover: null,
+    cover: kingCover,
     rating: 5,
     yearRead: 2023,
     originalYear: 1895,
     pageCount: 316,
     status: "read",
-    spineColor: "#7a6a1f",
+    spineColor: "#f7bb03",
     i18n: {
       en: {
         title: "The King in Yellow",
@@ -79,275 +82,38 @@ export const BOOKS: Book[] = [
     },
   },
   {
-    slug: "rich-dad-poor-dad",
-    cover: null,
-    rating: 3,
-    yearRead: 2022,
-    originalYear: 1997,
-    pageCount: 207,
+    slug: "motes-and-beams",
+    cover: motesCover,
+    rating: 5,
+    yearRead: 2024,
+    originalYear: 1895,
+    pageCount: 186,
     status: "read",
-    spineColor: "#2f4d3a",
+    spineColor: "#5d3e12",
     i18n: {
       en: {
-        title: "Rich Dad, Poor Dad",
-        author: "Robert T. Kiyosaki",
-        theme: "finance",
+        title: "Motes and Beams",
+        author: "Michael Pierce",
+        theme: "psychology",
         review:
-          "More an attitude than a book. Kiyosaki's central reframe — assets put money in your pocket, liabilities take it out — is repeated until it sticks, and the parables are thin.\n\nWorth reading once, mostly as a vaccine against the specific kind of middle-class financial superstition it argues against. Don't read the sequels.",
-        quote:
-          "Winners are not afraid of losing. But losers are. Failure is part of the process of success.",
+          "A dense but lucid map of Jungian personality theory. It reads less like a test and more like a taxonomy, with careful definitions and a steady emphasis on nuance.",
+        quote: "A map, not a verdict.",
       },
       pt: {
-        title: "Pai Rico, Pai Pobre",
-        author: "Robert T. Kiyosaki",
-        theme: "finanças",
+        title: "Motes and Beams",
+        author: "Michael Pierce",
+        theme: "psychology",
         review:
-          "Mais uma postura do que um livro. A virada central de Kiyosaki — ativos colocam dinheiro no seu bolso, passivos tiram — é repetida até grudar, e as parábolas são rasas.\n\nVale a leitura uma vez, sobretudo como vacina contra o tipo específico de superstição financeira de classe média que ele combate. Não leia as continuações.",
-        quote:
-          "Vencedores não têm medo de perder. Mas perdedores têm. O fracasso faz parte do processo de sucesso.",
+          "Um mapa denso, mas claro, da teoria junguiana da personalidade. Menos diagnóstico, mais cartografia, com conceitos bem definidos e foco na nuance.",
+        quote: "Um mapa, não um veredito.",
       },
       ja: {
-        title: "金持ち父さん 貧乏父さん",
-        author: "ロバート・キヨサキ",
-        theme: "ファイナンス",
+        title: "Motes and Beams",
+        author: "Michael Pierce",
+        theme: "psychology",
         review:
-          "本というより姿勢の話。資産は財布に金を入れ、負債は金を抜く——というキヨサキの中心的な言い換えは、頭に染み込むまで繰り返され、寓話は薄い。\n\n一度は読む価値がある。とくに、彼が批判する中産階級的な財政の迷信に対するワクチンとして。続編は読まなくていい。",
-        quote:
-          "勝者は負けることを恐れない。だが敗者は恐れる。失敗は成功の過程の一部だ。",
-      },
-    },
-  },
-  {
-    slug: "rich-dad",
-    cover: null,
-    rating: 3,
-    yearRead: 2022,
-    originalYear: 1997,
-    pageCount: 207,
-    status: "read",
-    spineColor: "#2f4d3a",
-    i18n: {
-      en: {
-        title: "Rich Dad, Poor Dad",
-        author: "Robert T. Kiyosaki",
-        theme: "finance",
-        review:
-          "More an attitude than a book. Kiyosaki's central reframe — assets put money in your pocket, liabilities take it out — is repeated until it sticks, and the parables are thin.\n\nWorth reading once, mostly as a vaccine against the specific kind of middle-class financial superstition it argues against. Don't read the sequels.",
-        quote:
-          "Winners are not afraid of losing. But losers are. Failure is part of the process of success.",
-      },
-      pt: {
-        title: "Pai Rico, Pai Pobre",
-        author: "Robert T. Kiyosaki",
-        theme: "finanças",
-        review:
-          "Mais uma postura do que um livro. A virada central de Kiyosaki — ativos colocam dinheiro no seu bolso, passivos tiram — é repetida até grudar, e as parábolas são rasas.\n\nVale a leitura uma vez, sobretudo como vacina contra o tipo específico de superstição financeira de classe média que ele combate. Não leia as continuações.",
-        quote:
-          "Vencedores não têm medo de perder. Mas perdedores têm. O fracasso faz parte do processo de sucesso.",
-      },
-      ja: {
-        title: "金持ち父さん 貧乏父さん",
-        author: "ロバート・キヨサキ",
-        theme: "ファイナンス",
-        review:
-          "本というより姿勢の話。資産は財布に金を入れ、負債は金を抜く——というキヨサキの中心的な言い換えは、頭に染み込むまで繰り返され、寓話は薄い。\n\n一度は読む価値がある。とくに、彼が批判する中産階級的な財政の迷信に対するワクチンとして。続編は読まなくていい。",
-        quote:
-          "勝者は負けることを恐れない。だが敗者は恐れる。失敗は成功の過程の一部だ。",
-      },
-    },
-  },
-  {
-    slug: "rich-dad-poo",
-    cover: null,
-    rating: 3,
-    yearRead: 2022,
-    originalYear: 1997,
-    pageCount: 207,
-    status: "read",
-    spineColor: "#2f4d3a",
-    i18n: {
-      en: {
-        title: "Rich Dad, Poor Dad",
-        author: "Robert T. Kiyosaki",
-        theme: "finance",
-        review:
-          "More an attitude than a book. Kiyosaki's central reframe — assets put money in your pocket, liabilities take it out — is repeated until it sticks, and the parables are thin.\n\nWorth reading once, mostly as a vaccine against the specific kind of middle-class financial superstition it argues against. Don't read the sequels.",
-        quote:
-          "Winners are not afraid of losing. But losers are. Failure is part of the process of success.",
-      },
-      pt: {
-        title: "Pai Rico, Pai Pobre",
-        author: "Robert T. Kiyosaki",
-        theme: "finanças",
-        review:
-          "Mais uma postura do que um livro. A virada central de Kiyosaki — ativos colocam dinheiro no seu bolso, passivos tiram — é repetida até grudar, e as parábolas são rasas.\n\nVale a leitura uma vez, sobretudo como vacina contra o tipo específico de superstição financeira de classe média que ele combate. Não leia as continuações.",
-        quote:
-          "Vencedores não têm medo de perder. Mas perdedores têm. O fracasso faz parte do processo de sucesso.",
-      },
-      ja: {
-        title: "金持ち父さん 貧乏父さん",
-        author: "ロバート・キヨサキ",
-        theme: "ファイナンス",
-        review:
-          "本というより姿勢の話。資産は財布に金を入れ、負債は金を抜く——というキヨサキの中心的な言い換えは、頭に染み込むまで繰り返され、寓話は薄い。\n\n一度は読む価値がある。とくに、彼が批判する中産階級的な財政の迷信に対するワクチンとして。続編は読まなくていい。",
-        quote:
-          "勝者は負けることを恐れない。だが敗者は恐れる。失敗は成功の過程の一部だ。",
-      },
-    },
-  },
-  {
-    slug: "rich-dad-p",
-    cover: null,
-    rating: 3,
-    yearRead: 2022,
-    originalYear: 1997,
-    pageCount: 207,
-    status: "read",
-    spineColor: "#2f4d3a",
-    i18n: {
-      en: {
-        title: "Rich Dad, Poor Dad",
-        author: "Robert T. Kiyosaki",
-        theme: "finance",
-        review:
-          "More an attitude than a book. Kiyosaki's central reframe — assets put money in your pocket, liabilities take it out — is repeated until it sticks, and the parables are thin.\n\nWorth reading once, mostly as a vaccine against the specific kind of middle-class financial superstition it argues against. Don't read the sequels.",
-        quote:
-          "Winners are not afraid of losing. But losers are. Failure is part of the process of success.",
-      },
-      pt: {
-        title: "Pai Rico, Pai Pobre",
-        author: "Robert T. Kiyosaki",
-        theme: "finanças",
-        review:
-          "Mais uma postura do que um livro. A virada central de Kiyosaki — ativos colocam dinheiro no seu bolso, passivos tiram — é repetida até grudar, e as parábolas são rasas.\n\nVale a leitura uma vez, sobretudo como vacina contra o tipo específico de superstição financeira de classe média que ele combate. Não leia as continuações.",
-        quote:
-          "Vencedores não têm medo de perder. Mas perdedores têm. O fracasso faz parte do processo de sucesso.",
-      },
-      ja: {
-        title: "金持ち父さん 貧乏父さん",
-        author: "ロバート・キヨサキ",
-        theme: "ファイナンス",
-        review:
-          "本というより姿勢の話。資産は財布に金を入れ、負債は金を抜く——というキヨサキの中心的な言い換えは、頭に染み込むまで繰り返され、寓話は薄い。\n\n一度は読む価値がある。とくに、彼が批判する中産階級的な財政の迷信に対するワクチンとして。続編は読まなくていい。",
-        quote:
-          "勝者は負けることを恐れない。だが敗者は恐れる。失敗は成功の過程の一部だ。",
-      },
-    },
-  },
-  {
-    slug: "rich-dad-poor-d",
-    cover: null,
-    rating: 3,
-    yearRead: 2022,
-    originalYear: 1997,
-    pageCount: 207,
-    status: "read",
-    spineColor: "#2f4d3a",
-    i18n: {
-      en: {
-        title: "Rich Dad, Poor Dad",
-        author: "Robert T. Kiyosaki",
-        theme: "finance",
-        review:
-          "More an attitude than a book. Kiyosaki's central reframe — assets put money in your pocket, liabilities take it out — is repeated until it sticks, and the parables are thin.\n\nWorth reading once, mostly as a vaccine against the specific kind of middle-class financial superstition it argues against. Don't read the sequels.",
-        quote:
-          "Winners are not afraid of losing. But losers are. Failure is part of the process of success.",
-      },
-      pt: {
-        title: "Pai Rico, Pai Pobre",
-        author: "Robert T. Kiyosaki",
-        theme: "finanças",
-        review:
-          "Mais uma postura do que um livro. A virada central de Kiyosaki — ativos colocam dinheiro no seu bolso, passivos tiram — é repetida até grudar, e as parábolas são rasas.\n\nVale a leitura uma vez, sobretudo como vacina contra o tipo específico de superstição financeira de classe média que ele combate. Não leia as continuações.",
-        quote:
-          "Vencedores não têm medo de perder. Mas perdedores têm. O fracasso faz parte do processo de sucesso.",
-      },
-      ja: {
-        title: "金持ち父さん 貧乏父さん",
-        author: "ロバート・キヨサキ",
-        theme: "ファイナンス",
-        review:
-          "本というより姿勢の話。資産は財布に金を入れ、負債は金を抜く——というキヨサキの中心的な言い換えは、頭に染み込むまで繰り返され、寓話は薄い。\n\n一度は読む価値がある。とくに、彼が批判する中産階級的な財政の迷信に対するワクチンとして。続編は読まなくていい。",
-        quote:
-          "勝者は負けることを恐れない。だが敗者は恐れる。失敗は成功の過程の一部だ。",
-      },
-    },
-  },
-  {
-    slug: "rich-dad-poor-da",
-    cover: null,
-    rating: 3,
-    yearRead: 2022,
-    originalYear: 1997,
-    pageCount: 207,
-    status: "read",
-    spineColor: "#2f4d3a",
-    i18n: {
-      en: {
-        title: "Rich Dad, Poor Dad",
-        author: "Robert T. Kiyosaki",
-        theme: "finance",
-        review:
-          "More an attitude than a book. Kiyosaki's central reframe — assets put money in your pocket, liabilities take it out — is repeated until it sticks, and the parables are thin.\n\nWorth reading once, mostly as a vaccine against the specific kind of middle-class financial superstition it argues against. Don't read the sequels.",
-        quote:
-          "Winners are not afraid of losing. But losers are. Failure is part of the process of success.",
-      },
-      pt: {
-        title: "Pai Rico, Pai Pobre",
-        author: "Robert T. Kiyosaki",
-        theme: "finanças",
-        review:
-          "Mais uma postura do que um livro. A virada central de Kiyosaki — ativos colocam dinheiro no seu bolso, passivos tiram — é repetida até grudar, e as parábolas são rasas.\n\nVale a leitura uma vez, sobretudo como vacina contra o tipo específico de superstição financeira de classe média que ele combate. Não leia as continuações.",
-        quote:
-          "Vencedores não têm medo de perder. Mas perdedores têm. O fracasso faz parte do processo de sucesso.",
-      },
-      ja: {
-        title: "金持ち父さん 貧乏父さん",
-        author: "ロバート・キヨサキ",
-        theme: "ファイナンス",
-        review:
-          "本というより姿勢の話。資産は財布に金を入れ、負債は金を抜く——というキヨサキの中心的な言い換えは、頭に染み込むまで繰り返され、寓話は薄い。\n\n一度は読む価値がある。とくに、彼が批判する中産階級的な財政の迷信に対するワクチンとして。続編は読まなくていい。",
-        quote:
-          "勝者は負けることを恐れない。だが敗者は恐れる。失敗は成功の過程の一部だ。",
-      },
-    },
-  },
-  {
-    slug: "ric",
-    cover: null,
-    rating: 3,
-    yearRead: 2022,
-    originalYear: 1997,
-    pageCount: 207,
-    status: "read",
-    spineColor: "#2f4d3a",
-    i18n: {
-      en: {
-        title: "Rich Dad, Poor Dad",
-        author: "Robert T. Kiyosaki",
-        theme: "finance",
-        review:
-          "More an attitude than a book. Kiyosaki's central reframe — assets put money in your pocket, liabilities take it out — is repeated until it sticks, and the parables are thin.\n\nWorth reading once, mostly as a vaccine against the specific kind of middle-class financial superstition it argues against. Don't read the sequels.",
-        quote:
-          "Winners are not afraid of losing. But losers are. Failure is part of the process of success.",
-      },
-      pt: {
-        title: "Pai Rico, Pai Pobre",
-        author: "Robert T. Kiyosaki",
-        theme: "finanças",
-        review:
-          "Mais uma postura do que um livro. A virada central de Kiyosaki — ativos colocam dinheiro no seu bolso, passivos tiram — é repetida até grudar, e as parábolas são rasas.\n\nVale a leitura uma vez, sobretudo como vacina contra o tipo específico de superstição financeira de classe média que ele combate. Não leia as continuações.",
-        quote:
-          "Vencedores não têm medo de perder. Mas perdedores têm. O fracasso faz parte do processo de sucesso.",
-      },
-      ja: {
-        title: "金持ち父さん 貧乏父さん",
-        author: "ロバート・キヨサキ",
-        theme: "ファイナンス",
-        review:
-          "本というより姿勢の話。資産は財布に金を入れ、負債は金を抜く——というキヨサキの中心的な言い換えは、頭に染み込むまで繰り返され、寓話は薄い。\n\n一度は読む価値がある。とくに、彼が批判する中産階級的な財政の迷信に対するワクチンとして。続編は読まなくていい。",
-        quote:
-          "勝者は負けることを恐れない。だが敗者は恐れる。失敗は成功の過程の一部だ。",
+          "ユング的な性格理論を丁寧に整理した一冊。診断というより地図としての視点が強く、概念の輪郭が分かりやすい。",
+        quote: "判決ではなく、地図だ。",
       },
     },
   },
