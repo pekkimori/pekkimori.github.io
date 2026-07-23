@@ -11,12 +11,25 @@
   /* width/height set via inline style by the React component (responsive) */
 }
 
+.book-slot::after {
+  position: absolute;
+  z-index: -1;
+  right: 2px;
+  bottom: -2px;
+  left: 2px;
+  height: 6px;
+  content: "";
+  background: rgb(0 0 0 / 34%);
+  filter: blur(3px);
+  transform: translateY(2px);
+}
+
 .book-3d {
   position: absolute;
   inset: 0;
   transform-style: preserve-3d;
   will-change: transform;
-    /* Initial state: spine facing the viewer.
+  /* Initial state: spine facing the viewer.
       The spine face is on the -X edge of the book; rotating the whole
       book 90deg around Y brings that edge to face the camera. */
   transform: rotateY(90deg);
@@ -37,11 +50,200 @@
   /* Concrete transforms are applied via CSS custom properties set inline. */
   transform: translateX(calc(var(--spine-offset-x) * -1)) rotateY(-90deg);
   width: var(--spine-thickness);
+  border-top: 1px solid rgb(255 255 255 / 9%);
+  border-right: 1px solid rgb(255 255 255 / 12%);
+  border-bottom: 1px solid rgb(0 0 0 / 28%);
+  border-left: 1px solid rgb(0 0 0 / 22%);
+  box-shadow:
+    inset 2px 0 0 rgb(0 0 0 / 14%),
+    inset -1px 0 0 rgb(255 255 255 / 9%);
+  isolation: isolate;
+}
+
+.book-face-spine::before,
+.book-face-spine::after {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  content: "";
+}
+
+.book-face-spine::before {
+  opacity: 0.2;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 11px,
+      rgb(255 255 255 / 18%) 11px 12px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 11px,
+      rgb(0 0 0 / 16%) 11px 12px
+    );
+  mix-blend-mode: soft-light;
+}
+
+.book-face-spine[data-spine-variant="1"]::before {
+  opacity: 0.16;
+  background: repeating-linear-gradient(
+    135deg,
+    transparent 0 9px,
+    rgb(255 255 255 / 18%) 9px 10px
+  );
+}
+
+.book-face-spine[data-spine-variant="2"]::before {
+  opacity: 0.18;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0 7px,
+    rgb(255 255 255 / 18%) 7px 8px
+  );
+}
+
+.book-face-spine[data-spine-variant="3"]::before {
+  opacity: 0.14;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0 6px,
+    rgb(0 0 0 / 18%) 6px 7px
+  );
+}
+
+.book-face-spine::after {
+  background: linear-gradient(
+    90deg,
+    rgb(0 0 0 / 18%),
+    transparent 22%,
+    transparent 72%,
+    rgb(255 255 255 / 8%)
+  );
 }
 
 .book-face-front {
   /* Front face stays in the XY plane, pushed out by half the spine thickness. */
   transform: translateZ(calc(var(--spine-thickness) / 2));
+  box-sizing: border-box;
+  padding: 0 0 0 4px;
+  border: 1px solid color-mix(in srgb, var(--book-tone) 74%, var(--border));
+  background-color: var(--book-tone);
+  isolation: isolate;
+}
+
+.book-cover-art {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: var(--book-tone);
+}
+
+.book-cover-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.98) contrast(1.02);
+}
+
+.book-cover-art::before,
+.book-cover-art::after {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  content: "";
+}
+
+.book-cover-art::before {
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--book-tone) 70%, transparent),
+      color-mix(in srgb, var(--book-tone) 24%, transparent) 5%,
+      transparent 13%
+    ),
+    linear-gradient(
+      180deg,
+      rgb(255 255 255 / 5%),
+      transparent 20% 82%,
+      rgb(0 0 0 / 6%)
+    );
+  mix-blend-mode: soft-light;
+}
+
+.book-cover-art::after {
+  opacity: 0.12;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 11px,
+      rgb(255 255 255 / 16%) 11px 12px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 11px,
+      rgb(0 0 0 / 14%) 11px 12px
+    );
+  mix-blend-mode: soft-light;
+}
+
+.book-face-front[data-cover-variant="1"] .book-cover-art::after {
+  opacity: 0.1;
+  background: repeating-linear-gradient(
+    135deg,
+    transparent 0 13px,
+    rgb(255 255 255 / 16%) 13px 14px
+  );
+}
+
+.book-face-front[data-cover-variant="2"] .book-cover-art::after {
+  opacity: 0.1;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0 8px,
+    rgb(255 255 255 / 17%) 8px 9px
+  );
+}
+
+.book-face-front[data-cover-variant="3"] .book-cover-art::after {
+  opacity: 0.09;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0 7px,
+    rgb(0 0 0 / 16%) 7px 8px
+  );
+}
+
+.book-cover-hinge {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 4;
+  width: 4px;
+  border-right: 1px solid var(--spine-ornament);
+  background: var(--book-tone);
+  box-shadow: 1px 0 0 rgb(0 0 0 / 16%);
+  opacity: 0.94;
+}
+
+.book-cover-fallback {
+  position: relative;
+  z-index: 1;
+  border: 1px solid color-mix(in srgb, var(--spine-ornament) 48%, transparent);
+  background:
+    linear-gradient(145deg, rgb(255 255 255 / 6%), transparent 44%),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 11px,
+      rgb(255 255 255 / 8%) 11px 12px
+    ),
+    var(--book-tone);
 }
 
 .book-face-back {
@@ -53,7 +255,7 @@
 .book-face-bottom {
   height: 4px;
   width: 100%;
-  background: linear-gradient(180deg, #d9c8a6, #b09a72);
+  background: linear-gradient(180deg, #dfddd8, #aaa7a2);
 }
 
 .book-face-top {
@@ -68,34 +270,84 @@
   transform-origin: bottom center;
 }
 
-/* The spine's printed text. Default writing direction is set inline
-   per-locale: en/pt use vertical-rl + rotate to read top-down along the
-   spine; ja uses native vertical-rl. */
+/* Spine type stays vertical while each string chooses mixed Latin or
+   upright CJK glyphs independently. */
 .book-spine-label {
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  inset: 22px 3px 21px;
+  z-index: 2;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  padding: 8px 2px;
+  justify-content: center;
+  gap: 2px;
+  overflow: hidden;
   text-align: center;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  line-height: 1.1;
-  letter-spacing: 0.02em;
-  color: rgba(255, 255, 255, 0.92);
-  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
+  color: var(--spine-ink);
+  text-shadow: 0 1px 0 rgb(0 0 0 / 16%);
 }
 
-.book-spine-label[data-orient="vertical-en"] {
+.book-spine-title,
+.book-spine-author {
+  max-height: 100%;
+  overflow: hidden;
+  white-space: nowrap;
   writing-mode: vertical-rl;
+}
+
+.book-spine-label
+  :is(.book-spine-title, .book-spine-author)[data-text-orient="mixed"] {
   text-orientation: mixed;
 }
 
-.book-spine-label[data-orient="vertical-ja"] {
-  writing-mode: vertical-rl;
+.book-spine-label
+  :is(.book-spine-title, .book-spine-author)[data-text-orient="upright"] {
   text-orientation: upright;
+}
+
+.book-spine-title {
+  font-family: var(--font-sans);
+  font-size: var(--spine-title-size);
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: 0.045em;
+}
+
+.book-spine-author {
+  font-family: var(--font-mono);
+  font-size: 7px;
+  font-weight: 550;
+  line-height: 1;
+  letter-spacing: 0.09em;
+  opacity: 0.68;
+  text-transform: uppercase;
+}
+
+.book-spine-divider {
+  width: 1px;
+  height: 46%;
+  flex: 0 0 auto;
+  background: linear-gradient(
+    transparent,
+    var(--spine-ornament) 18% 82%,
+    transparent
+  );
+}
+
+.book-spine-rule {
+  position: absolute;
+  right: 0;
+  left: 0;
+  z-index: 2;
+  height: 1px;
+  background: var(--spine-ornament);
+}
+
+.book-spine-rule-top {
+  top: 12px;
+}
+
+.book-spine-rule-bottom {
+  bottom: 12px;
 }
 
 .book-flight {
@@ -106,10 +358,36 @@
 }
 
 .shelf-baseline {
-  height: 6px;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--border) 80%, transparent), color-mix(in srgb, var(--border) 30%, transparent));
-  border-radius: 1px;
-  box-shadow: 0 6px 14px -8px color-mix(in srgb, var(--foreground) 40%, transparent);
+  position: relative;
+  height: 5px;
+  overflow: visible;
+  border: 0;
+  border-top: 1px solid color-mix(in srgb, var(--accent) 34%, var(--border));
+  border-radius: 0;
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--accent) 13%, transparent) 22% 78%,
+      transparent
+    ),
+    color-mix(in srgb, var(--background) 82%, var(--border));
+  box-shadow: 0 6px 12px -9px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+.shelf-baseline::after {
+  position: absolute;
+  top: -1px;
+  right: 10%;
+  left: 10%;
+  height: 1px;
+  content: "";
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--accent) 55%, transparent),
+    transparent
+  );
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -44,7 +44,7 @@ export default function Book({
   const inner3DRef = useRef<HTMLDivElement | null>(null);
   const slotRef = useRef<HTMLDivElement | null>(null);
   const hoverTLRef = useRef<gsap.core.Timeline | null>(null);
-  const metrics = getBookMetrics(isMobile);
+  const metrics = getBookMetrics(isMobile, book.slug, book.pageCount);
 
   // Hover timeline: tiny lift, no rotation. The book stays spine-on.
   useEffect(() => {

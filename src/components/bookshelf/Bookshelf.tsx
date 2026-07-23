@@ -6,12 +6,7 @@ import BookModal from "./BookModal";
 import FlyingBook from "./FlyingBook";
 import { getBookMetrics } from "./Book3D";
 import { STRINGS } from "./strings";
-import type {
-  Lang,
-  LocalizedBook,
-  ResolvedCover,
-  SortMode,
-} from "./types";
+import type { Lang, LocalizedBook, ResolvedCover, SortMode } from "./types";
 
 type BookForRender = LocalizedBook & { cover: ResolvedCover };
 
@@ -103,8 +98,6 @@ export default function Bookshelf({ lang, books }: Props) {
 
   const hasHover = useHoverCapable();
   const isMobile = useIsMobile();
-  const flightMetrics = useMemo(() => getBookMetrics(isMobile), [isMobile]);
-
   const collator = useMemo(
     () => new Intl.Collator(lang, { sensitivity: "base" }),
     [lang]
@@ -138,10 +131,7 @@ export default function Bookshelf({ lang, books }: Props) {
     [books, clickedSlug]
   );
 
-  const setBookAnchor = (
-    slug: string,
-    next: Partial<BookAnchor>
-  ) => {
+  const setBookAnchor = (slug: string, next: Partial<BookAnchor>) => {
     const current = bookRefs.current.get(slug) ?? { slot: null, inner: null };
     const updated = { ...current, ...next };
     if (!updated.slot && !updated.inner) bookRefs.current.delete(slug);
@@ -166,11 +156,13 @@ export default function Bookshelf({ lang, books }: Props) {
     const top = innerRect?.top ?? slotRect?.top ?? null;
     const left = slotRect?.left ?? innerRect?.left ?? null;
     if (top === null || left === null) return null;
+    const pageCount = books.find(book => book.slug === slug)?.pageCount;
+    const metrics = getBookMetrics(isMobile, slug, pageCount);
     return {
       top,
       left,
-      width: flightMetrics.coverWidth,
-      height: flightMetrics.coverHeight,
+      width: metrics.coverWidth,
+      height: metrics.coverHeight,
     };
   };
 
@@ -230,7 +222,7 @@ export default function Bookshelf({ lang, books }: Props) {
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <div className="font-mono text-xs uppercase tracking-wider text-accent">
+        <div className="font-mono text-xs tracking-wider text-accent uppercase">
           {s.prompt}
         </div>
         <div className="font-mono text-sm text-muted">
@@ -255,7 +247,7 @@ export default function Bookshelf({ lang, books }: Props) {
               className={[
                 "rounded-md border px-3 py-1 transition-colors",
                 active
-                  ? "border-accent text-accent font-semibold underline underline-offset-4"
+                  ? "border-accent font-semibold text-accent underline underline-offset-4"
                   : "border-border text-muted hover:text-foreground",
               ].join(" ")}
             >
@@ -270,13 +262,16 @@ export default function Bookshelf({ lang, books }: Props) {
           <p className="font-mono text-sm text-muted">{s.empty}</p>
         ) : (
           shelves.map((shelf, i) => (
-            <section key={shelf.theme ?? `shelf-${i}`} className="flex flex-col gap-3">
+            <section
+              key={shelf.theme ?? `shelf-${i}`}
+              className="flex flex-col gap-3"
+            >
               {shelf.theme && (
-                <h2 className="font-mono text-xs uppercase tracking-wider text-muted">
+                <h2 className="font-mono text-xs tracking-wider text-muted uppercase">
                   {s.themeMarker} {shelf.theme}
                 </h2>
               )}
-              <div className="bookshelf-row flex flex-wrap items-end gap-[6px] sm:gap-[6px]">
+              <div className="bookshelf-row flex flex-wrap items-end gap-[4px] sm:gap-[5px]">
                 {(() => {
                   const anchorSlug = clickedSlug ?? hoveredSlug;
                   const anchorIdx = shelf.items.findIndex(
@@ -331,7 +326,7 @@ export default function Bookshelf({ lang, books }: Props) {
 
       <p
         aria-hidden="true"
-        className="font-mono text-[10px] text-muted text-center"
+        className="text-center font-mono text-[10px] text-muted"
       >
         {hasHover ? s.footerHover : s.footerTouch}
       </p>

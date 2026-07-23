@@ -7,14 +7,12 @@ import AboutHeroTerminal from "@/components/about/AboutHeroTerminal";
 import BentoCard from "@/components/about/BentoCard.astro";
 import KonamiCat from "@/components/about/KonamiCat";
 import BookshelfCard from "@/components/about/BookshelfCard.astro";
-import NowCard from "@/components/about/NowCard.astro";
 import GamesCard from "@/components/about/GamesCard.astro";
 import MusicCard from "@/components/about/MusicCard.astro";
 import AnimeCard from "@/components/about/AnimeCard.astro";
 import AtlasCard from "@/components/about/AtlasCard.astro";
 import GlobeCard from "@/components/about/GlobeCard";
 import { ATLAS } from "@/data/about";
-
 ---
 
 <Layout lang="en">
@@ -35,11 +33,7 @@ import { ATLAS } from "@/data/about";
 
     <Hr />
 
-    <section id="now" class="pt-8 pb-6">
-      <NowCard />
-    </section>
-
-    <section id="archive" class="pb-10">
+    <section id="archive" class="pt-8 pb-10">
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <GamesCard />
         <BookshelfCard />

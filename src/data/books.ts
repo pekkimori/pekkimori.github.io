@@ -12,7 +12,7 @@ export const BOOKS: Book[] = [
     originalYear: 2018,
     pageCount: 624,
     status: "read",
-    spineColor: "#e80928",
+    spineColor: "#8f2f35",
     i18n: {
       en: {
         title: "The Laws of Human Nature",
@@ -50,7 +50,7 @@ export const BOOKS: Book[] = [
     originalYear: 1895,
     pageCount: 316,
     status: "read",
-    spineColor: "#f7bb03",
+    spineColor: "#c59a35",
     i18n: {
       en: {
         title: "The King in Yellow",
@@ -89,7 +89,7 @@ export const BOOKS: Book[] = [
     originalYear: 1895,
     pageCount: 186,
     status: "read",
-    spineColor: "#5d3e12",
+    spineColor: "#59402f",
     i18n: {
       en: {
         title: "Motes and Beams",

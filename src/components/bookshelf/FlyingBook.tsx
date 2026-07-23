@@ -30,7 +30,10 @@ export default function FlyingBook({
   const innerRef = useRef<HTMLDivElement | null>(null);
   const tlRef = useRef<gsap.core.Timeline | null>(null);
 
-  const metrics = useMemo(() => getBookMetrics(isMobile), [isMobile]);
+  const metrics = useMemo(
+    () => getBookMetrics(isMobile, book.slug, book.pageCount),
+    [book.pageCount, book.slug, isMobile]
+  );
 
   useEffect(() => {
     setMounted(true);
@@ -110,24 +113,26 @@ export default function FlyingBook({
           ease: "power2.inOut",
         },
         0
-      ).to(
-        inner,
-        {
-          rotateY: 0,
-          rotateX: -6,
-          duration: 0.7,
-          ease: "power2.inOut",
-        },
-        0
-      ).to(
-        root,
-        {
-          filter: "drop-shadow(-12px 22px 36px rgba(0,0,0,0.45))",
-          duration: 0.5,
-          ease: "power1.out",
-        },
-        0.1
-      );
+      )
+        .to(
+          inner,
+          {
+            rotateY: 0,
+            rotateX: -6,
+            duration: 0.7,
+            ease: "power2.inOut",
+          },
+          0
+        )
+        .to(
+          root,
+          {
+            filter: "drop-shadow(-12px 22px 36px rgba(0,0,0,0.45))",
+            duration: 0.5,
+            ease: "power1.out",
+          },
+          0.1
+        );
       tlRef.current = tl;
       return;
     }
@@ -153,24 +158,26 @@ export default function FlyingBook({
         ease: "power2.inOut",
       },
       0
-    ).to(
-      inner,
-      {
-        rotateY: 90,
-        rotateX: 0,
-        duration: 0.55,
-        ease: "power2.inOut",
-      },
-      0
-    ).to(
-      root,
-      {
-        filter: "drop-shadow(0 0 0 rgba(0,0,0,0))",
-        duration: 0.3,
-        ease: "power1.out",
-      },
-      0
-    );
+    )
+      .to(
+        inner,
+        {
+          rotateY: 90,
+          rotateX: 0,
+          duration: 0.55,
+          ease: "power2.inOut",
+        },
+        0
+      )
+      .to(
+        root,
+        {
+          filter: "drop-shadow(0 0 0 rgba(0,0,0,0))",
+          duration: 0.3,
+          ease: "power1.out",
+        },
+        0
+      );
     tlRef.current = tl;
   }, [fromRect, metrics, mounted, onRest, open]);
 
