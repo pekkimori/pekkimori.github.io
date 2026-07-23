@@ -1,0 +1,30 @@
+---
+import VibeCheckDemo from "@/components/VibeCheckDemo";
+import "@/styles/global.css";
+import "@fontsource-variable/open-sans";
+import "@fontsource/kalam/400.css";
+
+const title = "Minerva Vibe Check";
+const description =
+  "Discover your unique Minerva vibe through the original questionnaire and legacy ranking experience.";
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+    <link rel="icon" href="/vibe-check/minerva.svg" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalURL} />
+  </head>
+  <body>
+    <VibeCheckDemo client:load />
+  </body>
+</html>

@@ -1,92 +1,89 @@
 import { useEffect, useRef, useState } from "react";
 
 interface Project {
+  id: string;
   title: string;
   description: string;
   highlights?: string[];
   tags?: string[];
   link?: string;
+  officialLink?: string;
   github?: string;
-  status?: "live" | "wip";
+  status?: "live" | "wip" | "demo";
   icon?: string;
   previewColor?: string;
   category?: string;
   pos: [number, number];
   magnitude?: number;
+  placeholder?: boolean;
 }
 
 const PROJECTS: Project[] = [
   {
-    title: "??",
-    description: "??",
-    highlights: ["??", "??", "??"],
-    tags: ["??"],
-    status: "live",
-    icon: "??",
+    id: "vibe-check",
+    title: "Minerva Vibe Check",
+    description:
+      "A playful personality assessment that maps Minerva students to the legacies that fit them best.",
+    highlights: [
+      "Five ILO-based question groups",
+      "Interactive legacy ranking",
+      "Personalized identity profile",
+    ],
+    tags: ["Next.js", "TypeScript", "Firebase"],
+    link: "/projects/vibe-check",
+    officialLink: "https://yourminervavibe.com",
+    github: "https://github.com/pekkimori/legacyquestionnaire",
+    status: "demo",
+    icon: "✦",
     previewColor: "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)",
-    category: "??",
+    category: "Personality quiz",
     pos: [28, 18],
     magnitude: 2.2,
   },
   {
-    title: "??",
-    description: "??",
-    highlights: ["??", "??", "??"],
-    tags: ["??"],
-    status: "live",
-    icon: "??",
+    id: "future-02",
+    title: "",
+    description: "",
     previewColor: "linear-gradient(135deg, #0d9488 0%, #0891b2 100%)",
-    category: "??",
     pos: [72, 24],
     magnitude: 1.8,
+    placeholder: true,
   },
   {
-    title: "??",
-    description: "??",
-    highlights: ["??", "??", "??"],
-    tags: ["??"],
-    status: "wip",
-    icon: "??",
+    id: "future-03",
+    title: "",
+    description: "",
     previewColor: "linear-gradient(135deg, #ea580c 0%, #d97706 100%)",
-    category: "??",
     pos: [82, 58],
     magnitude: 1.6,
+    placeholder: true,
   },
   {
-    title: "??",
-    description: "??",
-    highlights: ["??", "??", "??"],
-    tags: ["??"],
-    status: "wip",
-    icon: "??",
+    id: "future-04",
+    title: "",
+    description: "",
     previewColor: "linear-gradient(135deg, #7c3aed 0%, #a21caf 100%)",
-    category: "??",
     pos: [18, 52],
     magnitude: 1.7,
+    placeholder: true,
   },
   {
-    title: "??",
-    description: "??",
-    highlights: ["??", "??", "??"],
-    tags: ["??"],
-    status: "wip",
-    icon: "??",
+    id: "future-05",
+    title: "",
+    description: "",
     previewColor: "linear-gradient(135deg, #be123c 0%, #c2410c 100%)",
-    category: "??",
     pos: [38, 74],
     magnitude: 1.5,
+    placeholder: true,
   },
   {
-    title: "??",
-    description: "??",
-    highlights: ["??", "??", "??"],
-    tags: ["??"],
-    status: "wip",
-    icon: "??",
+    id: "future-06",
+    title: "",
+    description: "",
     previewColor: "linear-gradient(135deg, #d97706 0%, #ca8a04 100%)",
-    category: "??",
     pos: [60, 68],
     magnitude: 1.6,
+    placeholder: true,
   },
 ];
 
@@ -114,7 +111,12 @@ function lcg(seed: number) {
 
 const BG_STARS = Array.from({ length: 40 }, (_, i) => {
   const r = lcg(i * 6271 + 99991);
-  return { cx: r() * 92 + 4, cy: r() * 84 + 8, r: r() * 1.1 + 0.3, o: r() * 0.18 + 0.06 };
+  return {
+    cx: r() * 92 + 4,
+    cy: r() * 84 + 8,
+    r: r() * 1.1 + 0.3,
+    o: r() * 0.18 + 0.06,
+  };
 });
 
 export default function ConstellationMap() {
@@ -130,6 +132,24 @@ export default function ConstellationMap() {
 
   function isConnected(a: number, b: number) {
     return hovered === a || hovered === b;
+  }
+
+  function tooltipPosition(clientX: number, clientY: number) {
+    const width = 280;
+    const height = 170;
+    const gap = 16;
+    const margin = 12;
+
+    return {
+      x:
+        clientX + gap + width > window.innerWidth
+          ? Math.max(margin, clientX - width - gap)
+          : clientX + gap,
+      y: Math.min(
+        Math.max(margin, clientY + gap),
+        window.innerHeight - height - margin
+      ),
+    };
   }
 
   useEffect(() => {
@@ -148,8 +168,6 @@ export default function ConstellationMap() {
 
     const stiffness = 0.18;
     const damping = 0.72;
-    const offset = 16;
-
     const step = () => {
       if (!initRef.current) {
         posRef.current = { x: targetRef.current.x, y: targetRef.current.y };
@@ -157,14 +175,18 @@ export default function ConstellationMap() {
         initRef.current = true;
       } else {
         velRef.current.x =
-          (velRef.current.x + (targetRef.current.x - posRef.current.x) * stiffness) * damping;
+          (velRef.current.x +
+            (targetRef.current.x - posRef.current.x) * stiffness) *
+          damping;
         velRef.current.y =
-          (velRef.current.y + (targetRef.current.y - posRef.current.y) * stiffness) * damping;
+          (velRef.current.y +
+            (targetRef.current.y - posRef.current.y) * stiffness) *
+          damping;
         posRef.current.x += velRef.current.x;
         posRef.current.y += velRef.current.y;
       }
       if (bubbleRef.current) {
-        bubbleRef.current.style.transform = `translate3d(${Math.round(posRef.current.x + offset)}px, ${Math.round(posRef.current.y + offset)}px, 0)`;
+        bubbleRef.current.style.transform = `translate3d(${Math.round(posRef.current.x)}px, ${Math.round(posRef.current.y)}px, 0)`;
       }
       rafRef.current = requestAnimationFrame(step);
     };
@@ -185,12 +207,12 @@ export default function ConstellationMap() {
       <div
         className="relative w-full overflow-hidden rounded-2xl border border-border"
         style={{ height: "clamp(380px, 58vh, 580px)" }}
-        onMouseMove={(e) => {
-          targetRef.current = { x: e.clientX, y: e.clientY };
+        onMouseMove={e => {
+          targetRef.current = tooltipPosition(e.clientX, e.clientY);
         }}
       >
         <svg
-          className="absolute inset-0 h-full w-full pointer-events-none"
+          className="pointer-events-none absolute inset-0 h-full w-full"
           aria-hidden="true"
         >
           {BG_STARS.map((s, i) => (
@@ -217,7 +239,8 @@ export default function ConstellationMap() {
                   strokeWidth: active ? 1.2 : 0.6,
                   strokeOpacity: active ? 0.65 : 0.3,
                   strokeDasharray: active ? "none" : "4 7",
-                  transition: "stroke 0.3s ease, stroke-opacity 0.3s ease, stroke-width 0.3s ease",
+                  transition:
+                    "stroke 0.3s ease, stroke-opacity 0.3s ease, stroke-width 0.3s ease",
                 }}
               />
             );
@@ -229,9 +252,38 @@ export default function ConstellationMap() {
           const size = (p.magnitude ?? 1.5) * 9;
           const hitArea = Math.max(size * 3.5, 48);
 
+          if (p.placeholder) {
+            return (
+              <div
+                key={p.id}
+                className="pointer-events-none absolute flex items-center justify-center"
+                style={{
+                  left: `${p.pos[0]}%`,
+                  top: `${p.pos[1]}%`,
+                  width: hitArea,
+                  height: hitArea,
+                  transform: "translate(-50%, -50%)",
+                }}
+                aria-hidden="true"
+              >
+                <div
+                  style={{
+                    width: size * 0.62,
+                    height: size * 0.62,
+                    clipPath: STAR_CLIP,
+                    background: "var(--muted)",
+                    filter: `drop-shadow(0 0 ${size * 0.25}px var(--muted))`,
+                    opacity: 0.35,
+                    animation: `twinkle ${3.2 + i * 0.38}s ease-in-out ${i * 0.42}s infinite`,
+                  }}
+                />
+              </div>
+            );
+          }
+
           return (
             <button
-              key={p.title}
+              key={p.id}
               className="absolute"
               style={{
                 left: `${p.pos[0]}%`,
@@ -246,15 +298,27 @@ export default function ConstellationMap() {
                 cursor: p.link ? "pointer" : "default",
               }}
               onMouseEnter={() => setHovered(i)}
-              onMouseLeave={() => setHovered((h) => (h === i ? null : h))}
+              onMouseLeave={() => setHovered(h => (h === i ? null : h))}
+              onFocus={event => {
+                const rect = event.currentTarget.getBoundingClientRect();
+                targetRef.current = tooltipPosition(rect.right, rect.top);
+                setHovered(i);
+              }}
+              onBlur={() => setHovered(h => (h === i ? null : h))}
               onClick={() => {
-                if (p.link) window.open(p.link, "_blank", "noopener,noreferrer");
+                if (!p.link) return;
+                if (/^https?:\/\//.test(p.link)) {
+                  window.open(p.link, "_blank", "noopener,noreferrer");
+                } else {
+                  window.location.assign(p.link);
+                }
               }}
               title={p.title}
+              aria-label={`${p.title}: open interactive portfolio demo`}
             >
               {isHovered && (
                 <div
-                  className="absolute rounded-full animate-ping"
+                  className="absolute animate-ping rounded-full"
                   style={{
                     width: size * 2.2,
                     height: size * 2.2,
@@ -271,14 +335,15 @@ export default function ConstellationMap() {
                   clipPath: STAR_CLIP,
                   background: "var(--accent)",
                   filter: `drop-shadow(0 0 ${isHovered ? size * 0.7 : size * 0.35}px var(--accent))`,
-                  transition: "width 0.25s cubic-bezier(0.34,1.56,0.64,1), height 0.25s cubic-bezier(0.34,1.56,0.64,1), filter 0.25s ease",
+                  transition:
+                    "width 0.25s cubic-bezier(0.34,1.56,0.64,1), height 0.25s cubic-bezier(0.34,1.56,0.64,1), filter 0.25s ease",
                   animation: `twinkle ${2.6 + i * 0.38}s ease-in-out ${i * 0.42}s infinite`,
                   flexShrink: 0,
                 }}
               />
 
               <span
-                className="absolute whitespace-nowrap pointer-events-none"
+                className="pointer-events-none absolute whitespace-nowrap"
                 style={{
                   top: `calc(50% + ${size * 0.85}px)`,
                   left: "50%",
@@ -299,7 +364,7 @@ export default function ConstellationMap() {
         })}
 
         <div
-          className="absolute bottom-4 left-1/2 -translate-x-1/2 pointer-events-none select-none whitespace-nowrap"
+          className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap select-none"
           style={{
             fontSize: "9px",
             letterSpacing: "0.18em",
@@ -323,7 +388,7 @@ export default function ConstellationMap() {
 
       <div
         ref={bubbleRef}
-        className="fixed top-0 left-0 pointer-events-none"
+        className="pointer-events-none fixed top-0 left-0"
         style={{
           opacity: hovered !== null ? 1 : 0,
           transition: "opacity 0.18s ease",
@@ -345,24 +410,51 @@ function ProjectBubble({ project }: { project: Project }) {
       style={{ minWidth: 180, maxWidth: 260 }}
     >
       <div className="flex items-center justify-between gap-2">
-        <span className="font-mono text-xs font-semibold text-foreground truncate">
+        <span className="truncate font-mono text-xs font-semibold text-foreground">
           {project.title}
         </span>
         <span
-          className="shrink-0 font-mono text-[10px] uppercase tracking-[0.12em]"
-          style={{ color: project.status === "live" ? "var(--color-accent)" : "var(--color-muted)" }}
+          className="shrink-0 font-mono text-[10px] tracking-[0.12em] uppercase"
+          style={{
+            color:
+              project.status === "live" || project.status === "demo"
+                ? "var(--color-accent)"
+                : "var(--color-muted)",
+          }}
         >
           [{project.status ?? "wip"}]
         </span>
       </div>
       {project.category && (
-        <div className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.15em] text-accent">
+        <div className="mt-0.5 font-mono text-[10px] tracking-[0.15em] text-accent uppercase">
           {project.category}
         </div>
       )}
-      {project.description && project.description !== "??" && (
-        <div className="mt-1.5 font-mono text-[11px] leading-relaxed text-muted line-clamp-2">
+      {project.description && (
+        <div className="mt-1.5 line-clamp-3 font-mono text-[11px] leading-relaxed text-muted">
           {project.description}
+        </div>
+      )}
+      {project.tags && project.tags.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1">
+          {project.tags.slice(0, 3).map(tag => (
+            <span
+              key={tag}
+              className="rounded border border-border px-1.5 py-0.5 font-mono text-[8px] tracking-wide text-muted uppercase"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
+      {project.officialLink && (
+        <div className="mt-2 font-mono text-[9px] text-muted">
+          Official · yourminervavibe.com ↗
+        </div>
+      )}
+      {project.link && (
+        <div className="mt-2 border-t border-border pt-2 font-mono text-[9px] tracking-[0.14em] text-accent uppercase">
+          Click to try the demo →
         </div>
       )}
     </div>
