@@ -1,0 +1,108 @@
+- generic [ref=e1]:
+  - link "Skip to content" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - link "PEKKIMORI" [ref=e5] [cursor=pointer]:
+        - /url: /en/
+      - navigation [ref=e6]:
+        - list [ref=e7]:
+          - listitem [ref=e8]:
+            - link "Posts" [ref=e9] [cursor=pointer]:
+              - /url: /en/posts
+          - listitem [ref=e10]:
+            - link "Tags" [ref=e11] [cursor=pointer]:
+              - /url: /en/tags
+          - listitem [ref=e12]:
+            - link "Portfolio" [ref=e13] [cursor=pointer]:
+              - /url: /en/portfolio
+          - listitem [ref=e14]:
+            - link "About" [ref=e15] [cursor=pointer]:
+              - /url: /en/about
+          - listitem [ref=e16]:
+            - generic [ref=e17]:
+              - link "Search" [ref=e18] [cursor=pointer]:
+                - /url: /en/search
+              - generic [ref=e24]:
+                - link "en" [ref=e25] [cursor=pointer]:
+                  - /url: /en/posts
+                - link "pt" [ref=e26] [cursor=pointer]:
+                  - /url: /pt/posts
+              - button "light" [ref=e27] [cursor=pointer]
+  - main [ref=e31]:
+    - separator [aria-hidden] [ref=e33]
+    - generic [ref=e36]:
+      - generic [ref=e37]:
+        - generic [ref=e38]: $ cat ~/bookshelf/*
+        - generic [ref=e39]: 3 books · 0 currently reading
+      - group "A–Z" [ref=e40]:
+        - button "A–Z" [pressed] [ref=e41] [cursor=pointer]
+        - button "by theme" [ref=e42] [cursor=pointer]
+        - button "by rating" [ref=e43] [cursor=pointer]
+      - generic [ref=e46]:
+        - generic:
+          - generic [aria-hidden]: ╔═════════════════╗ ║ Motes and Beams ║ ║ Michael Pierce ║ ╚═════════════════╝
+          - generic:
+            - generic:
+              - generic:
+                - generic: Motes and Beams
+                - generic: Michael Pierce
+            - button "Motes and Beams by Michael Pierce"
+        - generic [ref=e57]:
+          - generic [aria-hidden]: ╔════════════════════╗ ║ The King in Yellow ║ ║ Robert W. Chambers ║ ╚════════════════════╝
+          - generic [ref=e58]:
+            - generic [ref=e62]:
+              - generic [ref=e63]: The King in Yellow
+              - generic [ref=e65]: Robert W. Chambers
+            - button "The King in Yellow by Robert W. Chambers" [ref=e66] [cursor=pointer]
+        - generic [ref=e67]:
+          - generic [aria-hidden]: ╔══════════════════════════╗ ║ The Laws of Human Nature ║ ║ Robert Greene ║ ╚══════════════════════════╝
+          - generic [ref=e68]:
+            - generic [ref=e72]:
+              - generic [ref=e73]: The Laws of Human Nature
+              - generic [ref=e75]: Robert Greene
+            - button "The Laws of Human Nature by Robert Greene" [ref=e76] [cursor=pointer]
+      - paragraph [aria-hidden] [ref=e78]: "# hover a spine to see the cover · click for review"
+      - dialog [ref=e110]:
+        - button "Close" [active] [ref=e111] [cursor=pointer]: ×
+        - generic [ref=e112]:
+          - heading "Motes and Beams" [level=2] [ref=e113]
+          - paragraph [ref=e114]: Michael Pierce
+          - generic [ref=e115]:
+            - generic "5 out of 5 stars" [ref=e116]: ★★★★★
+            - text: ·2024·
+            - generic [ref=e117]: 186pp
+            - text: ·psychology
+          - paragraph [ref=e118]: first published 1895
+        - generic [ref=e119]:
+          - figure "— Motes and Beams" [ref=e120]:
+            - blockquote [ref=e121]: "\"A map, not a verdict.\""
+          - generic [ref=e123]:
+            - heading "review:" [level=3] [ref=e124]
+            - paragraph [ref=e126]: A dense but lucid map of Jungian personality theory. It reads less like a test and more like a taxonomy, with careful definitions and a steady emphasis on nuance.
+  - contentinfo [ref=e79]:
+    - generic [ref=e80]:
+      - generic [ref=e81]:
+        - link "PEKKIMORI on GitHub" [ref=e82] [cursor=pointer]:
+          - /url: https://github.com/pekkimori
+        - link "PEKKIMORI on LinkedIn" [ref=e87] [cursor=pointer]:
+          - /url: https://www.linkedin.com/in/rafaelh-mori/
+        - link "PEKKIMORI on Instagram" [ref=e93] [cursor=pointer]:
+          - /url: https://www.instagram.com/rafaelh.mori/
+        - link "Send an email to PEKKIMORI" [ref=e99] [cursor=pointer]:
+          - /url: mailto:rafaelh.mori@gmail.com
+      - generic [ref=e105]:
+        - generic [ref=e106]: Copyright © 2026
+        - generic [ref=e107]: "|"
+        - generic [ref=e108]: All rights reserved.
+  - generic [ref=e129]:
+    - button [ref=e130]
+    - button [ref=e136]
+    - button [ref=e140]
+    - button [ref=e148]
+  - generic [aria-hidden]:
+    - generic [aria-hidden]:
+      - generic:
+        - generic:
+          - generic: Motes and Beams
+          - generic: Michael Pierce

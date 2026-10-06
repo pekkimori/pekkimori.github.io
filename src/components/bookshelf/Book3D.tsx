@@ -30,11 +30,6 @@ function getBookVariant(slug: string): number {
   return slug.length % DESKTOP_PROFILES.length;
 }
 
-function getTextOrientation(value: string, lang: Lang): "mixed" | "upright" {
-  if (lang !== "ja") return "mixed";
-  return /[\u3040-\u30ff\u3400-\u9fff]/u.test(value) ? "upright" : "mixed";
-}
-
 function getSpineWidth(pageCount: number, isMobile: boolean): number {
   const normalized = Math.min(
     1,
@@ -104,7 +99,6 @@ type Props = {
 
 export default function Book3D({
   book,
-  lang,
   metrics,
   innerRef,
   className,
@@ -192,14 +186,14 @@ export default function Book3D({
         <div className="book-spine-label">
           <span
             className="book-spine-title"
-            data-text-orient={getTextOrientation(book.title, lang)}
+            data-text-orient="mixed"
           >
             {book.title}
           </span>
           <span className="book-spine-divider" aria-hidden="true" />
           <span
             className="book-spine-author"
-            data-text-orient={getTextOrientation(book.author, lang)}
+            data-text-orient="mixed"
           >
             {book.author}
           </span>

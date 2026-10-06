@@ -1,9 +1,12 @@
 ---
 import BentoCard from "./BentoCard.astro";
 import { ANIME, MAL_URL } from "@/data/about";
+import { ANIME_PT } from "@/data/about-pt";
+const isPt = Astro.url.pathname.startsWith("/pt/");
+const anime = isPt ? ANIME_PT : ANIME;
 ---
 
-<BentoCard prompt="$ cat ~/anime/favorites.txt">
+<BentoCard prompt={isPt ? "$ cat ~/anime/favoritos.txt" : "$ cat ~/anime/favorites.txt"}>
   <div class="flex flex-col gap-4">
     <a
       href={MAL_URL}
@@ -26,7 +29,7 @@ import { ANIME, MAL_URL } from "@/data/about";
 
     <ul class="space-y-3">
       {
-        ANIME.map((item, i) => (
+        anime.map((item, i) => (
           <li class="grid grid-cols-[2rem_1fr] items-baseline gap-3">
             <code class="font-mono text-[11px] text-accent">
               {String(i + 1).padStart(2, "0")}

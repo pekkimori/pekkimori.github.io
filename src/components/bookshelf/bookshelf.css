@@ -270,8 +270,7 @@
   transform-origin: bottom center;
 }
 
-/* Spine type stays vertical while each string chooses mixed Latin or
-   upright CJK glyphs independently. */
+/* Spine type stays vertical with mixed text orientation. */
 .book-spine-label {
   position: absolute;
   inset: 22px 3px 21px;
@@ -297,11 +296,6 @@
 .book-spine-label
   :is(.book-spine-title, .book-spine-author)[data-text-orient="mixed"] {
   text-orientation: mixed;
-}
-
-.book-spine-label
-  :is(.book-spine-title, .book-spine-author)[data-text-orient="upright"] {
-  text-orientation: upright;
 }
 
 .book-spine-title {

@@ -16,7 +16,6 @@ const { headings, class: className, lang, ...props } = Astro.props;
 const tocLabels: Record<string, string> = {
   en: "TABLE OF CONTENTS",
   pt: "ÍNDICE",
-  ja: "目次",
 };
 
 const tocLabel = tocLabels[lang ?? "en"] ?? "TABLE OF CONTENTS";
@@ -24,7 +23,6 @@ const tocLabel = tocLabels[lang ?? "en"] ?? "TABLE OF CONTENTS";
 const footnoteLabels: Record<string, string> = {
   en: "Footnotes",
   pt: "Notas de rodapé",
-  ja: "脚注",
 };
 
 const translatedHeadings = headings.map(h =>

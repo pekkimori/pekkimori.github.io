@@ -2,22 +2,17 @@
 import BentoCard from "./BentoCard.astro";
 
 const path = Astro.url.pathname;
-const lang: "en" | "pt" | "ja" = path.startsWith("/pt")
-  ? "pt"
-  : path.startsWith("/ja")
-    ? "ja"
-    : "en";
+const lang: "en" | "pt" = path.startsWith("/pt") ? "pt" : "en";
 
 const labels = {
   en: "Browse full shelf",
   pt: "Ver estante completa",
-  ja: "本棚を見る",
 };
 
 const href = `/${lang}/bookshelf`;
 ---
 
-<BentoCard prompt="$ ls ~/bookshelf">
+<BentoCard prompt={lang === "pt" ? "$ ls ~/estante" : "$ ls ~/bookshelf"}>
   <div class="book-scene">
     <div class="book-pile" aria-hidden="true">
       <span class="scattered-book scattered-book-one"></span>

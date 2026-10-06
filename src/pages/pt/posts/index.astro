@@ -8,7 +8,10 @@ import Card from "@/components/Card.astro";
 import getPostsByGroupCondition from "@/utils/getPostsByGroupCondition";
 import { SITE } from "@/config";
 
-const posts = await getCollection("blog", ({ data }) => !data.draft && data.language === "pt");
+const posts = await getCollection(
+  "blog",
+  ({ data }) => !data.draft && !data.versionOf && data.language === "pt"
+);
 
 const months = [
   "Janeiro",

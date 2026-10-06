@@ -12,7 +12,6 @@ const { lang } = Astro.props;
 const goBackLabels: Record<string, string> = {
   en: "Go back",
   pt: "Voltar",
-  ja: "戻る",
 };
 
 const goBackLabel = goBackLabels[lang ?? "en"] ?? "Go back";
@@ -20,7 +19,6 @@ const goBackLabel = goBackLabels[lang ?? "en"] ?? "Go back";
 const langHome: Record<string, string> = {
   en: "/en/",
   pt: "/pt/",
-  ja: "/ja/",
 };
 
 const fallbackHref = langHome[lang ?? "en"] ?? "/en/";
@@ -53,10 +51,10 @@ const fallbackHref = langHome[lang ?? "en"] ?? "/en/";
       // Adjust backUrl to always match the current page's language,
       // so switching language on a post page doesn't send the user back
       // to the previous language's listing.
-      const currentLangMatch = location.pathname.match(/^\/(en|pt|ja)\//);
+      const currentLangMatch = location.pathname.match(/^\/(en|pt)\//);
       if (currentLangMatch) {
         const currentLang = currentLangMatch[1];
-        backButton.href = backUrl.replace(/^\/(en|pt|ja)\//, `/${currentLang}/`);
+        backButton.href = backUrl.replace(/^\/(en|pt)\//, `/${currentLang}/`);
       } else {
         backButton.href = backUrl;
       }

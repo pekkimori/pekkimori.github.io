@@ -2,6 +2,7 @@
 author: Rafael Mori
 pubDatetime: 2026-03-27T12:00:00Z
 title: Magnum Opus
+commentDiscussion: 5
 featured: true
 draft: false
 language: en
@@ -32,7 +33,7 @@ So this text is the result of that. It's my understanding of the world and, from
 
 My goal is to talk about all of this in a fun, educational, and clear way. Philosophy has this problem: you start searching for reason and, halfway through, get lost in your own terms and metaphors.[^1] I want a text that's rich but simple. Brutal but human.
 
-I'm going to talk about three core values: truth, energy, and love. But I won't get to them directly. First, I need to show where they come from — after all, I don't want you to accept what I write just because I wrote it. I want you to think along with me, disagree if you disagree, and maybe one day send me a message telling me what you thought. Maybe you'll change my perspective too.
+I'm going to talk about three core values: truth, energy, and love.[^christian-virtues] But I won't get to them directly. First, I need to show where they come from — after all, I don't want you to accept what I write just because I wrote it. I want you to think along with me, disagree if you disagree, and maybe one day send me a message telling me what you thought. Maybe you'll change my perspective too.
 
 In the end, I'll connect the three values and show how they apply to real life — and what happens when we live without them. I'll bring in theories from different fields, ancient and modern thought, and try to show that very different people, thinking in very different ways, can arrive at a common and elevated principle when we genuinely try to be better. Also, if it sparks your interest, feel free to dive deeper into the books recommended in the footnotes!
 
@@ -444,6 +445,8 @@ A
 
 [^1]: Recommended for beginners: _Sophie's World_ — Jostein Gaarder
 
+[^christian-virtues]: My friend pointed out that these three values resemble the three Christian virtues: faith, hope, and love. However, I don’t base my thinking on them. In fact, I didn’t even know that! I have a very superficial knowledge of religion. Maybe there are coincidences, but it could just be coincidence. Or could it…? ₍^. .^₎
+
 [^2]: _Course in General Linguistics_ — Ferdinand de Saussure.
 
 [^3]: _Philosophy Before Socrates_ — Richard D. McKirahan
@@ -472,7 +475,7 @@ A
 
 [^15]: _The Conscious Mind_ — David Chalmers; _Consciousness Explained_ — Daniel Dennett
 
-[^16]: As the Map would say: _"If there's a place you gotta get, I can get you there I bet! I'm the Map! (2x) If there's a place you gotta go, I'm the one you need to know! I'm the Map! (2x) I'm the Map, I'm the Map! He's the Map, he's the Map! I'M THE MAP!!!"_
+[^16]: As the Map would say: “If there’s a place you got to go, I’m the one you need to know! I’m the Map! (2x) If there’s a place you got to get, I can get you there, I bet! I’m the Map! (2x) I’m the Map, I’m the Map! He’s the Map, he’s the Map! I’m the Map!!!”
 
 [^17]: _Science and Sanity_ — Alfred Korzybski
 

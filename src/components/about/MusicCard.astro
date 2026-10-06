@@ -1,9 +1,10 @@
 ---
 import BentoCard from "./BentoCard.astro";
 import { FAVORITE_SONGS, SPOTIFY_URL, FAVORITE_ARTISTS } from "@/data/about";
+const isPt = Astro.url.pathname.startsWith("/pt/");
 ---
 
-<BentoCard prompt="$ taste --music">
+<BentoCard prompt={isPt ? "$ gostos --musica" : "$ taste --music"}>
   <div class="flex flex-col gap-4">
     <a
       href={SPOTIFY_URL}
@@ -39,10 +40,10 @@ import { FAVORITE_SONGS, SPOTIFY_URL, FAVORITE_ARTISTS } from "@/data/about";
     </ul>
 
     <div>
-      <div class="mb-1.5 font-mono text-[10px] uppercase tracking-[0.15em] text-muted">favorites</div>
-      <div class="flex flex-wrap gap-1.5">
+      <div class="mb-1.5 font-mono text-[10px] uppercase tracking-[0.15em] text-muted">{isPt ? "favoritos" : "favorites"}</div>
+      <div class="flex flex-wrap justify-center gap-1.5">
         {FAVORITE_ARTISTS.map(artist => (
-          <span class="flex-auto text-center rounded-md border border-border px-2 py-0.5 font-mono text-[10px] text-muted">
+          <span class="text-center rounded-md border border-border px-2 py-0.5 font-mono text-[10px] text-muted">
             {artist}
           </span>
         ))}

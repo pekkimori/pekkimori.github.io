@@ -19,6 +19,9 @@ import react from "@astrojs/react";
 // https://astro.build/config
 export default defineConfig({
   site: SITE.website,
+  redirects: {
+    "/en/posts/preface-and-premises": "/en/posts/magnum-opus/",
+  },
   integrations: [sitemap(), react(), mdx()],
   markdown: {
     remarkPlugins: [

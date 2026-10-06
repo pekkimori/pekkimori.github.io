@@ -32,14 +32,6 @@ export const BOOKS: Book[] = [
         quote:
           "Não para se tornar outra pessoa, mas para ser mais plenamente você mesmo.",
       },
-      ja: {
-        title: "人間性の法則",
-        author: "ロバート・グリーン",
-        theme: "哲学",
-        review:
-          "自己啓発書を装った実務マニュアル。グリーンはナルシシズム、嫉妬、誇大妄想、同調といった人間の反復するパターンを目録化していく。処方箋というより診断書だ。\n\n章ごとの当たり外れはあるが、貫かれている軸は鋭い：他人が他人であることをやめないと諦めたとき、人は反射的に反応しなくなる。",
-        quote: "他の誰かになるのではなく、より徹底的に自分自身であること。",
-      },
     },
   },
   {
@@ -70,15 +62,6 @@ export const BOOKS: Book[] = [
         quote:
           "Sua mente é uma câmara de maravilhas, da qual ele extrai tesouros que você e eu daríamos anos de vida para adquirir.",
       },
-      ja: {
-        title: "黄衣の王",
-        author: "ロバート・W・チェンバース",
-        theme: "ホラー",
-        review:
-          "読み手を狂気へと駆り立てる禁断の戯曲に取り憑かれた短篇集。仕掛けは、最悪のページは決して見せず、それを読んでしまった人々が残した残骸だけを描くことにある。\n\nチェンバースは一八九五年にこれを書き、いまだに恐怖の通奏低音が鳴り止まない。ラヴクラフトを含むその後の奇想文学の半分は、彼に詫びを入れるべきだ。",
-        quote:
-          "彼の精神は驚異の小部屋であり、そこから彼は、あなたや私が数年の人生を差し出してでも手に入れたい宝を取り出してみせる。",
-      },
     },
   },
   {
@@ -106,14 +89,6 @@ export const BOOKS: Book[] = [
         review:
           "Um mapa denso, mas claro, da teoria junguiana da personalidade. Menos diagnóstico, mais cartografia, com conceitos bem definidos e foco na nuance.",
         quote: "Um mapa, não um veredito.",
-      },
-      ja: {
-        title: "Motes and Beams",
-        author: "Michael Pierce",
-        theme: "psychology",
-        review:
-          "ユング的な性格理論を丁寧に整理した一冊。診断というより地図としての視点が強く、概念の輪郭が分かりやすい。",
-        quote: "判決ではなく、地図だ。",
       },
     },
   },

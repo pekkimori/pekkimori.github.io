@@ -29,19 +29,15 @@ const currentPath =
 // Language prefixes
 const EN_PREFIX = "/en";
 const PT_PREFIX = "/pt";
-const JA_PREFIX = "/ja";
 const isEn = currentPath.startsWith(EN_PREFIX + "/") || currentPath === EN_PREFIX;
 const isPt = currentPath.startsWith(PT_PREFIX + "/") || currentPath === PT_PREFIX;
-const isJa = currentPath.startsWith(JA_PREFIX + "/") || currentPath === JA_PREFIX;
 
 // Strip the language prefix to get the canonical path segment
 const pathWithoutPrefix = isPt
   ? currentPath.slice(PT_PREFIX.length) || "/"
-  : isJa
-    ? currentPath.slice(JA_PREFIX.length) || "/"
-    : isEn
-      ? currentPath.slice(EN_PREFIX.length) || "/"
-      : currentPath;
+  : isEn
+    ? currentPath.slice(EN_PREFIX.length) || "/"
+    : currentPath;
 
 const isActive = (path: string) => {
   // Strip language prefix before comparing so both /en/posts and /pt/posts highlight "Posts"
@@ -53,22 +49,19 @@ const isActive = (path: string) => {
 // Build language-prefixed equivalents
 const enPath = EN_PREFIX + (pathWithoutPrefix === "/" ? "" : pathWithoutPrefix);
 const ptPath = PT_PREFIX + (pathWithoutPrefix === "/" ? "" : pathWithoutPrefix);
-const jaPath = JA_PREFIX + (pathWithoutPrefix === "/" ? "" : pathWithoutPrefix);
 
-// Paths that exist under /en/, /pt/, and /ja/
-const knownPaths = ["/", "/posts", "/tags", "/portfolio", "/about", "/search"];
+// Paths that exist under /en/ and /pt/
+const knownPaths = ["/", "/posts", "/tags", "/portfolio", "/about", "/search", "/bookshelf"];
 const equivalentExists = knownPaths.some(
   p => pathWithoutPrefix === p || pathWithoutPrefix.startsWith(p + "/")
 );
 
 const resolvedEnPath = equivalentExists ? (enPath || `${EN_PREFIX}/`) : `${EN_PREFIX}/posts`;
 const resolvedPtPath = equivalentExists ? ptPath : `${PT_PREFIX}/posts`;
-const resolvedJaPath = equivalentExists ? (jaPath || `${JA_PREFIX}/`) : `${JA_PREFIX}/posts`;
 
 const autoLanguageOptions = [
-  { label: "en", href: resolvedEnPath, isActive: !isPt && !isJa },
+  { label: "en", href: resolvedEnPath, isActive: !isPt },
   { label: "pt", href: resolvedPtPath, isActive: isPt },
-  { label: "ja", href: resolvedJaPath, isActive: isJa },
 ];
 
 // Explicit options from PostDetails (translated post slugs) take priority
@@ -76,13 +69,11 @@ const languageOptions =
   explicitLanguageOptions.length > 1 ? explicitLanguageOptions : autoLanguageOptions;
 
 // Nav links and logo stay within the active language tree
-const base = isPt ? PT_PREFIX : isJa ? JA_PREFIX : EN_PREFIX;
+const base = isPt ? PT_PREFIX : EN_PREFIX;
 
 const navLabels = isPt
-  ? { posts: "Posts", tags: "Tags", projects: "Portfólio", about: "Sobre", search: "Buscar" }
-  : isJa
-    ? { posts: "投稿", tags: "タグ", projects: "ポートフォリオ", about: "自己紹介", search: "検索" }
-    : { posts: "Posts", tags: "Tags", projects: "Portfolio", about: "About", search: "Search" };
+  ? { posts: "Publicações", tags: "Marcadores", projects: "Portfólio", about: "Sobre", search: "Buscar" }
+  : { posts: "Posts", tags: "Tags", projects: "Portfolio", about: "About", search: "Search" };
 ---
 
 <a
@@ -90,7 +81,7 @@ const navLabels = isPt
   href="#main-content"
   class="absolute start-16 -top-full z-50 bg-background px-3 py-2 text-accent backdrop-blur-lg transition-all focus:top-4"
 >
-  {isPt ? "Pular para o conteúdo" : isJa ? "コンテンツへスキップ" : "Skip to content"}
+  {isPt ? "Pular para o conteúdo" : "Skip to content"}
 </a>
 
 <header
@@ -118,7 +109,7 @@ const navLabels = isPt
         <button
           id="menu-btn"
           class="focus-outline self-end p-2 sm:hidden"
-          aria-label="Open Menu"
+          aria-label={isPt ? "Abrir menu" : "Open Menu"}
           aria-expanded="false"
           aria-controls="menu-items"
         >
@@ -185,7 +176,7 @@ const navLabels = isPt
                 <button
                   id="theme-btn"
                   class="focus-outline relative size-12 p-4 sm:size-8 hover:[&>svg]:stroke-accent"
-                  title="Toggles light & dark"
+                  title={isPt ? "Alternar entre tema claro e escuro" : "Toggles light & dark"}
                   aria-label="auto"
                   aria-live="polite"
                 >
@@ -214,7 +205,10 @@ const navLabels = isPt
       const openMenu = menuBtn.getAttribute("aria-expanded") === "true";
 
       menuBtn.setAttribute("aria-expanded", openMenu ? "false" : "true");
-      menuBtn.setAttribute("aria-label", openMenu ? "Open Menu" : "Close Menu");
+      const isPt = location.pathname.startsWith("/pt/");
+      menuBtn.setAttribute("aria-label", isPt
+        ? (openMenu ? "Abrir menu" : "Fechar menu")
+        : (openMenu ? "Open Menu" : "Close Menu"));
 
       menuItems.classList.toggle("hidden");
       menuIcon.classList.toggle("hidden");

@@ -1,6 +1,8 @@
 ---
 import { render, type CollectionEntry, getCollection } from "astro:content";
 import Comments from "@/components/Comments";
+import PostVersions from "@/components/PostVersions.astro";
+import { getPostVersions } from "@/utils/getPostVersions";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
@@ -26,6 +28,27 @@ const { post, posts } = Astro.props;
 
 // All posts (unfiltered by language) – used only for cross-language translation lookup
 const allBlogPosts = await getCollection("blog");
+const { current: currentVersion, versions } = getPostVersions(
+  post,
+  allBlogPosts
+);
+const earlierVersions = versions.filter(
+  version => version.data.versionOf && version.id !== post.id
+);
+const commentLabels = {
+  en: {
+    current: "Comments on the current version",
+    earlier: "Comments on this earlier version",
+    archive: "Comments from earlier versions",
+    read: "Read this version",
+  },
+  pt: {
+    current: "Comentários da versão atual",
+    earlier: "Comentários desta versão anterior",
+    archive: "Comentários de versões anteriores",
+    read: "Leia esta versão",
+  },
+}[post.data.language ?? "en"];
 
 const {
   title,
@@ -83,19 +106,20 @@ const allPosts = posts.map(({ data: { title, language }, id, filePath }) => ({
   language,
 }));
 
-const currentPostIndex = allPosts.findIndex(a => a.id === post.id);
+const currentPostIndex = allPosts.findIndex(a => a.id === currentVersion.id);
 
 const prevPost = currentPostIndex !== 0 ? allPosts[currentPostIndex - 1] : null;
 const nextPost =
-  currentPostIndex !== allPosts.length - 1 ? allPosts[currentPostIndex + 1] : null;
+  currentPostIndex !== allPosts.length - 1
+    ? allPosts[currentPostIndex + 1]
+    : null;
 
 const languageLabels = {
   pt: "pt",
   en: "en",
-  ja: "ja",
 } as const;
 
-const languageOrder = ["en", "pt", "ja"] as const;
+const languageOrder = ["en", "pt"] as const;
 
 // Posts are siblings if they share the same filename (last segment of id) and have a language set
 const baseSlug = post.id.split("/").pop();
@@ -105,8 +129,12 @@ const translatedPosts = post.data.language
       .filter(candidate => candidate.data.language)
       .sort(
         (a, b) =>
-          languageOrder.indexOf(a.data.language as (typeof languageOrder)[number]) -
-          languageOrder.indexOf(b.data.language as (typeof languageOrder)[number])
+          languageOrder.indexOf(
+            a.data.language as (typeof languageOrder)[number]
+          ) -
+          languageOrder.indexOf(
+            b.data.language as (typeof languageOrder)[number]
+          )
       )
   : [];
 
@@ -114,7 +142,12 @@ const shouldShowLanguageSelector = translatedPosts.length > 1;
 const hasLanguageSwitch = shouldShowLanguageSelector && Boolean(language);
 const languageOptions = shouldShowLanguageSelector
   ? translatedPosts.map(translatedPost => ({
-      href: getPath(translatedPost.id, translatedPost.filePath, true, translatedPost.data.language),
+      href: getPath(
+        translatedPost.id,
+        translatedPost.filePath,
+        true,
+        translatedPost.data.language
+      ),
       isActive: translatedPost.id === post.id,
       label:
         languageLabels[
@@ -135,7 +168,8 @@ const contentTransitionName = hasLanguageSwitch
   <main
     id="main-content"
     class:list={["app-layout pb-12", { "mt-8": !SITE.showBackButton }]}
-    data-pagefind-body
+    data-pagefind-body={post.data.versionOf ? undefined : ""}
+    data-pagefind-ignore={post.data.versionOf ? "all" : undefined}
   >
     <h1
       transition:name={titleTransitionName}
@@ -144,7 +178,13 @@ const contentTransitionName = hasLanguageSwitch
       {title}
     </h1>
     <div class="my-2 flex items-center gap-2">
-      <Datetime {pubDatetime} {modDatetime} {timezone} lang={language} size="lg" />
+      <Datetime
+        {pubDatetime}
+        {modDatetime}
+        {timezone}
+        lang={language}
+        size="lg"
+      />
       <span
         aria-hidden="true"
         class:list={[
@@ -154,6 +194,7 @@ const contentTransitionName = hasLanguageSwitch
       >
       <EditPost {hideEditPost} {post} class="max-sm:hidden" />
     </div>
+    {versions.length > 1 && <PostVersions {post} {versions} />}
     <div class="flex flex-row-reverse justify-between gap-8">
       <TableOfContents
         headings={headings}
@@ -174,11 +215,72 @@ const contentTransitionName = hasLanguageSwitch
     <EditPost class="sm:hidden" {hideEditPost} {post} />
 
     <ul class="mt-4 mb-8 flex flex-wrap gap-4 sm:my-8">
-      {tags.map(tag => <Tag tag={slugifyStr(tag)} tagName={tag} size="sm" lang={language} />)}
+      {
+        tags.map(tag => (
+          <Tag tag={slugifyStr(tag)} tagName={tag} size="sm" lang={language} />
+        ))
+      }
     </ul>
 
     <hr class="my-6 border-dashed" />
-    <Comments client:only="react" />
+    <section
+      aria-label={post.data.versionOf
+        ? commentLabels.earlier
+        : commentLabels.current}
+      data-pagefind-ignore
+    >
+      {
+        versions.length > 1 && (
+          <h2 class="text-xl font-semibold">
+            {post.data.versionOf
+              ? commentLabels.earlier
+              : commentLabels.current}
+          </h2>
+        )
+      }
+      <Comments
+        id="post-comments"
+        discussionNumber={post.data.commentDiscussion}
+        client:only="react"
+      />
+    </section>
+    {
+      earlierVersions.length > 0 && (
+        <section
+          class="mt-8"
+          aria-labelledby="earlier-comments-heading"
+          data-pagefind-ignore
+        >
+          <h2 id="earlier-comments-heading" class="mb-4 text-xl font-semibold">
+            {commentLabels.archive}
+          </h2>
+          {earlierVersions.map(version => (
+            <details class="mb-4 rounded-lg border border-border p-4">
+              <summary class="cursor-pointer font-medium hover:text-accent">
+                {version.data.versionLabel ?? version.data.title}
+              </summary>
+              <a
+                class="mt-3 inline-block text-sm underline decoration-dashed underline-offset-4 hover:text-accent"
+                href={getPath(
+                  version.id,
+                  version.filePath,
+                  true,
+                  version.data.language
+                )}
+              >
+                {commentLabels.read} →
+              </a>
+              <Comments
+                id={`version-comments-${slugifyStr(version.id)}`}
+                discussionNumber={version.data.commentDiscussion}
+                discussionPath={`${getPath(version.id, version.filePath, true, version.data.language).replace(/^\//, "")}/`}
+                client:only="react"
+              />
+            </details>
+          ))}
+        </section>
+      )
+    }
     <hr class="my-6 border-dashed" />
     <BackToTopButton />
 
@@ -191,7 +293,12 @@ const contentTransitionName = hasLanguageSwitch
       {
         prevPost && (
           <a
-            href={getPath(prevPost.id, prevPost.filePath, true, prevPost.language)}
+            href={getPath(
+              prevPost.id,
+              prevPost.filePath,
+              true,
+              prevPost.language
+            )}
             class="flex w-full gap-1 hover:opacity-75"
           >
             <IconChevronLeft class="inline-block flex-none rtl:rotate-180" />
@@ -205,7 +312,12 @@ const contentTransitionName = hasLanguageSwitch
       {
         nextPost && (
           <a
-            href={getPath(nextPost.id, nextPost.filePath, true, nextPost.language)}
+            href={getPath(
+              nextPost.id,
+              nextPost.filePath,
+              true,
+              nextPost.language
+            )}
             class="flex w-full justify-end gap-1 text-end hover:opacity-75 sm:col-start-2"
           >
             <div>
@@ -328,7 +440,6 @@ const contentTransitionName = hasLanguageSwitch
   const footnoteLabels = {
     en: "Footnotes",
     pt: "Notas de rodapé",
-    ja: "脚注",
   };
 
   function translateFootnoteLabel() {
@@ -363,7 +474,9 @@ const contentTransitionName = hasLanguageSwitch
       const fnLi = document.getElementById(href.replace("#", ""));
       if (!fnLi) return;
       const clone = fnLi.cloneNode(true);
-      clone.querySelectorAll("a[data-footnote-backref]").forEach(a => a.remove());
+      clone
+        .querySelectorAll("a[data-footnote-backref]")
+        .forEach(a => a.remove());
       contentCache.set(ref, clone.innerHTML.trim());
     });
 

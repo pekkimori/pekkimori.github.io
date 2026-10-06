@@ -1,6 +1,6 @@
 import type { ImageMetadata } from "astro";
 
-export type Lang = "en" | "pt" | "ja";
+export type Lang = "en" | "pt";
 
 export type BookStatus = "read" | "reading" | "want-to-read";
 

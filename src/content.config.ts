@@ -15,11 +15,15 @@ const blog = defineCollection({
       featured: z.boolean().optional(),
       draft: z.boolean().optional(),
       tags: z.array(z.string()).default(["others"]),
-      language: z.enum(["pt", "en", "ja"]).optional(),
+      language: z.enum(["pt", "en"]).optional(),
       ogImage: image().or(z.string()).optional(),
       description: z.string(),
       canonicalURL: z.string().optional(),
       hideEditPost: z.boolean().optional(),
+      // Earlier versions stay at their original URLs; reference the current post ID.
+      versionOf: z.string().optional(),
+      versionLabel: z.string().optional(),
+      commentDiscussion: z.number().int().positive().optional(),
       timezone: z.string().optional(),
     }),
 });

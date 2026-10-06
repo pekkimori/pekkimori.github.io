@@ -345,6 +345,7 @@ export default function Bookshelf({ lang, books }: Props) {
       <BookModal
         book={clickedBook}
         lang={lang}
+        coverHidden={flightBook !== null}
         onClose={() => {
           if (clickedSlug) {
             const rect = getBookRect(clickedSlug);

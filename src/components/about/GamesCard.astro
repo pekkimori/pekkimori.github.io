@@ -1,9 +1,10 @@
 ---
 import BentoCard from "./BentoCard.astro";
 import { STEAM_PROFILE_URL } from "@/data/about";
+const isPt = Astro.url.pathname.startsWith("/pt/");
 ---
 
-<BentoCard prompt="$ steam --pinned">
+<BentoCard prompt={isPt ? "$ steam --favoritos" : "$ steam --pinned"}>
   <div class="flex flex-col gap-4">
     <a
       href={STEAM_PROFILE_URL}
@@ -26,7 +27,7 @@ import { STEAM_PROFILE_URL } from "@/data/about";
 
     <img
       src="/gifs/about/transport_stag_example.gif"
-      alt="The Stag transport beetle from Hollow Knight."
+      alt={isPt ? "O besouro de transporte de Hollow Knight." : "The Stag transport beetle from Hollow Knight."}
       class="w-full rounded-xl object-cover"
       loading="lazy"
       decoding="async"

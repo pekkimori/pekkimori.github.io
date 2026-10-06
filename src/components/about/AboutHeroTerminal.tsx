@@ -11,14 +11,24 @@ const LINES: { text: string; pauseAfterMs?: number }[] = [
   { text: "$ _" },
 ];
 
+const PT_LINES = LINES.map(line => ({
+  ...line,
+  text: ({
+    "> polymath · INTJ 145 · truth · energy · love": "> polímata · INTJ 145 · verdade · energia · amor",
+    "$ cat ~/intro.md": "$ cat ~/introducao.md",
+    "> building systems, exploring brains.": "> construindo sistemas, explorando cérebros.",
+  } as Record<string, string>)[line.text] ?? line.text,
+}));
+
 function prefersReducedMotion() {
   if (typeof window === "undefined") return false;
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
-export default function AboutHeroTerminal() {
+export default function AboutHeroTerminal({ lang = "en" }: { lang?: "en" | "pt" }) {
+  const lines = lang === "pt" ? PT_LINES : LINES;
   const [rendered, setRendered] = useState<string[]>(() =>
-    prefersReducedMotion() ? LINES.map(l => l.text) : []
+    prefersReducedMotion() ? lines.map(l => l.text) : []
   );
   const cancelledRef = useRef(false);
 
@@ -32,9 +42,9 @@ export default function AboutHeroTerminal() {
 
     const tick = () => {
       if (cancelledRef.current) return;
-      if (currentLine >= LINES.length) return;
+      if (currentLine >= lines.length) return;
 
-      const line = LINES[currentLine];
+      const line = lines[currentLine];
       if (currentChar === 0) next.push("");
 
       if (currentChar < line.text.length) {
@@ -55,7 +65,7 @@ export default function AboutHeroTerminal() {
     return () => {
       cancelledRef.current = true;
     };
-  }, []);
+  }, [lines]);
 
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-background/80">
@@ -64,12 +74,12 @@ export default function AboutHeroTerminal() {
         <span className="inline-block h-3 w-3 rounded-full bg-[#ffbd2e]" aria-hidden="true" />
         <span className="inline-block h-3 w-3 rounded-full bg-[#27c93f]" aria-hidden="true" />
         <span className="ml-2 font-mono text-xs text-muted">
-          rafael@polymath: ~
+          {lang === "pt" ? "rafael@polímata: ~" : "rafael@polymath: ~"}
         </span>
       </div>
       <pre
         className="m-0 overflow-x-auto whitespace-pre-wrap p-4 font-mono text-sm leading-relaxed"
-        aria-label="About me terminal"
+        aria-label={lang === "pt" ? "Terminal sobre mim" : "About me terminal"}
       >
         {rendered.map((line, i) => (
           <span key={i}>

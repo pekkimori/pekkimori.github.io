@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import type { Lang, LocalizedBook, ResolvedCover } from "./types";
 import { STRINGS } from "./strings";
 
@@ -6,25 +7,41 @@ type Props = {
   book: (LocalizedBook & { cover: ResolvedCover }) | null;
   lang: Lang;
   onClose: () => void;
+  coverHidden?: boolean;
 };
 
-export default function BookModal({ book, lang, onClose }: Props) {
+export default function BookModal({
+  book,
+  lang,
+  onClose,
+  coverHidden = false,
+}: Props) {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const closeBtnRef = useRef<HTMLButtonElement | null>(null);
   const titleId = "bookshelf-modal-title";
   const s = STRINGS[lang];
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   useEffect(() => {
     if (!book) return;
+    const previousFocus = document.activeElement as HTMLElement | null;
     const prevOverflow = document.body.style.overflow;
+    const prevRootOverflow = document.documentElement.style.overflow;
+    document.documentElement.style.overflow = "hidden";
     document.body.style.overflow = "hidden";
     // Defer focus to the close button so the flying book starts unhindered.
-    const focusTimer = window.setTimeout(() => closeBtnRef.current?.focus(), 50);
+    const focusTimer = window.setTimeout(
+      () => closeBtnRef.current?.focus(),
+      50
+    );
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
-        onClose();
+        onCloseRef.current();
       } else if (e.key === "Tab") {
         const root = rootRef.current;
         if (!root) return;
@@ -49,10 +66,13 @@ export default function BookModal({ book, lang, onClose }: Props) {
       window.removeEventListener("keydown", onKey);
       window.clearTimeout(focusTimer);
       document.body.style.overflow = prevOverflow;
+      document.documentElement.style.overflow = prevRootOverflow;
+      if (previousFocus?.isConnected)
+        previousFocus.focus({ preventScroll: true });
     };
-  }, [book, onClose]);
+  }, [book]);
 
-  if (!book) return null;
+  if (!book || typeof document === "undefined") return null;
 
   const reviewParagraphs = book.review
     .split(/\n\n+/)
@@ -61,104 +81,109 @@ export default function BookModal({ book, lang, onClose }: Props) {
 
   const ratingStars = "★".repeat(book.rating) + "☆".repeat(5 - book.rating);
 
-  // The flying book is sized 160 * 1.6 = 256 wide × 240 * 1.6 = 384 tall and
-  // lands at viewport center. Floating panels are anchored to viewport coords
-  // so they sit cleanly above and below it. (Mobile gets a smaller landing
-  // zone of 110 * 1.6 = 176 × 180 * 1.6 = 288.)
-  return (
+  return createPortal(
     <div
       ref={rootRef}
       role="dialog"
       aria-modal="true"
       aria-labelledby={titleId}
-      className="fixed inset-0 z-40"
+      className="fixed inset-0 z-50 grid place-items-center bg-background/85 p-4 backdrop-blur-sm"
       onMouseDown={e => {
         if (e.target === e.currentTarget) onClose();
       }}
-      style={{
-        background: "color-mix(in srgb, var(--background) 82%, transparent)",
-        backdropFilter: "blur(4px)",
-        animation: "bookModalFade 240ms ease-out",
-      }}
+      style={{ animation: "bookModalFade 240ms ease-out" }}
     >
-      <button
-        ref={closeBtnRef}
-        type="button"
-        onClick={onClose}
-        aria-label={s.modalClose}
-        className="fixed top-4 right-4 z-50 size-10 rounded-md border border-border bg-background/60 font-mono text-base text-muted hover:text-accent focus-visible:outline-2 focus-visible:outline-dashed focus-visible:outline-accent"
-      >
-        &times;
-      </button>
-
-      {/* Title panel — sits ABOVE the centered flying book. */}
-      <div
-        className="pointer-events-none fixed left-1/2 -translate-x-1/2 w-[min(520px,calc(100vw-32px))] text-center"
-        style={{
-          top: "calc(50vh - 220px - 96px)",
-        }}
-      >
-        <div className="pointer-events-auto rounded-md border border-border bg-background/70 px-4 py-3 font-mono">
-          <h2 id={titleId} className="text-sm font-semibold tracking-wide text-foreground">
-            {book.title}
-          </h2>
-          <p className="mt-0.5 text-xs text-muted">{book.author}</p>
-          <div className="mt-2 text-[11px] text-foreground/80">
-            <span aria-label={`${book.rating} out of 5 stars`}>
-              <span aria-hidden="true" className="text-accent">
-                {ratingStars}
-              </span>
-            </span>
-            <span className="mx-2 text-muted">·</span>
-            <span>{book.yearRead}</span>
-            <span className="mx-2 text-muted">·</span>
-            <span>
-              {book.pageCount}
-              {s.modalPagesSuffix}
-            </span>
-            <span className="mx-2 text-muted">·</span>
-            <span>{book.theme}</span>
-          </div>
-          <p className="mt-1 text-[10px] text-muted">
-            {s.modalFirstPublished(book.originalYear)}
-          </p>
-        </div>
-      </div>
-
-      {/* Quote + review panel — sits BELOW the centered flying book. */}
-      <div
-        className="pointer-events-none fixed left-1/2 -translate-x-1/2 w-[min(560px,calc(100vw-32px))]"
-        style={{
-          top: "calc(50vh + 200px)",
-          maxHeight: "calc(50vh - 220px)",
-        }}
-      >
-        <div className="pointer-events-auto flex max-h-[calc(50vh-220px)] flex-col gap-3 overflow-y-auto rounded-md border border-border bg-background/70 px-4 py-3">
-          {book.quote && (
-            <figure className="text-center">
-              <blockquote className="font-mono text-xs italic text-foreground/90">
-                {'"'}
-                {book.quote}
-                {'"'}
-              </blockquote>
-              <figcaption className="mt-1 font-mono text-[10px] text-muted">
-                &mdash; {book.title}
-              </figcaption>
-            </figure>
-          )}
-
-          <div>
-            <h3 className="font-mono text-[10px] uppercase tracking-wider text-accent">
-              {s.modalReviewLabel}
-            </h3>
-            <div className="mt-1.5 space-y-2 font-serif text-[13px] leading-relaxed">
-              {reviewParagraphs.map((p, i) => (
-                <p key={i}>{p}</p>
-              ))}
+      <div className="relative w-full max-w-3xl overflow-hidden rounded-xl border border-border bg-background shadow-2xl">
+        <button
+          ref={closeBtnRef}
+          type="button"
+          onClick={onClose}
+          aria-label={s.modalClose}
+          className="absolute top-3 right-3 z-10 flex size-10 items-center justify-center rounded-md border border-border bg-background font-mono text-xl text-muted hover:text-accent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-dashed"
+        >
+          &times;
+        </button>
+        <div className="max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain p-5 sm:p-8">
+          <div className="grid items-start gap-6 md:grid-cols-[200px_minmax(0,1fr)] md:gap-8">
+            <div
+              data-book-cover
+              className="mx-auto aspect-[2/3] w-28 shrink-0 md:w-[200px]"
+              style={{ opacity: coverHidden ? 0 : 1 }}
+            >
+              {book.cover ? (
+                <img
+                  src={book.cover.src}
+                  srcSet={book.cover.srcSet}
+                  sizes="(min-width: 768px) 200px, 112px"
+                  width={book.cover.width}
+                  height={book.cover.height}
+                  alt={
+                    lang === "pt"
+                      ? `Capa de ${book.title}`
+                      : `Cover of ${book.title}`
+                  }
+                  className="h-full w-full rounded-sm object-contain shadow-lg"
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center rounded-sm border border-border bg-accent/10 p-4 text-center font-serif text-accent">
+                  {book.title}
+                </div>
+              )}
+            </div>
+            <div className="min-w-0">
+              <h2
+                id={titleId}
+                className="pr-10 font-serif text-2xl leading-tight font-semibold text-foreground"
+              >
+                {book.title}
+              </h2>
+              <p className="mt-2 font-mono text-sm text-muted">{book.author}</p>
+              <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-xs text-muted">
+                <span
+                  aria-label={
+                    lang === "pt"
+                      ? `${book.rating} de 5 estrelas`
+                      : `${book.rating} out of 5 stars`
+                  }
+                >
+                  <span aria-hidden="true" className="text-accent">
+                    {ratingStars}
+                  </span>
+                </span>
+                <span>{book.yearRead}</span>
+                <span>
+                  {book.pageCount} {s.modalPagesSuffix}
+                </span>
+                <span>{book.theme}</span>
+              </div>
+              <p className="mt-2 font-mono text-xs text-muted">
+                {s.modalFirstPublished(book.originalYear)}
+              </p>
+              {book.quote && (
+                <figure className="my-6 border-l-2 border-accent/40 pl-4">
+                  <blockquote className="font-serif text-sm leading-relaxed text-foreground/90 italic">
+                    “{book.quote}”
+                  </blockquote>
+                  <figcaption className="mt-2 font-mono text-xs text-muted">
+                    — {book.title}
+                  </figcaption>
+                </figure>
+              )}
+              <section className="mt-6">
+                <h3 className="font-mono text-xs tracking-wider text-accent uppercase">
+                  {s.modalReviewLabel}
+                </h3>
+                <div className="mt-3 space-y-3 font-serif text-sm leading-relaxed">
+                  {reviewParagraphs.map((paragraph, i) => (
+                    <p key={i}>{paragraph}</p>
+                  ))}
+                </div>
+              </section>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

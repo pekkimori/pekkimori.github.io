@@ -1,12 +1,15 @@
 ---
 import BentoCard from "./BentoCard.astro";
 import { ATLAS } from "@/data/about";
+import { ATLAS_PT } from "@/data/about-pt";
+const isPt = Astro.url.pathname.startsWith("/pt/");
+const atlas = isPt ? ATLAS_PT : ATLAS;
 ---
 
-<BentoCard prompt="$ atlas --languages">
+<BentoCard prompt={isPt ? "$ atlas --idiomas" : "$ atlas --languages"}>
   <ul class="space-y-1.5">
     {
-      ATLAS.languages.map(l => {
+      atlas.languages.map(l => {
         const filled = "▓".repeat(l.level) + "░".repeat(4 - l.level);
         return (
           <li class="flex flex-col gap-0.5">

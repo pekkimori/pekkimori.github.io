@@ -11,7 +11,7 @@ const HEIGHT = 380;
 const SCALE = 175;
 
 type Tooltip = { place: AtlasPlace; x: number; y: number };
-type Props = { places: AtlasPlace[] };
+type Props = { places: AtlasPlace[]; lang?: "en" | "pt" };
 
 // Dot product of a geographic point with the current view direction.
 // Returns 1 = dead center, 0 = horizon, -1 = fully behind.
@@ -22,12 +22,17 @@ function depth(lng: number, lat: number, rotation: [number, number, number]): nu
   return Math.sin(φ1) * Math.sin(φ2) + Math.cos(φ1) * Math.cos(φ2) * Math.cos(Δλ);
 }
 
-export default function GlobeCard({ places }: Props) {
+export default function GlobeCard({ places, lang = "en" }: Props) {
+  const labels = lang === "pt"
+    ? { interactive: "Globo interativo: arraste para girar", lived: "morei", visited: "visitei", drag: "arraste para girar" }
+    : { interactive: "Interactive globe: drag to rotate", lived: "lived", visited: "visited", drag: "drag to rotate" };
   const [countries, setCountries] = useState<GeoPermissibleObjects | null>(null);
   const [rotation, setRotation] = useState<[number, number, number]>([20, -20, 0]);
   const [tooltip, setTooltip] = useState<Tooltip | null>(null);
   const [hoveredKey, setHoveredKey] = useState<string | null>(null);
   const isDragging = useRef(false);
+  const [dragging, setDragging] = useState(false);
+  const activePointer = useRef<number | null>(null);
   const lastMouse = useRef({ x: 0, y: 0 });
   const svgRef = useRef<SVGSVGElement>(null);
 
@@ -56,14 +61,19 @@ export default function GlobeCard({ places }: Props) {
   const pathGen = geoPath(proj);
   const graticule = geoGraticule()();
 
-  const onMouseDown = useCallback((e: React.MouseEvent) => {
+  const onPointerDown = useCallback((e: React.PointerEvent<SVGSVGElement>) => {
+    if (!e.isPrimary || e.button !== 0 || activePointer.current !== null) return;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    activePointer.current = e.pointerId;
     isDragging.current = true;
+    setDragging(true);
     lastMouse.current = { x: e.clientX, y: e.clientY };
     setTooltip(null);
+    setHoveredKey(null);
   }, []);
 
-  const onMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!isDragging.current) return;
+  const onPointerMove = useCallback((e: React.PointerEvent<SVGSVGElement>) => {
+    if (activePointer.current !== e.pointerId) return;
     const dx = e.clientX - lastMouse.current.x;
     const dy = e.clientY - lastMouse.current.y;
     lastMouse.current = { x: e.clientX, y: e.clientY };
@@ -75,8 +85,14 @@ export default function GlobeCard({ places }: Props) {
     setTooltip(null);
   }, []);
 
-  const onMouseUp = useCallback(() => {
+  const onPointerEnd = useCallback((e: React.PointerEvent<SVGSVGElement>) => {
+    if (activePointer.current !== e.pointerId) return;
+    activePointer.current = null;
     isDragging.current = false;
+    setDragging(false);
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    }
   }, []);
 
   const markers = places.map(place => {
@@ -96,11 +112,13 @@ export default function GlobeCard({ places }: Props) {
         ref={svgRef}
         width="100%"
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
-        style={{ display: "block", cursor: isDragging.current ? "grabbing" : "grab" }}
-        onMouseDown={onMouseDown}
-        onMouseMove={onMouseMove}
-        onMouseUp={onMouseUp}
-        onMouseLeave={onMouseUp}
+        aria-label={labels.interactive}
+        style={{ display: "block", cursor: dragging ? "grabbing" : "grab", touchAction: "none" }}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerEnd}
+        onPointerCancel={onPointerEnd}
+        onLostPointerCapture={onPointerEnd}
       >
         <defs>
           {/* Clip everything to the sphere circle */}
@@ -197,7 +215,7 @@ export default function GlobeCard({ places }: Props) {
             <div className="font-mono text-[11px] text-muted">{tooltip.place.note}</div>
           )}
           <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.15em] text-accent">
-            {tooltip.place.kind}
+            {labels[tooltip.place.kind]}
           </div>
         </div>
       )}
@@ -206,13 +224,13 @@ export default function GlobeCard({ places }: Props) {
       <div className="mt-1 flex gap-4 font-mono text-[10px] text-muted">
         <span className="flex items-center gap-1.5">
           <span className="inline-block h-2.5 w-2.5 rounded-full bg-accent" />
-          lived
+          {labels.lived}
         </span>
         <span className="flex items-center gap-1.5">
           <span className="inline-block h-2.5 w-2.5 rounded-full bg-muted" />
-          visited
+          {labels.visited}
         </span>
-        <span className="ml-auto opacity-50">drag to rotate</span>
+        <span className="ml-auto opacity-50">{labels.drag}</span>
       </div>
     </div>
   );

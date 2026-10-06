@@ -46,14 +46,29 @@ export default function FlyingBook({
     if (!root || !inner || !fromRect) return;
 
     tlRef.current?.kill();
+    const previousRect = root.getBoundingClientRect();
+    const previousScale = gsap.getProperty(root, "scale");
 
     const viewport = window.visualViewport;
     const viewportWidth = viewport?.width ?? window.innerWidth;
     const viewportHeight = viewport?.height ?? window.innerHeight;
     const viewportLeft = viewport?.offsetLeft ?? 0;
     const viewportTop = viewport?.offsetTop ?? 0;
-    const centerX = viewportLeft + viewportWidth / 2;
-    const centerY = viewportTop + viewportHeight / 2;
+    const landing = document
+      .querySelector("[data-book-cover]")
+      ?.getBoundingClientRect();
+    const centerX = landing
+      ? landing.left + landing.width / 2
+      : viewportLeft + viewportWidth / 2;
+    const centerY = landing
+      ? landing.top + landing.height / 2
+      : viewportTop + viewportHeight / 2;
+    const landingScale = landing
+      ? Math.min(
+          landing.width / fromRect.width,
+          landing.height / fromRect.height
+        )
+      : FLIGHT_SCALE;
     const startCenterX = fromRect.left + fromRect.width / 2;
     const startCenterY = fromRect.top + fromRect.height / 2;
     const deltaX = centerX - startCenterX;
@@ -80,10 +95,11 @@ export default function FlyingBook({
         gsap.set(root, {
           x: deltaX,
           y: deltaY,
-          scale: FLIGHT_SCALE,
+          scale: landingScale,
           filter: "drop-shadow(-12px 22px 36px rgba(0,0,0,0.45))",
         });
         gsap.set(inner, { rotateY: 0, rotateX: -6 });
+        onRest();
       } else {
         onRest();
       }
@@ -102,13 +118,13 @@ export default function FlyingBook({
         rotateX: 0,
       });
 
-      const tl = gsap.timeline();
+      const tl = gsap.timeline({ onComplete: onRest });
       tl.to(
         root,
         {
           x: deltaX,
           y: deltaY,
-          scale: FLIGHT_SCALE,
+          scale: landingScale,
           duration: 0.7,
           ease: "power2.inOut",
         },
@@ -139,14 +155,10 @@ export default function FlyingBook({
 
     const tl = gsap.timeline({ onComplete: onRest });
     gsap.set(root, {
-      x: deltaX,
-      y: deltaY,
-      scale: FLIGHT_SCALE,
+      x: previousRect.left + previousRect.width / 2 - startCenterX,
+      y: previousRect.top + previousRect.height / 2 - startCenterY,
+      scale: previousScale,
       filter: "drop-shadow(-12px 22px 36px rgba(0,0,0,0.45))",
-    });
-    gsap.set(inner, {
-      rotateY: 0,
-      rotateX: -6,
     });
     tl.to(
       root,

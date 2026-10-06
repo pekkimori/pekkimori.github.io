@@ -1,0 +1,271 @@
+- generic [active] [ref=e1]:
+  - link "Skip to content" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - link "PEKKIMORI" [ref=e5] [cursor=pointer]:
+        - /url: /en/
+      - navigation [ref=e6]:
+        - list [ref=e7]:
+          - listitem [ref=e8]:
+            - link "Posts" [ref=e9] [cursor=pointer]:
+              - /url: /en/posts
+          - listitem [ref=e10]:
+            - link "Tags" [ref=e11] [cursor=pointer]:
+              - /url: /en/tags
+          - listitem [ref=e12]:
+            - link "Portfolio" [ref=e13] [cursor=pointer]:
+              - /url: /en/portfolio
+          - listitem [ref=e14]:
+            - link "About" [ref=e15] [cursor=pointer]:
+              - /url: /en/about
+          - listitem [ref=e16]:
+            - generic [ref=e17]:
+              - link "Search" [ref=e18] [cursor=pointer]:
+                - /url: /en/search
+              - generic [ref=e24]:
+                - link "en" [ref=e25] [cursor=pointer]:
+                  - /url: /en/about
+                - link "pt" [ref=e26] [cursor=pointer]:
+                  - /url: /pt/about
+              - button "light" [ref=e27] [cursor=pointer]
+  - main [ref=e31]:
+    - generic [ref=e33]:
+      - generic [ref=e35]:
+        - generic [ref=e36]: "rafael@polymath: ~"
+        - generic "About me terminal" [ref=e41]: $
+      - img "A contentedly looping cat." [ref=e44]
+    - separator [aria-hidden] [ref=e46]
+    - generic [ref=e48]:
+      - article [ref=e49]:
+        - generic [ref=e50]: $ steam --pinned
+        - generic [ref=e52]:
+          - link "pekkimori steamcommunity.com/id/pekkimori →" [ref=e53] [cursor=pointer]:
+            - /url: https://steamcommunity.com/id/pekkimori/
+            - generic [aria-hidden] [ref=e54]: "[PKM]"
+            - generic [ref=e55]:
+              - generic [ref=e56]: pekkimori
+              - generic [ref=e57]: steamcommunity.com/id/pekkimori
+            - generic [ref=e58]: →
+          - img "The Stag transport beetle from Hollow Knight." [ref=e59]
+      - article [ref=e60]:
+        - generic [ref=e61]: $ ls ~/bookshelf
+        - link "Browse full shelf" [ref=e65] [cursor=pointer]:
+          - /url: /en/bookshelf
+          - generic [ref=e84]: P
+      - article [ref=e88]:
+        - generic [ref=e89]: $ taste --music
+        - generic [ref=e91]:
+          - link "pekkimori open.spotify.com →" [ref=e92] [cursor=pointer]:
+            - /url: https://open.spotify.com/user/ihf9rp07w73vzy9efl6mrk04p
+            - generic [aria-hidden] [ref=e93]: "[SPT]"
+            - generic [ref=e94]:
+              - generic [ref=e95]: pekkimori
+              - generic [ref=e96]: open.spotify.com
+            - generic [ref=e97]: →
+          - list [ref=e98]:
+            - listitem [ref=e99]:
+              - code [ref=e100]: "01"
+              - generic [ref=e101]:
+                - generic [ref=e102]: Aos Olhos de uma Criança
+                - generic [ref=e103]: Emicida
+            - listitem [ref=e104]:
+              - code [ref=e105]: "02"
+              - generic [ref=e106]:
+                - generic [ref=e107]: Can't Help Falling in Love
+                - generic [ref=e108]: Elvis Presley
+            - listitem [ref=e109]:
+              - code [ref=e110]: "03"
+              - generic [ref=e111]:
+                - generic [ref=e112]: Dried Flowers
+                - generic [ref=e113]: Ado
+            - listitem [ref=e114]:
+              - code [ref=e115]: "04"
+              - generic [ref=e116]:
+                - generic [ref=e117]: Sirens
+                - generic [ref=e118]: Pearl Jam
+            - listitem [ref=e119]:
+              - code [ref=e120]: "05"
+              - generic [ref=e121]:
+                - generic [ref=e122]: Jane Doe
+                - generic [ref=e123]: Kenshi Yonezu
+            - listitem [ref=e124]:
+              - code [ref=e125]: "06"
+              - generic [ref=e126]:
+                - generic [ref=e127]: The Pretender
+                - generic [ref=e128]: Foo Fighters
+            - listitem [ref=e129]:
+              - code [ref=e130]: "07"
+              - generic [ref=e131]:
+                - generic [ref=e132]: Everything Goes On
+                - generic [ref=e133]: Porter Robinson
+            - listitem [ref=e134]:
+              - code [ref=e135]: "08"
+              - generic [ref=e136]:
+                - generic [ref=e137]: Weight of the World
+                - generic [ref=e138]: "NieR: Automata OST"
+            - listitem [ref=e139]:
+              - code [ref=e140]: "09"
+              - generic [ref=e141]:
+                - generic [ref=e142]: I Guess It's Not Too Late
+                - generic [ref=e143]: Noa Mal
+            - listitem [ref=e144]:
+              - code [ref=e145]: "10"
+              - generic [ref=e146]:
+                - generic [ref=e147]: Conselho
+                - generic [ref=e148]: Samba Raiz
+          - generic [ref=e149]:
+            - generic [ref=e150]: favorites
+            - generic [ref=e151]:
+              - generic [ref=e152]: AC/DC
+              - generic [ref=e153]: Ado
+              - generic [ref=e154]: Aimer
+              - generic [ref=e155]: Aimyon
+              - generic [ref=e156]: ANAVITÓRIA
+              - generic [ref=e157]: Arctic Monkeys
+              - generic [ref=e158]: beabadoobee
+              - generic [ref=e159]: Billie Eilish
+              - generic [ref=e160]: Bon Jovi
+              - generic [ref=e161]: Bruno Mars
+              - generic [ref=e162]: Clairo
+              - generic [ref=e163]: Creed
+              - generic [ref=e164]: Emicida
+              - generic [ref=e165]: Eminem
+              - generic [ref=e166]: Elvis Presley
+              - generic [ref=e167]: Eve
+              - generic [ref=e168]: Foo Fighters
+              - generic [ref=e169]: Frank Sinatra
+              - generic [ref=e170]: Fuji Kaze
+              - generic [ref=e171]: Gorillaz
+              - generic [ref=e172]: Green Day
+              - generic [ref=e173]: Kenshi Yonezu
+              - generic [ref=e174]: King Gnu
+              - generic [ref=e175]: Legião Urbana
+              - generic [ref=e176]: Linkin Park
+              - generic [ref=e177]: Mamonas Assassinas
+              - generic [ref=e178]: Men I Trust
+              - generic [ref=e179]: Mitski
+              - generic [ref=e180]: My Chemical Romance
+              - generic [ref=e181]: Nando Reis
+              - generic [ref=e182]: Paramore
+              - generic [ref=e183]: Pearl Jam
+              - generic [ref=e184]: Pentakill
+              - generic [ref=e185]: Pitty
+              - generic [ref=e186]: Queen
+              - generic [ref=e187]: Roberta Campos
+              - generic [ref=e188]: Saucy Dog
+              - generic [ref=e189]: Skank
+              - generic [ref=e190]: Titãs
+              - generic [ref=e191]: Twenty One Pilots
+              - generic [ref=e192]: Vaundy
+              - generic [ref=e193]: YUI
+      - article [ref=e194]:
+        - generic [ref=e195]: $ cat ~/anime/favorites.txt
+        - generic [ref=e197]:
+          - link "PEKKIMORI_ myanimelist.net/animelist/PEKKIMORI_ →" [ref=e198] [cursor=pointer]:
+            - /url: https://myanimelist.net/animelist/PEKKIMORI_
+            - generic [aria-hidden] [ref=e199]: "[MAL]"
+            - generic [ref=e200]:
+              - generic [ref=e201]: PEKKIMORI_
+              - generic [ref=e202]: myanimelist.net/animelist/PEKKIMORI_
+            - generic [ref=e203]: →
+          - list [ref=e204]:
+            - listitem [ref=e205]:
+              - code [ref=e206]: "01"
+              - generic [ref=e207]:
+                - generic [ref=e208]: Fullmetal Alchemist
+                - generic [ref=e209]:
+                  - generic [ref=e210]: A lesson without pain is meaningless. For you cannot gain anything without sacrificing something else in return, but once you have overcome it and made it your own...you will gain an irreplaceable fullmetal heart.
+                  - generic [ref=e211]: It's a cruel and random world, but the chaos is all so beautiful.
+            - listitem [ref=e212]:
+              - code [ref=e213]: "02"
+              - generic [ref=e214]:
+                - generic [ref=e215]: Steins;Gate
+                - generic [ref=e216]:
+                  - generic [ref=e217]: No-one knows what the future holds. That's why its potential is infinite.
+                  - generic [ref=e218]: Time is passing so quickly. Right now, I feel like complaining to Einstein. Whether time is slow or fast depends on perception. Relativity theory is so romantic. And so sad.
+            - listitem [ref=e219]:
+              - code [ref=e220]: "03"
+              - generic [ref=e221]:
+                - generic [ref=e222]: Monogatari Series
+                - generic [ref=e223]:
+                  - generic [ref=e224]: I don't know everything, I just know what I know.
+                  - generic [ref=e225]: People have to save themselves. One person saving another is impossible.
+                  - generic [ref=e226]: No character looks the same from all angles.
+                  - generic [ref=e227]: The fake is of far greater value. In its deliberate attempt to be real, it's more real than the real thing.
+      - article [ref=e228]:
+        - generic [ref=e229]: $ atlas --languages
+        - list [ref=e231]:
+          - listitem [ref=e232]:
+            - generic [ref=e233]:
+              - generic [ref=e234]: pt
+              - generic [ref=e235]: Portuguese
+              - generic [ref=e236]: ▓▓▓▓
+            - generic [ref=e237]: amor · saudade · carinho · paixão
+          - listitem [ref=e238]:
+            - generic [ref=e239]:
+              - generic [ref=e240]: en
+              - generic [ref=e241]: English
+              - generic [ref=e242]: ▓▓▓▓
+            - generic [ref=e243]: love · longing · fondness · devotion
+          - listitem [ref=e244]:
+            - generic [ref=e245]:
+              - generic [ref=e246]: es
+              - generic [ref=e247]: Spanish
+              - generic [ref=e248]: ▓▓▓▓
+            - generic [ref=e249]: amor · cariño · querer · ternura
+          - listitem [ref=e250]:
+            - generic [ref=e251]:
+              - generic [ref=e252]: ja
+              - generic [ref=e253]: Japanese
+              - generic [ref=e254]: ▓▓░░
+            - generic [ref=e255]: 愛 (ai) · 恋 (koi) · 好き (suki) · 慕情 (bojō)
+          - listitem [ref=e256]:
+            - generic [ref=e257]:
+              - generic [ref=e258]: ru
+              - generic [ref=e259]: Russian
+              - generic [ref=e260]: ▓░░░
+            - generic [ref=e261]: любовь · нежность · страсть · тоска
+          - listitem [ref=e262]:
+            - generic [ref=e263]:
+              - generic [ref=e264]: zh
+              - generic [ref=e265]: Chinese
+              - generic [ref=e266]: ▓░░░
+            - generic [ref=e267]: 爱 (ài) · 情 (qíng) · 思念 (sīniàn)
+          - listitem [ref=e268]:
+            - generic [ref=e269]:
+              - generic [ref=e270]: de
+              - generic [ref=e271]: German
+              - generic [ref=e272]: ▓░░░
+            - generic [ref=e273]: Liebe · Sehnsucht · Zuneigung · Innigkeit
+      - article [ref=e274]:
+        - generic [ref=e275]: $ atlas --places
+        - generic [ref=e278]:
+          - img [ref=e279]:
+            - generic [ref=e283] [cursor=pointer]
+            - generic [ref=e284] [cursor=pointer]
+            - generic [ref=e285] [cursor=pointer]
+            - generic [ref=e286] [cursor=pointer]
+            - generic [ref=e287] [cursor=pointer]
+            - generic [ref=e288] [cursor=pointer]
+            - generic [ref=e289] [cursor=pointer]
+            - generic [ref=e290] [cursor=pointer]
+          - generic [ref=e291]:
+            - generic [ref=e292]: lived
+            - generic [ref=e294]: visited
+            - generic [ref=e296]: drag to rotate
+  - contentinfo [ref=e297]:
+    - generic [ref=e298]:
+      - generic [ref=e299]:
+        - link "PEKKIMORI on GitHub" [ref=e300] [cursor=pointer]:
+          - /url: https://github.com/pekkimori
+        - link "PEKKIMORI on LinkedIn" [ref=e305] [cursor=pointer]:
+          - /url: https://www.linkedin.com/in/rafaelh-mori/
+        - link "PEKKIMORI on Instagram" [ref=e311] [cursor=pointer]:
+          - /url: https://www.instagram.com/rafaelh.mori/
+        - link "Send an email to PEKKIMORI" [ref=e317] [cursor=pointer]:
+          - /url: mailto:rafaelh.mori@gmail.com
+      - generic [ref=e323]:
+        - generic [ref=e324]: Copyright © 2026
+        - generic [ref=e325]: "|"
+        - generic [ref=e326]: All rights reserved.

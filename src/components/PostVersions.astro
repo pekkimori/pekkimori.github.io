@@ -1,0 +1,85 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { getPath } from "@/utils/getPath";
+
+interface Props {
+  post: CollectionEntry<"blog">;
+  versions: CollectionEntry<"blog">[];
+}
+
+const { post, versions } = Astro.props;
+const labels = {
+  en: {
+    heading: "Post versions",
+    current: "Current version",
+    earlier: "Earlier version",
+    notice: "You’re reading an earlier version of this post.",
+    read: "Read the current version",
+  },
+  pt: {
+    heading: "Versões do texto",
+    current: "Versão atual",
+    earlier: "Versão anterior",
+    notice: "Você está lendo uma versão anterior deste texto.",
+    read: "Leia a versão atual",
+  },
+}[post.data.language ?? "en"];
+const current = versions[0];
+const path = (version: CollectionEntry<"blog">) =>
+  getPath(version.id, version.filePath, true, version.data.language);
+const date = (version: CollectionEntry<"blog">) =>
+  version.data.pubDatetime.toLocaleDateString(post.data.language ?? "en", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    timeZone: "UTC",
+  });
+---
+
+<nav
+  aria-label={labels.heading}
+  class="my-6 rounded-lg border border-border p-4"
+  data-pagefind-ignore
+>
+  <p class="mb-3 text-sm font-semibold">{labels.heading}</p>
+  {
+    post.data.versionOf && (
+      <p class="mb-3 text-sm">
+        {labels.notice}{" "}
+        <a
+          class="underline decoration-dashed underline-offset-4 hover:text-accent"
+          href={path(current)}
+        >
+          {labels.read} →
+        </a>
+      </p>
+    )
+  }
+  <ul class="flex flex-wrap gap-2">
+    {
+      versions.map(version => (
+        <li>
+          <a
+            href={path(version)}
+            aria-current={version.id === post.id ? "page" : undefined}
+            class:list={[
+              "inline-block rounded-md border px-3 py-2 text-sm hover:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
+              version.id === post.id
+                ? "border-accent bg-accent/10 text-accent"
+                : "border-border",
+            ]}
+          >
+            <span class="block font-medium">
+              {version.id === current.id
+                ? labels.current
+                : (version.data.versionLabel ?? labels.earlier)}
+            </span>
+            <span class="block text-xs opacity-75">
+              {version.data.title} · {date(version)}
+            </span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</nav>

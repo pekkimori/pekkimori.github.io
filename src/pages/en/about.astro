@@ -41,7 +41,7 @@ import { ATLAS } from "@/data/about";
         <AnimeCard />
         <AtlasCard />
         <BentoCard prompt="$ atlas --places">
-          <GlobeCard client:visible places={ATLAS.places} />
+          <GlobeCard client:load places={ATLAS.places} />
         </BentoCard>
       </div>
     </section>

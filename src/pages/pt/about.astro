@@ -12,7 +12,7 @@ import MusicCard from "@/components/about/MusicCard.astro";
 import AnimeCard from "@/components/about/AnimeCard.astro";
 import AtlasCard from "@/components/about/AtlasCard.astro";
 import GlobeCard from "@/components/about/GlobeCard";
-import { ATLAS } from "@/data/about";
+import { ATLAS_PT } from "@/data/about-pt";
 ---
 
 <Layout lang="pt">
@@ -20,7 +20,7 @@ import { ATLAS } from "@/data/about";
   <main id="main-content" data-layout="about">
     <section id="hero" class="pt-8 pb-6">
       <div class="grid grid-cols-1 items-start gap-6 md:grid-cols-[1fr_auto]">
-        <AboutHeroTerminal client:load />
+        <AboutHeroTerminal client:load lang="pt" />
         <img
           src="/gifs/about/hero-cat.gif"
           alt="Um gatinho em loop contente."
@@ -40,8 +40,8 @@ import { ATLAS } from "@/data/about";
         <MusicCard />
         <AnimeCard />
         <AtlasCard />
-        <BentoCard prompt="$ atlas --places">
-          <GlobeCard client:visible places={ATLAS.places} />
+        <BentoCard prompt="$ atlas --lugares">
+          <GlobeCard client:load places={ATLAS_PT.places} lang="pt" />
         </BentoCard>
       </div>
     </section>
