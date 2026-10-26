@@ -37,7 +37,8 @@ export default function KonamiCat() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  if (!triggered) return null;
+  // Give Astro's renderer detection a React element even while the cat is hidden.
+  if (!triggered) return <></>;
 
   return (
     <img

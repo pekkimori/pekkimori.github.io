@@ -9,6 +9,7 @@ const GEO_URL = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json"
 const WIDTH = 380;
 const HEIGHT = 380;
 const SCALE = 175;
+const FUTURE_COLOR = "var(--color-accent)";
 
 type Tooltip = { place: AtlasPlace; x: number; y: number };
 type Props = { places: AtlasPlace[]; lang?: "en" | "pt" };
@@ -24,8 +25,8 @@ function depth(lng: number, lat: number, rotation: [number, number, number]): nu
 
 export default function GlobeCard({ places, lang = "en" }: Props) {
   const labels = lang === "pt"
-    ? { interactive: "Globo interativo: arraste para girar", lived: "morei", visited: "visitei", drag: "arraste para girar" }
-    : { interactive: "Interactive globe: drag to rotate", lived: "lived", visited: "visited", drag: "drag to rotate" };
+    ? { interactive: "Globo interativo: arraste para girar", lived: "morei", visited: "visitei", future: "futuro", drag: "arraste para girar" }
+    : { interactive: "Interactive globe: drag to rotate", lived: "lived", visited: "visited", future: "future", drag: "drag to rotate" };
   const [countries, setCountries] = useState<GeoPermissibleObjects | null>(null);
   const [rotation, setRotation] = useState<[number, number, number]>([20, -20, 0]);
   const [tooltip, setTooltip] = useState<Tooltip | null>(null);
@@ -165,6 +166,7 @@ export default function GlobeCard({ places, lang = "en" }: Props) {
           const key = place.code + place.city;
           const isHovered = hoveredKey === key;
           const isLived = place.kind === "lived";
+          const isFuture = place.kind === "future";
           const r = isHovered ? (isLived ? 9 : 7) : isLived ? 7 : 5;
           const isFront = blurPx === 0;
 
@@ -174,9 +176,10 @@ export default function GlobeCard({ places, lang = "en" }: Props) {
               cx={coords[0]}
               cy={coords[1]}
               r={r}
-              fill={isHovered ? "var(--color-foreground)" : isLived ? "var(--color-accent)" : "var(--color-muted)"}
-              stroke="var(--color-background)"
-              strokeWidth={1.5}
+              aria-label={`${place.city}: ${labels[place.kind]}`}
+              fill={isFuture ? "var(--color-background)" : isHovered ? "var(--color-foreground)" : isLived ? "var(--color-accent)" : "var(--color-muted)"}
+              stroke={isFuture ? FUTURE_COLOR : "var(--color-background)"}
+              strokeWidth={isFuture ? 2 : 1.5}
               opacity={opacity}
               style={{
                 filter: blurPx > 0 ? `blur(${blurPx.toFixed(1)}px)` : undefined,
@@ -214,14 +217,17 @@ export default function GlobeCard({ places, lang = "en" }: Props) {
           {tooltip.place.note && (
             <div className="font-mono text-[11px] text-muted">{tooltip.place.note}</div>
           )}
-          <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.15em] text-accent">
+          <div
+            className="mt-1 font-mono text-[10px] uppercase tracking-[0.15em] text-accent"
+            style={tooltip.place.kind === "future" ? { color: FUTURE_COLOR } : undefined}
+          >
             {labels[tooltip.place.kind]}
           </div>
         </div>
       )}
 
       {/* Legend */}
-      <div className="mt-1 flex gap-4 font-mono text-[10px] text-muted">
+      <div className="mt-1 flex flex-wrap gap-x-4 gap-y-2 font-mono text-[10px] text-muted">
         <span className="flex items-center gap-1.5">
           <span className="inline-block h-2.5 w-2.5 rounded-full bg-accent" />
           {labels.lived}
@@ -229,6 +235,13 @@ export default function GlobeCard({ places, lang = "en" }: Props) {
         <span className="flex items-center gap-1.5">
           <span className="inline-block h-2.5 w-2.5 rounded-full bg-muted" />
           {labels.visited}
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span
+            className="inline-block h-2.5 w-2.5 rounded-full border-2"
+            style={{ borderColor: FUTURE_COLOR }}
+          />
+          {labels.future}
         </span>
         <span className="ml-auto opacity-50">{labels.drag}</span>
       </div>

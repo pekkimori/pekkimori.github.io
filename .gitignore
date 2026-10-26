@@ -28,3 +28,10 @@ public/pagefind/
 
 # brainstorm scratch
 .superpowers/
+
+# local agent state and worktrees
+.claude/
+
+# browser test artifacts
+.playwright-cli/
+output/playwright/

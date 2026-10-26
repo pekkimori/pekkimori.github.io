@@ -2,50 +2,15 @@
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
-import Hr from "@/components/Hr.astro";
-import AboutHeroTerminal from "@/components/about/AboutHeroTerminal";
-import BentoCard from "@/components/about/BentoCard.astro";
+import RetroDesktop from "@/components/about/RetroDesktop";
 import KonamiCat from "@/components/about/KonamiCat";
-import BookshelfCard from "@/components/about/BookshelfCard.astro";
-import GamesCard from "@/components/about/GamesCard.astro";
-import MusicCard from "@/components/about/MusicCard.astro";
-import AnimeCard from "@/components/about/AnimeCard.astro";
-import AtlasCard from "@/components/about/AtlasCard.astro";
-import GlobeCard from "@/components/about/GlobeCard";
-import { ATLAS } from "@/data/about";
 ---
 
-<Layout lang="en">
+<Layout lang="en" title="About · Rafael Mori">
   <Header />
   <main id="main-content" data-layout="about">
-    <section id="hero" class="pt-8 pb-6">
-      <div class="grid grid-cols-1 items-start gap-6 md:grid-cols-[1fr_auto]">
-        <AboutHeroTerminal client:load />
-        <img
-          src="/gifs/about/hero-cat.gif"
-          alt="A contentedly looping cat."
-          class="hidden h-60 w-60 rounded-xl object-cover md:block"
-          loading="eager"
-          decoding="async"
-        />
-      </div>
-    </section>
-
-    <Hr />
-
-    <section id="archive" class="pt-8 pb-10">
-      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <GamesCard />
-        <BookshelfCard />
-        <MusicCard />
-        <AnimeCard />
-        <AtlasCard />
-        <BentoCard prompt="$ atlas --places">
-          <GlobeCard client:load places={ATLAS.places} />
-        </BentoCard>
-      </div>
-    </section>
-
+    <h1 class="sr-only">About Rafael Mori</h1>
+    <RetroDesktop client:load lang="en" />
     <KonamiCat client:idle />
   </main>
   <Footer />
@@ -53,9 +18,10 @@ import { ATLAS } from "@/data/about";
 
 <script>
   document.addEventListener("astro:page-load", () => {
-    const layout = (document.querySelector("#main-content") as HTMLElement)
-      ?.dataset?.layout;
-    if (layout === "about") {
+    if (
+      document.querySelector("#main-content")?.getAttribute("data-layout") ===
+      "about"
+    ) {
       sessionStorage.setItem("backUrl", "/en/about");
     }
   });

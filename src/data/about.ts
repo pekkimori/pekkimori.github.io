@@ -37,7 +37,7 @@ export type AtlasPlace = {
   code: string;
   city: string;
   note: string;
-  kind: "lived" | "visited";
+  kind: "lived" | "visited" | "future";
   lng: number;
   lat: number;
 };
@@ -104,7 +104,7 @@ export const ATLAS: {
   languages: [
     { code: "pt", name: "Portuguese", level: 4, love: ["amor", "saudade", "carinho", "paixão"] },
     { code: "en", name: "English", level: 4, love: ["love", "longing", "fondness", "devotion"] },
-    { code: "es", name: "Spanish", level: 4, love: ["amor", "cariño", "querer", "ternura"] },
+    { code: "es", name: "Spanish", level: 3, love: ["amor", "cariño", "querer", "ternura"] },
     { code: "ja", name: "Japanese", level: 2, love: ["愛 (ai)", "恋 (koi)", "好き (suki)", "慕情 (bojō)"] },
     { code: "ru", name: "Russian", level: 1, love: ["любовь", "нежность", "страсть", "тоска"] },
     { code: "zh", name: "Chinese", level: 1, love: ["爱 (ài)", "情 (qíng)", "思念 (sīniàn)"] },
@@ -117,10 +117,8 @@ export const ATLAS: {
     { code: "co", city: "Bogotá", note: "", kind: "visited", lng: -74.07, lat: 4.71 },
     { code: "qa", city: "Doha", note: "", kind: "visited", lng: 51.53, lat: 25.29 },
     { code: "jp", city: "Tokyo", note: "", kind: "lived", lng: 139.65, lat: 35.68 },
-    { code: "au", city: "Melbourne", note: "", kind: "visited", lng: 144.96, lat: -37.81 },
-    { code: "cl", city: "Santiago", note: "", kind: "visited", lng: -70.67, lat: -33.45 },
     { code: "ar", city: "Buenos Aires", note: "", kind: "lived", lng: -58.38, lat: -34.60 },
-    { code: "de", city: "Berlin", note: "", kind: "lived", lng: 13.41, lat: 52.52 },
+    { code: "de", city: "Berlin", note: "", kind: "future", lng: 13.41, lat: 52.52 },
   ],
 };
 
