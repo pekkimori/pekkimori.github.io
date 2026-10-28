@@ -1,9 +1,25 @@
-@plugin '@tailwindcss/typography';
+@plugin "@tailwindcss/typography";
 
 @layer base {
   /* ===== Override default Tailwind Typography styles ===== */
   .app-prose {
     @apply prose;
+    --tw-prose-body: var(--foreground);
+    --tw-prose-headings: var(--foreground);
+    --tw-prose-lead: var(--muted);
+    --tw-prose-links: var(--accent);
+    --tw-prose-bold: var(--foreground);
+    --tw-prose-counters: var(--muted);
+    --tw-prose-bullets: var(--accent);
+    --tw-prose-hr: var(--border);
+    --tw-prose-quotes: var(--foreground);
+    --tw-prose-quote-borders: var(--accent);
+    --tw-prose-captions: var(--muted);
+    --tw-prose-code: var(--foreground);
+    --tw-prose-pre-code: var(--foreground);
+    --tw-prose-pre-bg: var(--secondary);
+    --tw-prose-th-borders: var(--border);
+    --tw-prose-td-borders: var(--border);
     font-family: var(--font-serif);
     font-size: 1.15rem;
     line-height: 1.8;
@@ -31,7 +47,7 @@
     }
 
     a {
-      @apply wrap-break-word text-foreground decoration-dashed underline-offset-4 hover:text-accent focus-visible:no-underline;
+      @apply wrap-break-word text-accent decoration-accent/50 decoration-dashed underline-offset-4 hover:decoration-solid focus-visible:no-underline;
     }
 
     ul {
@@ -70,7 +86,7 @@
     }
 
     code {
-      @apply rounded bg-muted/75 p-1 font-mono wrap-break-word text-foreground before:content-none after:content-none;
+      @apply rounded bg-secondary/75 p-1 font-mono wrap-break-word text-foreground before:content-none after:content-none;
     }
 
     .astro-code code {
@@ -78,7 +94,7 @@
     }
 
     blockquote {
-      @apply border-s-accent/80 wrap-break-word opacity-80;
+      @apply border-s-accent/80 wrap-break-word text-foreground;
     }
 
     details {

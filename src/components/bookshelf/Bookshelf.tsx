@@ -1,51 +1,32 @@
-// src/components/bookshelf/Bookshelf.tsx
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
+import { LayoutGrid, Rows3, Search, X } from "lucide-react";
 import "./bookshelf.css";
 import Book from "./Book";
-import BookModal from "./BookModal";
-import FlyingBook from "./FlyingBook";
-import { getBookMetrics } from "./Book3D";
+import { getShelfBookMetrics, getShelfSlotWidth } from "./Book3D";
 import { STRINGS } from "./strings";
-import type { Lang, LocalizedBook, ResolvedCover, SortMode } from "./types";
+import type { Lang, LocalizedBook, ShelfView, SortMode } from "./types";
 
-type BookForRender = LocalizedBook & { cover: ResolvedCover };
-
-type Rect = { top: number; left: number; width: number; height: number };
-
-type BookAnchor = {
-  slot: HTMLDivElement | null;
-  inner: HTMLDivElement | null;
-};
-
+type BookForRender = LocalizedBook;
 type Props = {
   lang: Lang;
-  books: BookForRender[];
+  books: LocalizedBook[];
+  active?: boolean;
+  unavailableSlugs: string[];
+  revealSlug?: string;
+  onOpenBook: (book: LocalizedBook) => void;
 };
 
-function useHoverCapable(): boolean {
-  const [hover, setHover] = useState(true);
-  useEffect(() => {
-    if (typeof window === "undefined" || !window.matchMedia) return;
-    const mq = window.matchMedia("(hover: hover) and (pointer: fine)");
-    const update = () => setHover(mq.matches);
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
-  }, []);
-  return hover;
-}
-
-function useIsMobile(): boolean {
-  const [mobile, setMobile] = useState(false);
-  useEffect(() => {
-    if (typeof window === "undefined" || !window.matchMedia) return;
-    const mq = window.matchMedia("(max-width: 767px)");
-    const update = () => setMobile(mq.matches);
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
-  }, []);
-  return mobile;
+function normalizeSearch(value: string, lang: Lang) {
+  return value
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLocaleLowerCase(lang);
 }
 
 function groupByTheme(
@@ -86,275 +67,267 @@ function partitionByStatus(books: BookForRender[]): BookForRender[] {
   return [...main, ...tail];
 }
 
-export default function Bookshelf({ lang, books }: Props) {
+export default function Bookshelf({
+  lang,
+  books,
+  active = true,
+  unavailableSlugs,
+  revealSlug,
+  onOpenBook,
+}: Props) {
   const s = STRINGS[lang];
+  const rootRef = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState(800);
   const [sort, setSort] = useState<SortMode>("alpha");
+  const [view, setView] = useState<ShelfView>("spines");
+  const [query, setQuery] = useState("");
   const [hoveredSlug, setHoveredSlug] = useState<string | null>(null);
-  const [clickedSlug, setClickedSlug] = useState<string | null>(null);
-  const [flightBook, setFlightBook] = useState<BookForRender | null>(null);
-  const [flightFrom, setFlightFrom] = useState<Rect | null>(null);
-  const [flightOpen, setFlightOpen] = useState(false);
-  const bookRefs = useRef<Map<string, BookAnchor>>(new Map());
-
-  const hasHover = useHoverCapable();
-  const isMobile = useIsMobile();
+  const [hasHover, setHasHover] = useState(true);
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    const observer = new ResizeObserver(([entry]) => {
+      if (entry.contentRect.width > 0)
+        setWidth(Math.floor(entry.contentRect.width));
+    });
+    observer.observe(root);
+    const media = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const update = () => setHasHover(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => {
+      observer.disconnect();
+      media.removeEventListener("change", update);
+    };
+  }, []);
+  useEffect(() => {
+    if (!active) setHoveredSlug(null);
+  }, [active]);
+  // A checked-out book can return even if the shelf was filtered meanwhile.
+  useEffect(() => {
+    if (revealSlug) {
+      setQuery("");
+      setHoveredSlug(null);
+    }
+  }, [revealSlug]);
+  const small = width < 600;
   const collator = useMemo(
     () => new Intl.Collator(lang, { sensitivity: "base" }),
     [lang]
   );
-
-  const counts = useMemo(
-    () => ({
-      total: books.length,
-      reading: books.filter(b => b.status === "reading").length,
-    }),
-    [books]
+  const searchIndex = useMemo(
+    () =>
+      new Map(
+        books.map(book => [
+          book.slug,
+          normalizeSearch(`${book.title} ${book.author} ${book.theme}`, lang),
+        ])
+      ),
+    [books, lang]
   );
-
-  const shelves = useMemo<
-    Array<{ theme?: string; items: BookForRender[] }>
-  >(() => {
-    if (sort === "theme") {
-      return groupByTheme(books, collator).map(g => ({
-        theme: g.theme,
-        items: partitionByStatus(g.items),
-      }));
-    }
-    if (sort === "rating") {
-      return [{ items: partitionByStatus(sortRating(books, collator)) }];
-    }
-    return [{ items: partitionByStatus(sortAlpha(books, collator)) }];
-  }, [books, collator, sort]);
-
-  const clickedBook = useMemo(
-    () => books.find(b => b.slug === clickedSlug) ?? null,
-    [books, clickedSlug]
+  const matches = useMemo(() => {
+    const terms = normalizeSearch(query, lang)
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
+    return terms.length
+      ? books.filter(book =>
+          terms.every(term => searchIndex.get(book.slug)?.includes(term))
+        )
+      : books;
+  }, [books, query, lang, searchIndex]);
+  const unavailable = useMemo(
+    () => new Set(unavailableSlugs),
+    [unavailableSlugs]
   );
-
-  const setBookAnchor = (slug: string, next: Partial<BookAnchor>) => {
-    const current = bookRefs.current.get(slug) ?? { slot: null, inner: null };
-    const updated = { ...current, ...next };
-    if (!updated.slot && !updated.inner) bookRefs.current.delete(slug);
-    else bookRefs.current.set(slug, updated);
-  };
-
-  const registerSlotRef = (slug: string, el: HTMLDivElement | null) => {
-    setBookAnchor(slug, { slot: el });
-  };
-
-  const registerInnerRef = (slug: string, el: HTMLDivElement | null) => {
-    setBookAnchor(slug, { inner: el });
-  };
-
-  const getBookRect = (slug: string): Rect | null => {
-    const anchor = bookRefs.current.get(slug);
-    const slot = anchor?.slot ?? null;
-    const inner = anchor?.inner ?? null;
-    if (!slot && !inner) return null;
-    const slotRect = slot?.getBoundingClientRect() ?? null;
-    const innerRect = inner?.getBoundingClientRect() ?? null;
-    const top = innerRect?.top ?? slotRect?.top ?? null;
-    const left = slotRect?.left ?? innerRect?.left ?? null;
-    if (top === null || left === null) return null;
-    const pageCount = books.find(book => book.slug === slug)?.pageCount;
-    const metrics = getBookMetrics(isMobile, slug, pageCount);
-    return {
-      top,
-      left,
-      width: metrics.coverWidth,
-      height: metrics.coverHeight,
-    };
-  };
-
-  const startFlight = (book: BookForRender) => {
-    const rect = getBookRect(book.slug);
-    if (rect) {
-      setFlightBook(book);
-      setFlightFrom(rect);
-      setFlightOpen(true);
-    } else {
-      setFlightBook(null);
-      setFlightFrom(null);
-      setFlightOpen(false);
+  const shelves = useMemo(() => {
+    const groups =
+      sort === "theme"
+        ? groupByTheme(matches, collator)
+        : [
+            {
+              theme: "",
+              items:
+                sort === "rating"
+                  ? sortRating(matches, collator)
+                  : sortAlpha(matches, collator),
+            },
+          ];
+    const rows: Array<{
+      key: string;
+      theme?: string;
+      items: LocalizedBook[];
+      height: number;
+    }> = [];
+    const budget = Math.max(40, width - 48);
+    const gap = view === "spines" ? 3 : 16;
+    for (const group of groups) {
+      let items: LocalizedBook[] = [];
+      let used = 0;
+      let first = true;
+      const flush = () => {
+        if (!items.length) return;
+        const tallest = Math.max(
+          ...items.map(
+            book =>
+              getShelfBookMetrics(small, book.slug, book.pageCount, view)
+                .coverHeight
+          )
+        );
+        rows.push({
+          key: `${group.theme}:${items[0].slug}`,
+          theme: first ? group.theme : undefined,
+          items,
+          height:
+            tallest +
+            52 +
+            (view === "covers" ? 64 + (sort === "rating" ? 18 : 0) : 0) +
+            (first && group.theme ? 26 : 0),
+        });
+        first = false;
+        items = [];
+        used = 0;
+      };
+      for (const book of partitionByStatus(group.items)) {
+        const bookWidth = getShelfSlotWidth(
+          getShelfBookMetrics(small, book.slug, book.pageCount, view),
+          view
+        );
+        if (items.length && used + gap + bookWidth > budget) flush();
+        used += (items.length ? gap : 0) + bookWidth;
+        items.push(book);
+      }
+      flush();
     }
-    setClickedSlug(book.slug);
-  };
-
-  const handleFlightRest = useCallback(() => {
-    setFlightBook(null);
-    setFlightFrom(null);
-  }, []);
-
-  const handleBookClick = (book: BookForRender) => {
-    if (hasHover) {
-      startFlight(book);
-      return;
-    }
-    // Touch: first tap hovers, second tap launches the flight + modal.
-    if (hoveredSlug === book.slug) {
-      startFlight(book);
-    } else {
-      setHoveredSlug(book.slug);
-    }
-  };
-
-  const handleSortKey = (
-    e: React.KeyboardEvent<HTMLDivElement>,
-    modes: SortMode[]
-  ) => {
-    const idx = modes.indexOf(sort);
-    if (e.key === "ArrowRight") {
-      e.preventDefault();
-      setSort(modes[(idx + 1) % modes.length]);
-    } else if (e.key === "ArrowLeft") {
-      e.preventDefault();
-      setSort(modes[(idx - 1 + modes.length) % modes.length]);
-    }
-  };
-
+    return rows;
+  }, [matches, collator, sort, view, width, small]);
   const modes: SortMode[] = ["alpha", "theme", "rating"];
-  const sortLabels: Record<SortMode, string> = {
+  const labels: Record<SortMode, string> = {
     alpha: s.sortAZ,
     theme: s.sortTheme,
     rating: s.sortRating,
   };
-
   return (
-    <div className="flex flex-col gap-6">
-      <header className="flex flex-col gap-1">
-        <div className="font-mono text-xs tracking-wider text-accent uppercase">
-          {s.prompt}
+    <div ref={rootRef} className="bookshelf-archive" data-view={view}>
+      <div className="bookshelf-toolbar">
+        <label className="bookshelf-search">
+          <Search size={14} aria-hidden="true" />
+          <input
+            type="search"
+            aria-label={s.searchLabel}
+            placeholder={s.searchPlaceholder}
+            value={query}
+            onChange={event => {
+              setQuery(event.target.value);
+              setHoveredSlug(null);
+            }}
+          />
+          {query && (
+            <button
+              type="button"
+              aria-label={s.clearSearch}
+              onClick={() => setQuery("")}
+            >
+              <X size={14} aria-hidden="true" />
+            </button>
+          )}
+        </label>
+        <div className="bookshelf-views" role="group" aria-label={s.viewLabel}>
+          <button
+            type="button"
+            aria-pressed={view === "spines"}
+            onClick={() => {
+              setView("spines");
+              setHoveredSlug(null);
+            }}
+          >
+            <Rows3 size={13} aria-hidden="true" />
+            {s.spines}
+          </button>
+          <button
+            type="button"
+            aria-pressed={view === "covers"}
+            onClick={() => {
+              setView("covers");
+              setHoveredSlug(null);
+            }}
+          >
+            <LayoutGrid size={13} aria-hidden="true" />
+            {s.covers}
+          </button>
         </div>
-        <div className="font-mono text-sm text-muted">
-          {s.countsSuffix(counts.total, counts.reading)}
-        </div>
-      </header>
-
+      </div>
       <div
         role="group"
-        aria-label={s.sortAZ}
-        onKeyDown={e => handleSortKey(e, modes)}
-        className="flex flex-wrap items-center gap-2 font-mono text-xs"
-      >
-        {modes.map(m => {
-          const active = sort === m;
-          return (
-            <button
-              key={m}
-              type="button"
-              aria-pressed={active}
-              onClick={() => setSort(m)}
-              className={[
-                "rounded-md border px-3 py-1 transition-colors",
-                active
-                  ? "border-accent font-semibold text-accent underline underline-offset-4"
-                  : "border-border text-muted hover:text-foreground",
-              ].join(" ")}
-            >
-              {sortLabels[m]}
-            </button>
-          );
-        })}
-      </div>
-
-      <div className="flex flex-col gap-8">
-        {books.length === 0 ? (
-          <p className="font-mono text-sm text-muted">{s.empty}</p>
-        ) : (
-          shelves.map((shelf, i) => (
-            <section
-              key={shelf.theme ?? `shelf-${i}`}
-              className="flex flex-col gap-3"
-            >
-              {shelf.theme && (
-                <h2 className="font-mono text-xs tracking-wider text-muted uppercase">
-                  {s.themeMarker} {shelf.theme}
-                </h2>
-              )}
-              <div className="bookshelf-row flex flex-wrap items-end gap-[4px] sm:gap-[5px]">
-                {(() => {
-                  const anchorSlug = clickedSlug ?? hoveredSlug;
-                  const anchorIdx = shelf.items.findIndex(
-                    b => b.slug === anchorSlug
-                  );
-                  return shelf.items.map((book, idx) => {
-                    let nudgeX = 0;
-                    if (anchorIdx >= 0 && idx !== anchorIdx) {
-                      const delta = idx - anchorIdx;
-                      const dir = Math.sign(delta);
-                      const abs = Math.abs(delta);
-                      if (abs === 1) nudgeX = dir * 8;
-                      else if (abs === 2) nudgeX = dir * 3;
-                    }
-                    return (
-                      <Book
-                        key={book.slug}
-                        book={book}
-                        lang={lang}
-                        showRating={sort === "rating"}
-                        isHovered={hoveredSlug === book.slug}
-                        isClicked={clickedSlug === book.slug}
-                        isGhosted={flightBook?.slug === book.slug}
-                        nudgeX={nudgeX}
-                        hasHover={hasHover}
-                        isMobile={isMobile}
-                        onPointerEnter={() => {
-                          if (clickedSlug === null) setHoveredSlug(book.slug);
-                        }}
-                        onPointerLeave={() => {
-                          if (hoveredSlug === book.slug) setHoveredSlug(null);
-                        }}
-                        onFocus={() => {
-                          if (clickedSlug === null) setHoveredSlug(book.slug);
-                        }}
-                        onBlur={() => {
-                          if (hoveredSlug === book.slug) setHoveredSlug(null);
-                        }}
-                        onClick={() => handleBookClick(book)}
-                        registerSlotRef={el => registerSlotRef(book.slug, el)}
-                        registerInnerRef={el => registerInnerRef(book.slug, el)}
-                      />
-                    );
-                  });
-                })()}
-              </div>
-              <div className="shelf-baseline" aria-hidden="true" />
-            </section>
-          ))
-        )}
-      </div>
-
-      <p
-        aria-hidden="true"
-        className="text-center font-mono text-[10px] text-muted"
-      >
-        {hasHover ? s.footerHover : s.footerTouch}
-      </p>
-
-      {flightBook && flightFrom && (
-        <FlyingBook
-          book={flightBook}
-          lang={lang}
-          isMobile={isMobile}
-          fromRect={flightFrom}
-          open={flightOpen}
-          onRest={handleFlightRest}
-        />
-      )}
-
-      <BookModal
-        book={clickedBook}
-        lang={lang}
-        coverHidden={flightBook !== null}
-        onClose={() => {
-          if (clickedSlug) {
-            const rect = getBookRect(clickedSlug);
-            if (rect) setFlightFrom(rect);
-          }
-          setClickedSlug(null);
-          setFlightOpen(false);
+        aria-label={s.sortLabel}
+        className="bookshelf-controls"
+        onKeyDown={event => {
+          if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
+          event.preventDefault();
+          const next =
+            modes[
+              (modes.indexOf(sort) + (event.key === "ArrowRight" ? 1 : 2)) % 3
+            ];
+          setSort(next);
+          event.currentTarget
+            .querySelector<HTMLButtonElement>(`[data-sort="${next}"]`)
+            ?.focus();
         }}
-      />
+      >
+        <span className="bookshelf-sort-label">{s.sortLabel}</span>
+        {modes.map(mode => (
+          <button
+            key={mode}
+            data-sort={mode}
+            type="button"
+            aria-pressed={sort === mode}
+            onClick={() => setSort(mode)}
+            className="bookshelf-sort"
+          >
+            {labels[mode]}
+          </button>
+        ))}
+      </div>
+      <div className="bookshelf-bays">
+        {!matches.length && (
+          <p className="bookshelf-empty" role="status">
+            {books.length ? s.noMatches : s.empty}
+          </p>
+        )}
+        {shelves.map(shelf => (
+          <section
+            key={shelf.key}
+            className="bookshelf-bay"
+            style={
+              { "--shelf-bay-height": `${shelf.height}px` } as CSSProperties
+            }
+          >
+            {shelf.theme && (
+              <h2 className="bookshelf-theme">
+                {s.themeMarker} {shelf.theme}
+              </h2>
+            )}
+            <div className="bookshelf-row">
+              {shelf.items.map(book => (
+                <Book
+                  key={book.slug}
+                  book={book}
+                  lang={lang}
+                  view={view}
+                  showRating={sort === "rating"}
+                  isHovered={hoveredSlug === book.slug}
+                  isGhosted={unavailable.has(book.slug)}
+                  hasHover={hasHover}
+                  small={small}
+                  onHoverChange={setHoveredSlug}
+                  onOpenBook={onOpenBook}
+                />
+              ))}
+            </div>
+            <div className="shelf-baseline" aria-hidden="true" />
+          </section>
+        ))}
+      </div>
     </div>
   );
 }

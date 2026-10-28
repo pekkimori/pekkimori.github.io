@@ -1,0 +1,176 @@
+---
+import { getCollection, type CollectionEntry } from "astro:content";
+import { getImage } from "astro:assets";
+import PostArticle from "./PostArticle.astro";
+import { getPostVersions } from "@/utils/getPostVersions";
+import { SITE } from "@/config";
+import Layout from "@/layouts/Layout.astro";
+import AboutTerminal from "@/components/about/AboutTerminal";
+import KonamiCat from "@/components/about/KonamiCat";
+import { appVersion } from "@/utils/appVersion";
+import { BOOKS, getBooksForLocale } from "@/data/books";
+import { SOCIALS } from "@/constants";
+import getSortedPosts from "@/utils/getSortedPosts";
+import { getPath } from "@/utils/getPath";
+import { slugifyStr } from "@/utils/slugify";
+import type { AppId } from "@/data/about-commands";
+import type { PostsView } from "./types";
+
+type Props = {
+  lang: "en" | "pt";
+  initialTab?: AppId;
+  initialView?: PostsView;
+  tag?: string;
+  post?: CollectionEntry<"blog">;
+};
+const {
+  lang,
+  post,
+  initialTab = "terminal",
+  initialView = "posts",
+  tag = "",
+} = Astro.props;
+const localized = getBooksForLocale(lang);
+const books = await Promise.all(
+  BOOKS.map(async (book, i) => {
+    const image = book.cover
+      ? await getImage({
+          src: book.cover,
+          widths: [160, 320, 480],
+          formats: ["avif", "webp"],
+        })
+      : null;
+    return {
+      ...localized[i],
+      cover: image
+        ? {
+            src: image.src,
+            srcSet: image.srcSet.attribute,
+            width: image.attributes.width as number,
+            height: image.attributes.height as number,
+          }
+        : null,
+    };
+  })
+);
+const allBlogPosts = await getCollection("blog");
+const localizedPosts = allBlogPosts.filter(
+  p => !p.data.draft && (p.data.language ?? "en") === lang
+);
+const metadata = (entry: CollectionEntry<"blog">) => ({
+  title: entry.data.title,
+  href: getPath(entry.id, entry.filePath, true, lang),
+  commentDiscussion: entry.data.commentDiscussion,
+});
+const postCatalog = localizedPosts.map(entry => ({
+  ...metadata(entry),
+  description: entry.data.description,
+  date: entry.data.pubDatetime.toISOString(),
+  featured: !!entry.data.featured,
+  tags: entry.data.tags.map(name => ({ name, slug: slugifyStr(name) })),
+  translations: allBlogPosts
+    .filter(
+      candidate =>
+        !candidate.data.draft &&
+        candidate.id.split("/").pop() === entry.id.split("/").pop()
+    )
+    .map(candidate => ({
+      lang: candidate.data.language ?? "en",
+      href: getPath(
+        candidate.id,
+        candidate.filePath,
+        true,
+        candidate.data.language ?? "en"
+      ),
+    })),
+  earlierVersions: getPostVersions(entry, allBlogPosts)
+    .versions.filter(
+      version => version.data.versionOf && version.id !== entry.id
+    )
+    .map(metadata),
+}));
+const posts = getSortedPosts(localizedPosts).map(
+  entry => postCatalog.find(p => p.href === metadata(entry).href)!
+);
+const initialPost = post
+  ? postCatalog.find(p => p.href === metadata(post).href)
+  : undefined;
+const titles: Partial<Record<AppId, string>> =
+  lang === "pt"
+    ? {
+        about: "Sobre",
+        bookshelf: "Estante",
+        portfolio: "Portfólio",
+        posts: "Publicações",
+      }
+    : {
+        about: "About",
+        bookshelf: "Bookshelf",
+        portfolio: "Portfolio",
+        posts: "Posts",
+      };
+const title = initialPost
+  ? `${initialPost.title} · Rafael Mori`
+  : initialTab === "terminal"
+    ? "pekkimori · Rafael Mori"
+    : `${titles[initialTab] ?? initialTab} · Rafael Mori`;
+---
+
+<Layout
+  {lang}
+  {title}
+  scrollSmooth={false}
+  starryBackground={false}
+  description={post?.data.description}
+  author={post?.data.author}
+  pubDatetime={post?.data.pubDatetime}
+  modDatetime={post?.data.modDatetime}
+  canonicalURL={post?.data.canonicalURL}
+  ogImage={post
+    ? typeof post.data.ogImage === "string"
+      ? post.data.ogImage
+      : (post.data.ogImage?.src ??
+        (SITE.dynamicOgImage
+          ? `${getPath(post.id, post.filePath)}/index.png`
+          : undefined))
+    : undefined}
+>
+  <a id="skip-to-content" href="#main-content" class="terminal-skip"
+    >{lang === "pt" ? "Pular para o conteúdo" : "Skip to content"}</a
+  >
+  <main
+    id="main-content"
+    data-layout="terminal"
+    data-pagefind-ignore={post ? undefined : "all"}
+  >
+    {
+      !post && (
+        <h1 class="sr-only">
+          {lang === "pt"
+            ? "O universo de Rafael Mori"
+            : "Rafael Mori’s corner of the internet"}
+        </h1>
+      )
+    }
+    <AboutTerminal
+      client:load
+      {lang}
+      version={appVersion}
+      {books}
+      {posts}
+      {postCatalog}
+      {initialPost}
+      {initialTab}
+      {initialView}
+      initialTag={tag}
+      socials={SOCIALS.map(({ name, href, linkTitle }) => ({
+        name,
+        href,
+        title: linkTitle,
+      }))}
+    >
+      {post && <PostArticle slot="post-content" {post} />}
+    </AboutTerminal>
+    <KonamiCat client:idle />
+  </main>
+</Layout>

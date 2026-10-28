@@ -1,0 +1,93 @@
+---
+import { getCollection, render, type CollectionEntry } from "astro:content";
+import Datetime from "@/components/Datetime.astro";
+import EditPost from "@/components/EditPost.astro";
+import PostVersions from "@/components/PostVersions.astro";
+import ShareLinks from "@/components/ShareLinks.astro";
+import TableOfContents from "@/components/TableOfContents.astro";
+import Tag from "@/components/Tag.astro";
+import { getPostVersions } from "@/utils/getPostVersions";
+import getSortedPosts from "@/utils/getSortedPosts";
+import { getPath } from "@/utils/getPath";
+import { slugifyStr } from "@/utils/slugify";
+
+type Props = { post: CollectionEntry<"blog"> };
+const { post } = Astro.props;
+const { Content, headings } = await render(post);
+const {
+  title,
+  pubDatetime,
+  modDatetime,
+  timezone,
+  language,
+  hideEditPost,
+  tags,
+} = post.data;
+const pt = language === "pt";
+const allPosts = await getCollection("blog");
+const { current, versions } = getPostVersions(post, allPosts);
+const posts = getSortedPosts(
+  allPosts.filter(p => p.data.language === language)
+);
+const index = posts.findIndex(p => p.id === current.id);
+const previous = index > 0 ? posts[index - 1] : undefined;
+const next = index >= 0 ? posts[index + 1] : undefined;
+---
+
+<div
+  data-terminal-article
+  data-pagefind-body={post.data.versionOf ? undefined : ""}
+  data-pagefind-ignore={post.data.versionOf ? "all" : undefined}
+>
+  <div class="terminal-article-layout">
+    <div class="terminal-article-main">
+      <header class="terminal-article-heading">
+        <h1 data-pagefind-meta="title">{title}</h1>
+        <Datetime {pubDatetime} {modDatetime} {timezone} lang={language} />
+        <EditPost {hideEditPost} {post} />
+      </header>
+      {versions.length > 1 && <PostVersions {post} {versions} />}
+      <article
+        class="app-prose w-full max-w-none prose-pre:bg-(--shiki-light-bg) dark:prose-pre:bg-(--shiki-dark-bg)"
+      >
+        <Content />
+      </article>
+      <ul class="terminal-article-tags" data-pagefind-ignore>
+        {
+          tags.map(tag => (
+            <Tag
+              tag={slugifyStr(tag)}
+              tagName={tag}
+              size="sm"
+              lang={language}
+            />
+          ))
+        }
+      </ul>
+      <div class="terminal-article-share" data-pagefind-ignore>
+        <ShareLinks />
+      </div>
+      <nav
+        class="terminal-article-pagination"
+        aria-label={pt ? "Outras publicações" : "Other posts"}
+        data-pagefind-ignore
+      >
+        {
+          previous && (
+            <a href={getPath(previous.id, previous.filePath, true, language)}>
+              ← {previous.data.title}
+            </a>
+          )
+        }
+        {
+          next && (
+            <a href={getPath(next.id, next.filePath, true, language)}>
+              {next.data.title} →
+            </a>
+          )
+        }
+      </nav>
+    </div>
+    <TableOfContents {headings} lang={language} />
+  </div>
+</div>

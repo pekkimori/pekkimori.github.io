@@ -1,0 +1,83 @@
+.retro-station {
+  --crt-bloom: color-mix(in srgb, var(--foreground) 30%, transparent);
+  position: relative;
+  isolation: isolate;
+  box-sizing: border-box;
+}
+.retro-station .retro-screen {
+  height: 100%;
+}
+/* Glow is concentrated on the heading instead of every glyph on the page. */
+.retro-terminal-hero h2 {
+  text-shadow:
+    -0.4px 0 #ff788218,
+    0.4px 0 #83dcff18,
+    0 0 12px var(--crt-bloom);
+}
+.crt-surface,
+.crt-surface > div {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  user-select: none;
+}
+.crt-surface {
+  z-index: 50;
+  overflow: hidden;
+  contain: paint;
+}
+.crt-raster {
+  opacity: 0.2;
+  background-image:
+    repeating-linear-gradient(0deg, #00000050 0 1px, transparent 1px 3px),
+    url("/textures/crt-grain.png");
+  background-size:
+    auto,
+    64px 64px;
+}
+.crt-surface > .crt-beam {
+  inset: -18% 0 auto;
+  height: 18%;
+  background: linear-gradient(
+    transparent,
+    color-mix(in srgb, var(--foreground) 5%, transparent) 85%,
+    color-mix(in srgb, var(--foreground) 10%, transparent) 99%,
+    transparent
+  );
+  /* Transform-only animation leaves the content and static glass untouched. */
+  animation: crt-beam 11s linear infinite;
+}
+.crt-glass {
+  background:
+    radial-gradient(
+      ellipse at 50% 45%,
+      transparent 62%,
+      #00000008 82%,
+      #00000030 100%
+    ),
+    linear-gradient(
+      125deg,
+      #ffffff0a,
+      transparent 35%,
+      transparent 80%,
+      #ffffff03
+    );
+}
+@keyframes crt-beam {
+  to {
+    transform: translateY(660%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .crt-beam {
+    display: none;
+  }
+}
+@media print {
+  .retro-terminal-hero h2 {
+    text-shadow: none;
+  }
+  .crt-surface {
+    display: none;
+  }
+}

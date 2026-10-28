@@ -34,15 +34,16 @@ export const SECRET_COMMANDS: SecretCommand[] = [
 
 export const DESKTOP_FOLDERS = [
   "about",
-  "games",
-  "bookshelf",
-  "music",
-  "anime",
-  "languages",
+  "posts",
+  "portfolio",
   "atlas",
+  "bookshelf",
+  "anime",
+  "games",
+  "music",
 ] as const;
 export type FolderId = (typeof DESKTOP_FOLDERS)[number];
-export type AppId = FolderId | "commands" | "terminal";
+export type AppId = FolderId | "terminal";
 
 export const PUBLIC_COMMANDS = [
   ["help", "Show this command guide", "Mostrar este guia"],

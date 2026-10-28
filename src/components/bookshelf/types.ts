@@ -34,8 +34,10 @@ export type ResolvedCover = {
 
 // Flattened single-locale shape consumed by Bookshelf.tsx.
 // `cover` is the resolved shape, not the raw ImageMetadata.
-export type LocalizedBook = Omit<Book, "i18n" | "cover"> & BookI18n & {
-  cover: ResolvedCover;
-};
+export type LocalizedBook = Omit<Book, "i18n" | "cover"> &
+  BookI18n & {
+    cover: ResolvedCover;
+  };
 
 export type SortMode = "alpha" | "theme" | "rating";
+export type ShelfView = "spines" | "covers";

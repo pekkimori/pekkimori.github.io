@@ -100,10 +100,3 @@ export function getBooksForLocale(lang: Lang): Omit<LocalizedBook, "cover">[] {
     ...i18n[lang],
   }));
 }
-
-export function getBookCounts(): { total: number; reading: number } {
-  return {
-    total: BOOKS.length,
-    reading: BOOKS.filter(b => b.status === "reading").length,
-  };
-}

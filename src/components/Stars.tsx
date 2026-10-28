@@ -27,6 +27,8 @@ interface StarProps {
 }
 
 interface StarBackgroundProps {
+  color?: string;
+  animate?: boolean;
   starDensity?: number;
   allStarsTwinkle?: boolean;
   twinkleProbability?: number;
@@ -36,6 +38,8 @@ interface StarBackgroundProps {
 }
 
 export const StarsBackground: React.FC<StarBackgroundProps> = ({
+  color = "#ffffff",
+  animate = true,
   starDensity = 0.00015,
   allStarsTwinkle = true,
   twinkleProbability = 0.7,
@@ -245,18 +249,19 @@ export const StarsBackground: React.FC<StarBackgroundProps> = ({
           star.y += star.vy;
         }
 
-        if (star.twinkleSpeed !== null) {
+        if (animate && star.twinkleSpeed !== null) {
           star.opacity =
             0.5 + Math.abs(Math.sin(time / star.twinkleSpeed) * 0.5);
         }
 
         ctx.beginPath();
         ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity})`;
+        ctx.fillStyle = color;
+        ctx.globalAlpha = star.opacity;
         ctx.fill();
       }
 
-      animationFrameId = requestAnimationFrame(render);
+      if (animate) animationFrameId = requestAnimationFrame(render);
     };
 
     render();
@@ -264,7 +269,7 @@ export const StarsBackground: React.FC<StarBackgroundProps> = ({
     return () => {
       cancelAnimationFrame(animationFrameId);
     };
-  }, [stars]);
+  }, [stars, color, animate]);
 
   return (
     <canvas

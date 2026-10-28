@@ -1,499 +1,63 @@
 ---
 import type { MarkdownHeading } from "astro";
-
 import { generateToc } from "@/utils/generateToc";
 import TOCHeading from "@/components/TOCHeading.astro";
 
-interface Props {
-  headings: MarkdownHeading[];
-  class?: string;
-  id?: string;
-  lang?: string;
-}
-
-const { headings, class: className, lang, ...props } = Astro.props;
-
-const tocLabels: Record<string, string> = {
-  en: "TABLE OF CONTENTS",
-  pt: "ÍNDICE",
-};
-
-const tocLabel = tocLabels[lang ?? "en"] ?? "TABLE OF CONTENTS";
-
-const footnoteLabels: Record<string, string> = {
-  en: "Footnotes",
-  pt: "Notas de rodapé",
-};
-
-const translatedHeadings = headings.map(h =>
-  h.slug === "footnote-label"
-    ? { ...h, text: footnoteLabels[lang ?? "en"] ?? h.text }
-    : h
+type Props = { headings: MarkdownHeading[]; lang?: string };
+const { headings, lang = "en" } = Astro.props;
+const pt = lang === "pt";
+const label = pt ? "ÍNDICE" : "TABLE OF CONTENTS";
+const toc = generateToc(
+  headings.map(heading =>
+    heading.slug === "footnote-label"
+      ? { ...heading, text: pt ? "Notas de rodapé" : "Footnotes" }
+      : heading
+  )
 );
-
-const toc = generateToc(translatedHeadings);
 ---
 
 {
   toc.length > 0 && (
-    <>
-      <div
-        id="toc-btn-container"
-        class:list={[
-          "fixed end-4 bottom-24 z-50 lg:hidden",
-          "translate-y-14 opacity-0 transition duration-500",
-        ]}
-      >
-        <button
-          id="toc-mobile-btn"
-          class="group relative flex size-14 items-center justify-center rounded-full bg-background shadow-xl"
-          aria-label="Show Table of Contents"
-          type="button"
-        >
-          <svg class="size-6 text-accent" viewBox="0 0 24 24" fill="none">
-            <rect
-              x="4"
-              y="6"
-              width="16"
-              height="2"
-              rx="1"
-              fill="currentColor"
-            />
-            <rect
-              x="4"
-              y="11"
-              width="16"
-              height="2"
-              rx="1"
-              fill="currentColor"
-            />
-            <rect
-              x="4"
-              y="16"
-              width="16"
-              height="2"
-              rx="1"
-              fill="currentColor"
-            />
-          </svg>
-          <span class="sr-only text-sm group-hover:text-accent">
-            Table of Contents
-          </span>
-        </button>
-      </div>
-
-      <div
-        id="toc-mobile-overlay"
-        class="pointer-events-none fixed end-4 bottom-36 z-50 opacity-0 transition-opacity duration-300 lg:hidden"
-        style="max-width: 22rem;"
-      >
-        <div
-          class="relative flex w-full flex-col rounded-2xl bg-background/90 p-4 shadow-2xl backdrop-blur-lg"
-          style="max-height: 70vh; overflow-y: auto;"
-        >
-          <toc-heading class="w-full" {...props}>
-            <h2 class="mb-4 text-center font-semibold">{tocLabel}</h2>
-            <ul class="text-card-foreground">
-              {toc.map(heading => (
-                <TOCHeading heading={heading} />
-              ))}
-            </ul>
-          </toc-heading>
-        </div>
-      </div>
-
-      <toc-heading class={className} {...props}>
-        <h2 class="font-semibold">{tocLabel}</h2>
-        <ul class="mt-4 text-card-foreground">
+    <post-toc class="post-toc" data-pagefind-ignore>
+      <nav class="post-toc-desktop" aria-label={label}>
+        <h2>{label}</h2>
+        <ul>
           {toc.map(heading => (
-            <TOCHeading heading={heading} />
+            <TOCHeading {heading} {lang} />
           ))}
         </ul>
-      </toc-heading>
-    </>
+      </nav>
+      <div class="post-toc-mobile" data-toc-dock>
+        <button
+          class="post-toc-toggle"
+          data-toc-toggle
+          type="button"
+          aria-expanded="false"
+          aria-label={pt ? "Mostrar índice" : "Show Table of Contents"}
+        >
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <>
+              <rect x="4" y="6" width="16" height="2" rx="1" />
+              <rect x="4" y="11" width="16" height="2" rx="1" />
+              <rect x="4" y="16" width="16" height="2" rx="1" />
+            </>
+          </svg>
+        </button>
+        <nav class="post-toc-popup" data-toc-popup aria-label={label} hidden>
+          <h2>{label}</h2>
+          <ul>
+            {toc.map(heading => (
+              <TOCHeading {heading} {lang} />
+            ))}
+          </ul>
+        </nav>
+      </div>
+    </post-toc>
   )
 }
-
-<script>
-  // This script tag is useful only if you want to display the TOC alongside the blog post...
-  // ... and highlight the section that the user is currently reading through.
-  // Feel free to remove this tag if you don't need this type of functionality.
-
-  interface TOCLink {
-    element: HTMLAnchorElement;
-    progressBar: HTMLElement;
-    slug: string;
-  }
-
-  interface HeadingProgress {
-    inView: boolean;
-    progress: number;
-  }
-
-  class TOC extends HTMLElement {
-    headings: HTMLElement[] = [];
-    tocLinks: TOCLink[] = [];
-    headingProgress: Record<string, HeadingProgress> = {};
-
-    constructor() {
-      super();
-    }
-
-    initializeToc() {
-      // Initialize the headings and tocLinks
-      this.headings = Array.from(
-        document.querySelectorAll(
-          "#article h2, #article h3, #article h4, #article h5, #article h6"
-        )
-      );
-      this.tocLinks = Array.from(this.querySelectorAll('a[href^="#"]')).map(
-        link => ({
-          element: link as HTMLAnchorElement,
-          progressBar: link.previousElementSibling as HTMLElement,
-          slug: (link.getAttribute("href") || "").substring(1),
-        })
-      );
-    }
-
-    updatePositionAndStyle = () => {
-      const windowHeight = window.innerHeight;
-      const articleElement = document.querySelector("#article") as HTMLElement;
-      const articleTop = articleElement?.offsetTop || 0;
-      const scrollTop = window.scrollY;
-
-      this.headings.forEach((el, index) => {
-        const nextHeading = this.headings[index + 1];
-        const nextHeadingTop = nextHeading
-          ? nextHeading.offsetTop
-          : articleElement.offsetHeight + articleTop;
-
-        // Calculate section boundaries relative to viewport
-        const headingTop = el.offsetTop;
-        const sectionEnd = nextHeadingTop;
-
-        // Check if section is in viewport (allows multiple sections to be active)
-        const headingInViewport = headingTop <= scrollTop + windowHeight;
-        const sectionStillVisible = sectionEnd > scrollTop;
-        const inView = headingInViewport && sectionStillVisible;
-
-        // Calculate progress: section is 100% when its end reaches bottom of viewport
-        const sectionHeight = sectionEnd - headingTop;
-        const viewportBottom = scrollTop + windowHeight;
-        const progressDistance = Math.max(0, viewportBottom - headingTop);
-        const progress = Math.min(
-          1,
-          Math.max(0, progressDistance / sectionHeight)
-        );
-
-        this.headingProgress[el.id] = {
-          inView,
-          progress,
-        };
-      });
-
-      this.tocLinks.forEach(({ element: el, progressBar: bar, slug }, i) => {
-        const { inView, progress } = this.headingProgress[slug];
-        if (this.headingProgress[slug]) {
-          el.classList.toggle("highlight", inView);
-          el.classList.toggle("highlight-bg-translucent", inView);
-          el.classList.toggle(
-            "rounded-t-2xl",
-            inView &&
-              (i == 0 ||
-                !this.headingProgress[this.tocLinks[i - 1]?.slug].inView)
-          );
-          el.classList.toggle(
-            "rounded-b-2xl",
-            inView &&
-              (i == this.tocLinks.length - 1 ||
-                !this.headingProgress[this.tocLinks[i + 1]?.slug].inView)
-          );
-          bar.classList.toggle("is-read", !inView && progress == 1);
-          bar.classList.toggle("highlight-bg", inView);
-          bar.style.setProperty("height", `${progress * 90}%`);
-        }
-      });
-    };
-
-    connectedCallback() {
-      // Listen for the headings-ready event first
-      const handleHeadingsReady = () => {
-        this.initializeToc();
-        this.setupEventListeners();
-      };
-
-      document.addEventListener("headings-ready", handleHeadingsReady, {
-        once: true,
-      });
-
-      // Fallback: Wait for content to be ready
-      const waitForContent = () => {
-        const article = document.querySelector("#article");
-        const headings = document.querySelectorAll(
-          "#article h2, #article h3, #article h4, #article h5, #article h6"
-        );
-
-        if (article && headings.length > 0) {
-          // Remove the event listener since we're initializing now
-          document.removeEventListener("headings-ready", handleHeadingsReady);
-          this.initializeToc();
-          this.setupEventListeners();
-        } else {
-          // Try again after a short delay
-          setTimeout(waitForContent, 100);
-        }
-      };
-
-      // Check if content is already ready
-      if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", waitForContent);
-      } else {
-        // Small delay to allow headings-ready event to fire first
-        setTimeout(waitForContent, 50);
-      }
-    }
-
-    // Cache DOM elements for toggleSubheadings to avoid per-frame queries
-    _toggleCache: Map<
-      HTMLAnchorElement,
-      { childrenUl: Element; chevron: Element | null }
-    > = new Map();
-
-    toggleSubheadings(linkEl: HTMLAnchorElement, force?: boolean) {
-      let cached = this._toggleCache.get(linkEl);
-      if (!cached) {
-        const li = linkEl.closest("li");
-        if (!li) return;
-        const childrenUl = li.querySelector(":scope > .toc-children");
-        if (!childrenUl) return;
-        cached = { childrenUl, chevron: linkEl.querySelector(".toc-chevron") };
-        this._toggleCache.set(linkEl, cached);
-      }
-
-      const { childrenUl, chevron } = cached;
-      const isExpanded = childrenUl.classList.contains("expanded");
-      const shouldExpand = force !== undefined ? force : !isExpanded;
-
-      if (shouldExpand === isExpanded) return;
-
-      childrenUl.classList.toggle("expanded", shouldExpand);
-      chevron?.classList.toggle("rotated", shouldExpand);
-    }
-
-    // Cache: parent slug -> child slugs[]
-    _childSlugCache: Map<string, string[]> = new Map();
-
-    getChildSlugs(linkEl: HTMLAnchorElement, slug: string): string[] {
-      let cached = this._childSlugCache.get(slug);
-      if (cached) return cached;
-      const li = linkEl.closest("li");
-      if (!li) {
-        this._childSlugCache.set(slug, []);
-        return [];
-      }
-      const childLinks = li.querySelectorAll(
-        ':scope > .toc-children a[href^="#"]'
-      );
-      cached = Array.from(childLinks).map(c =>
-        (c.getAttribute("href") || "").substring(1)
-      );
-      this._childSlugCache.set(slug, cached);
-      return cached;
-    }
-
-    isAnyChildInView(linkEl: HTMLAnchorElement, slug: string): boolean {
-      const childSlugs = this.getChildSlugs(linkEl, slug);
-      for (const childSlug of childSlugs) {
-        if (this.headingProgress[childSlug]?.inView) return true;
-      }
-      return false;
-    }
-
-    // Cache which parent links have children (computed once)
-    _parentLinks: { element: HTMLAnchorElement; slug: string }[] | null = null;
-
-    getParentLinks() {
-      if (this._parentLinks) return this._parentLinks;
-      this._parentLinks = this.tocLinks
-        .filter(
-          ({ element: el }) => el.getAttribute("data-has-children") === "true"
-        )
-        .map(({ element, slug }) => ({ element, slug }));
-      return this._parentLinks;
-    }
-
-    updateSubheadingVisibility() {
-      // Auto-expand parent headings whose sections OR any child section is in view
-      for (const { element: el, slug } of this.getParentLinks()) {
-        const progress = this.headingProgress[slug];
-        const parentInView = progress?.inView;
-        const childInView = this.isAnyChildInView(el, slug);
-
-        if (parentInView || childInView) {
-          this.toggleSubheadings(el, true);
-        } else if (progress && !parentInView && !childInView) {
-          this.toggleSubheadings(el, false);
-        }
-      }
-    }
-
-    setupEventListeners() {
-      // Smooth scroll + toggle subheadings on click
-      this.tocLinks.forEach(link => {
-        link.element.addEventListener("click", e => {
-          e.preventDefault();
-          const directHeading = this.headings.find(
-            heading => heading.id === link.slug
-          );
-          if (directHeading) {
-            const lenis = (
-              window as Window & {
-                __lenis?: { scrollTo: (target: Element) => void };
-              }
-            ).__lenis;
-            if (lenis) {
-              lenis.scrollTo(directHeading);
-            } else {
-              directHeading.scrollIntoView({ behavior: "smooth" });
-            }
-            history.pushState(
-              null,
-              directHeading.textContent || "",
-              link.element.getAttribute("href")
-            );
-          }
-          // Also toggle subheadings if this heading has children
-          if (link.element.getAttribute("data-has-children") === "true") {
-            this.toggleSubheadings(link.element);
-          }
-        });
-      });
-
-      // Initial call and listen to scroll event
-      this.updatePositionAndStyle();
-      this.updateSubheadingVisibility();
-
-      // Skip scroll work for mobile TOC when overlay is hidden
-      const isMobile = !!this.closest("#toc-mobile-overlay");
-
-      // Use requestAnimationFrame for better performance
-      let ticking = false;
-      const scrollHandler = () => {
-        // Mobile TOC doesn't need live scroll tracking (it's a popup)
-        if (isMobile) return;
-        if (!ticking) {
-          requestAnimationFrame(() => {
-            this.updatePositionAndStyle();
-            this.updateSubheadingVisibility();
-            ticking = false;
-          });
-          ticking = true;
-        }
-      };
-
-      window.addEventListener("scroll", scrollHandler);
-      window.addEventListener("resize", scrollHandler);
-    }
-  }
-
-  customElements.define("toc-heading", TOC);
-
-  // Mobile TOC toggle logic
-  const btn = document.getElementById("toc-mobile-btn");
-  const overlay = document.getElementById("toc-mobile-overlay");
-  const tocBtnContainer = document.getElementById("toc-btn-container");
-
-  let tocOpen = false;
-
-  function toggleTOC() {
-    tocOpen = !tocOpen;
-    if (tocOpen) {
-      overlay?.classList.add("opacity-100");
-      overlay?.classList.remove("opacity-0", "pointer-events-none");
-      overlay?.classList.add("pointer-events-auto");
-      document.body.style.overflow = "hidden";
-    } else {
-      overlay?.classList.remove("opacity-100", "pointer-events-auto");
-      overlay?.classList.add("opacity-0", "pointer-events-none");
-      document.body.style.overflow = "";
-    }
-  }
-
-  btn?.addEventListener("click", toggleTOC);
-
-  // Hide overlay if user clicks outside the modal
-  overlay?.addEventListener("click", e => {
-    if (e.target === overlay) toggleTOC();
-  });
-
-  // Sync TOC button visibility/animation with Back to Top button
-  function handleTocBtnScroll() {
-    const rootElement = document.documentElement;
-    const scrollTotal = rootElement.scrollHeight - rootElement.clientHeight;
-    const scrollTop = rootElement.scrollTop;
-    const isVisible = scrollTop / scrollTotal > 0.1;
-
-    if (tocBtnContainer) {
-      if (isVisible) {
-        // Add a delay before showing the TOC button
-        setTimeout(() => {
-          tocBtnContainer.classList.add("opacity-100");
-          tocBtnContainer.classList.add("translate-y-0");
-          tocBtnContainer.classList.remove("opacity-0");
-          tocBtnContainer.classList.remove("translate-y-14");
-        }, 200); // 200ms delay
-      } else {
-        // Hide immediately
-        tocBtnContainer.classList.remove("opacity-100");
-        tocBtnContainer.classList.remove("translate-y-0");
-        tocBtnContainer.classList.add("opacity-0");
-        tocBtnContainer.classList.add("translate-y-14");
-        // Also hide the overlay if open, with a 200ms delay
-        if (overlay?.classList.contains("opacity-100")) {
-          setTimeout(() => {
-            overlay.classList.remove("opacity-100", "pointer-events-auto");
-            overlay.classList.add("opacity-0", "pointer-events-none");
-            document.body.style.overflow = "";
-            tocOpen = false;
-          }, 200);
-        }
-      }
-    }
-  }
-
-  let tocBtnTicking = false;
-  document.addEventListener("scroll", () => {
-    if (!tocBtnTicking) {
-      window.requestAnimationFrame(() => {
-        handleTocBtnScroll();
-        tocBtnTicking = false;
-      });
-      tocBtnTicking = true;
-    }
-  });
-
-  // Initial state
-  handleTocBtnScroll();
-</script>
-
-<style>
-  toc-heading :global(.toc-item) {
-    display: flow-root;
-  }
-
-  toc-heading :global(.toc-children) {
-    grid-template-rows: 0fr;
-  }
-
-  toc-heading :global(.toc-children.expanded) {
-    grid-template-rows: 1fr;
-  }
-
-  toc-heading :global(.toc-chevron) {
-    transform: rotate(0deg);
-  }
-
-  toc-heading :global(.toc-chevron.rotated) {
-    transform: rotate(180deg);
-  }
-</style>

@@ -32,16 +32,6 @@ const getAttr = (distance: number, maxDist: number, minVal: number, maxVal: numb
   return Math.max(minVal, val + minVal);
 };
 
-const debounce = <T extends (...args: unknown[]) => void>(func: T, delay: number) => {
-  let timeoutId: ReturnType<typeof setTimeout>;
-  return (...args: Parameters<T>) => {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => {
-      func(...args);
-    }, delay);
-  };
-};
-
 const TextPressure: React.FC<TextPressureProps> = ({
   text = 'Compressa',
   fontFamily = 'Roboto Flex',
@@ -104,6 +94,7 @@ const TextPressure: React.FC<TextPressureProps> = ({
     if (!containerRef.current || !titleRef.current) return;
 
     const { width: containerW, height: containerH } = containerRef.current.getBoundingClientRect();
+    if (containerW <= 0) return;
 
     let newFontSize = containerW / (chars.length / 2);
     newFontSize = Math.max(newFontSize, minFontSize);
@@ -125,10 +116,17 @@ const TextPressure: React.FC<TextPressureProps> = ({
   }, [chars.length, minFontSize, scale]);
 
   useEffect(() => {
-    const debouncedSetSize = debounce(setSize, 100);
-    debouncedSetSize();
-    window.addEventListener('resize', debouncedSetSize);
-    return () => window.removeEventListener('resize', debouncedSetSize);
+    const container = containerRef.current;
+    if (!container) return;
+    let previousWidth = 0;
+    const observer = new ResizeObserver(([entry]) => {
+      const currentWidth = entry.contentRect.width;
+      if (currentWidth <= 0 || currentWidth === previousWidth) return;
+      previousWidth = currentWidth;
+      setSize();
+    });
+    observer.observe(container);
+    return () => observer.disconnect();
   }, [setSize]);
 
   useEffect(() => {
@@ -198,7 +196,7 @@ const TextPressure: React.FC<TextPressureProps> = ({
   }, [fontFamily, fontUrl, stroke, textColor, strokeColor, strokeWidth]);
 
   return (
-    <div ref={containerRef} className="relative w-full h-full overflow-hidden bg-transparent">
+    <div ref={containerRef} className="relative w-full bg-transparent">
       {styleElement}
       <h1
         ref={titleRef}
@@ -212,6 +210,7 @@ const TextPressure: React.FC<TextPressureProps> = ({
           transform: `scale(1, ${scaleY})`,
           transformOrigin: 'center top',
           margin: 0,
+          paddingInline: '0.08em',
           fontWeight: 100,
           color: stroke ? undefined : textColor
         }}

@@ -1,152 +1,139 @@
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 import { gsap } from "gsap";
-import Book3D, { getBookMetrics } from "./Book3D";
-import type { Lang, LocalizedBook, ResolvedCover } from "./types";
-import HoverTooltip from "./HoverTooltip";
+import Book3D, { getShelfBookMetrics, getShelfSlotWidth } from "./Book3D";
+import type { Lang, LocalizedBook, ShelfView } from "./types";
 
 type Props = {
-  book: LocalizedBook & { cover: ResolvedCover };
+  book: LocalizedBook;
   lang: Lang;
+  view: ShelfView;
   showRating: boolean;
   isHovered: boolean;
-  isClicked: boolean;
   isGhosted: boolean;
-  nudgeX: number;
   hasHover: boolean;
-  isMobile: boolean;
-  onPointerEnter: () => void;
-  onPointerLeave: () => void;
-  onClick: () => void;
-  onFocus: () => void;
-  onBlur: () => void;
-  registerSlotRef: (el: HTMLDivElement | null) => void;
-  registerInnerRef: (el: HTMLDivElement | null) => void;
+  small: boolean;
+  onHoverChange: (slug: string | null) => void;
+  onOpenBook: (book: LocalizedBook) => void;
 };
 
-export default function Book({
+export default memo(function Book({
   book,
   lang,
+  view,
   showRating,
   isHovered,
-  isClicked,
   isGhosted,
-  nudgeX,
   hasHover,
-  isMobile,
-  onPointerEnter,
-  onPointerLeave,
-  onClick,
-  onFocus,
-  onBlur,
-  registerSlotRef,
-  registerInnerRef,
+  small,
+  onHoverChange,
+  onOpenBook,
 }: Props) {
-  const inner3DRef = useRef<HTMLDivElement | null>(null);
-  const slotRef = useRef<HTMLDivElement | null>(null);
-  const hoverTLRef = useRef<gsap.core.Timeline | null>(null);
-  const metrics = getBookMetrics(isMobile, book.slug, book.pageCount);
-
-  // Hover timeline: tiny lift, no rotation. The book stays spine-on.
+  const innerRef = useRef<HTMLDivElement>(null);
+  const previous = useRef({ view, hovered: false });
+  const metrics = getShelfBookMetrics(small, book.slug, book.pageCount, view);
+  const restRotation = view === "spines" ? 90 : 24;
+  const selected = isHovered && !isGhosted;
   useEffect(() => {
-    if (!inner3DRef.current) return;
-    const el = inner3DRef.current;
-    const tl = gsap.timeline({ paused: true });
-    tl.to(el, {
-      y: -14,
-      z: 8,
-      scale: 1.02,
-      duration: 0.28,
+    const inner = innerRef.current;
+    if (!inner) return;
+    const changedView = previous.current.view !== view;
+    const wasHovered = previous.current.hovered;
+    previous.current = { view, hovered: selected };
+    // Idle books use CSS, without allocating a paused animation per book.
+    if (!changedView && !selected && !wasHovered) return;
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+    const animation = gsap.to(inner, {
+      y: selected && !reduced ? -8 : 0,
+      rotateY:
+        selected && !reduced ? (view === "spines" ? 75 : 0) : restRotation,
+      rotateX: selected && view === "covers" && !reduced ? -4 : 0,
+      // Hidden shelf books must settle before a returning flight measures them.
+      duration: reduced || changedView || isGhosted ? 0 : 0.25,
       ease: "power2.out",
+      overwrite: true,
     });
-    hoverTLRef.current = tl;
     return () => {
-      tl.kill();
-      hoverTLRef.current = null;
+      animation.kill();
     };
-  }, []);
+  }, [selected, view, restRotation, isGhosted]);
 
-  // Drive hover state. Suppressed when the book is in flight.
-  useEffect(() => {
-    const tl = hoverTLRef.current;
-    if (!tl) return;
-    if (isHovered && !isClicked) tl.timeScale(1).play();
-    else tl.timeScale(1.3).reverse();
-  }, [isHovered, isClicked]);
-
-  // Sibling nudge: slide the slot horizontally when a neighbor is hovered/clicked.
-  useEffect(() => {
-    const slot = slotRef.current;
-    if (!slot) return;
-    gsap.to(slot, {
-      x: nudgeX,
-      duration: 0.28,
-      ease: "power2.out",
-    });
-  }, [nudgeX]);
-
-  const ariaLabel = `${book.title} by ${book.author}${
-    book.status === "reading" ? " (currently reading)" : ""
-  }`;
-
+  const ariaLabel =
+    lang === "pt"
+      ? `${book.title}, de ${book.author}`
+      : `${book.title} by ${book.author}`;
   return (
     <div
-      className="relative flex flex-col items-center"
+      className="book-object"
+      data-selected={selected}
+      data-book-slug={book.slug}
+      data-unavailable={isGhosted}
+      inert={isGhosted}
+      aria-hidden={isGhosted || undefined}
       style={{
         opacity: isGhosted ? 0 : 1,
         pointerEvents: isGhosted ? "none" : "auto",
+        width: getShelfSlotWidth(metrics, view),
+        zIndex: selected ? 5 : 1,
       }}
     >
-      <HoverTooltip
-        title={book.title}
-        author={book.author}
-        visible={isHovered && !isClicked}
-      />
-
       <div
-        ref={el => {
-          slotRef.current = el;
-          registerSlotRef(el);
-        }}
+        id={`book-shelf-${book.slug}`}
         className="book-slot"
         style={{
-          width: metrics.spineWidth,
+          width: getShelfSlotWidth(metrics, view),
           height: metrics.coverHeight,
           opacity: book.status === "want-to-read" ? 0.6 : 1,
-          zIndex: isClicked ? 60 : isHovered ? 5 : 1,
         }}
       >
         <Book3D
           book={book}
           lang={lang}
           metrics={metrics}
-          innerRef={el => {
-            inner3DRef.current = el;
-            registerInnerRef(el);
+          innerRef={innerRef}
+          style={{
+            left:
+              view === "spines"
+                ? -(metrics.coverWidth - metrics.spineWidth) / 2
+                : 0,
+            transform: `rotateY(${restRotation}deg)`,
           }}
         />
-
         <button
           type="button"
           aria-label={ariaLabel}
-          onMouseEnter={hasHover ? onPointerEnter : undefined}
-          onMouseLeave={hasHover ? onPointerLeave : undefined}
-          onFocus={onFocus}
-          onBlur={onBlur}
-          onClick={onClick}
-          className="absolute inset-0 z-10 cursor-pointer bg-transparent outline-offset-2 outline-accent focus-visible:outline-2 focus-visible:outline-dashed"
+          title={`${book.title} — ${book.author}`}
+          onMouseEnter={hasHover ? () => onHoverChange(book.slug) : undefined}
+          onMouseLeave={hasHover ? () => onHoverChange(null) : undefined}
+          onFocus={() => onHoverChange(book.slug)}
+          onBlur={() => onHoverChange(null)}
+          onClick={() => {
+            onOpenBook(book);
+            onHoverChange(null);
+          }}
+          className="book-hitbox absolute inset-0 z-10 cursor-pointer bg-transparent outline-offset-2 outline-accent focus-visible:outline-2 focus-visible:outline-dashed"
         />
       </div>
-
-      {showRating && (
-        <div className="mt-2 font-mono text-[10px] text-accent">
-          <span aria-label={`${book.rating} out of 5 stars`}>
-            <span aria-hidden="true">
-              {"★".repeat(book.rating)}
-              {"☆".repeat(5 - book.rating)}
-            </span>
+      <div className="book-caption" aria-hidden="true">
+        <span className="book-caption-title">{book.title}</span>
+        <span className="book-caption-author">{book.author}</span>
+      </div>
+      {showRating && view === "covers" && (
+        <span
+          className="book-rating"
+          aria-label={
+            lang === "pt"
+              ? `${book.rating} de 5 estrelas`
+              : `${book.rating} out of 5 stars`
+          }
+        >
+          <span aria-hidden="true">
+            {"★".repeat(book.rating)}
+            {"☆".repeat(5 - book.rating)}
           </span>
-        </div>
+        </span>
       )}
     </div>
   );
-}
+});

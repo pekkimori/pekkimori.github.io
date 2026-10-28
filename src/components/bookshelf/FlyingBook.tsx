@@ -1,209 +1,144 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useLayoutEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { gsap } from "gsap";
 import Book3D, { getBookMetrics } from "./Book3D";
-import type { Lang, LocalizedBook, ResolvedCover } from "./types";
-
-type Rect = { top: number; left: number; width: number; height: number };
-
-type Props = {
-  book: LocalizedBook & { cover: ResolvedCover };
-  lang: Lang;
-  isMobile: boolean;
-  fromRect: Rect;
-  open: boolean;
-  onRest: () => void;
-};
-
-const FLIGHT_SCALE = 1.6;
+import { getBookPose, type BookFlight } from "./book-flight";
+import type { Lang, LocalizedBook } from "./types";
 
 export default function FlyingBook({
   book,
   lang,
-  isMobile,
-  fromRect,
-  open,
+  flight,
   onRest,
-}: Props) {
-  const [mounted, setMounted] = useState(false);
-  const rootRef = useRef<HTMLDivElement | null>(null);
-  const innerRef = useRef<HTMLDivElement | null>(null);
-  const tlRef = useRef<gsap.core.Timeline | null>(null);
+}: {
+  book: LocalizedBook;
+  lang: Lang;
+  flight: BookFlight;
+  onRest: (flight: BookFlight) => void;
+}) {
+  const rootRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+  const metrics = getBookMetrics(false, book.slug, book.pageCount);
+  const { from } = flight;
 
-  const metrics = useMemo(
-    () => getBookMetrics(isMobile, book.slug, book.pageCount),
-    [book.pageCount, book.slug, isMobile]
-  );
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!mounted) return;
+  useLayoutEffect(() => {
     const root = rootRef.current;
     const inner = innerRef.current;
-    if (!root || !inner || !fromRect) return;
-
-    tlRef.current?.kill();
-    const previousRect = root.getBoundingClientRect();
-    const previousScale = gsap.getProperty(root, "scale");
-
-    const viewport = window.visualViewport;
-    const viewportWidth = viewport?.width ?? window.innerWidth;
-    const viewportHeight = viewport?.height ?? window.innerHeight;
-    const viewportLeft = viewport?.offsetLeft ?? 0;
-    const viewportTop = viewport?.offsetTop ?? 0;
-    const landing = document
-      .querySelector("[data-book-cover]")
-      ?.getBoundingClientRect();
-    const centerX = landing
-      ? landing.left + landing.width / 2
-      : viewportLeft + viewportWidth / 2;
-    const centerY = landing
-      ? landing.top + landing.height / 2
-      : viewportTop + viewportHeight / 2;
-    const landingScale = landing
-      ? Math.min(
-          landing.width / fromRect.width,
-          landing.height / fromRect.height
-        )
-      : FLIGHT_SCALE;
-    const startCenterX = fromRect.left + fromRect.width / 2;
-    const startCenterY = fromRect.top + fromRect.height / 2;
-    const deltaX = centerX - startCenterX;
-    const deltaY = centerY - startCenterY;
-    const reducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    ).matches;
-
+    if (!root || !inner) return;
+    let frame = 0;
+    let attempts = 0;
+    let timeline: gsap.core.Timeline | undefined;
+    let finished = false;
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      onRest(flight);
+    };
     gsap.set(root, {
-      position: "fixed",
-      top: fromRect.top,
-      left: fromRect.left,
-      width: fromRect.width,
-      height: fromRect.height,
-      zIndex: 60,
-      pointerEvents: "none",
-      perspective: 1200,
-      perspectiveOrigin: "50% 60%",
-      transformOrigin: "50% 50%",
+      x: 0,
+      y: 0,
+      width: from.rect.width,
+      height: from.rect.height,
+      opacity: from.opacity,
+      perspectiveOrigin: `${from.perspectiveOrigin.x}% ${from.perspectiveOrigin.y}%`,
     });
-
-    if (reducedMotion) {
-      if (open) {
-        gsap.set(root, {
-          x: deltaX,
-          y: deltaY,
-          scale: landingScale,
-          filter: "drop-shadow(-12px 22px 36px rgba(0,0,0,0.45))",
-        });
-        gsap.set(inner, { rotateY: 0, rotateX: -6 });
-        onRest();
-      } else {
-        onRest();
+    gsap.set(inner, {
+      rotateX: from.rotateX,
+      rotateY: from.rotateY,
+      "--spine-thickness": `${from.thickness}px`,
+    });
+    const launch = () => {
+      const targetElement = document.getElementById(
+        `book-${flight.destination}-${book.slug}`
+      );
+      // A closed or minimized bookshelf is restored before measuring its slot.
+      targetElement?.scrollIntoView({
+        block: "nearest",
+        inline: "nearest",
+        behavior: "instant",
+      });
+      const target = getBookPose(book.slug, flight.destination);
+      if (!target) {
+        if (++attempts < 30) frame = requestAnimationFrame(launch);
+        else finish();
+        return;
       }
-      return;
-    }
-
-    if (open) {
-      gsap.set(root, {
-        x: 0,
-        y: 0,
-        scale: 1,
-        filter: "drop-shadow(0 0 0 rgba(0,0,0,0))",
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        finish();
+        return;
+      }
+      timeline = gsap.timeline({
+        defaults: { duration: 0.9, ease: "sine.inOut" },
+        onComplete: finish,
       });
-      gsap.set(inner, {
-        rotateY: 90,
-        rotateX: 0,
-      });
-
-      const tl = gsap.timeline({ onComplete: onRest });
-      tl.to(
-        root,
-        {
-          x: deltaX,
-          y: deltaY,
-          scale: landingScale,
-          duration: 0.7,
-          ease: "power2.inOut",
-        },
-        0
-      )
+      timeline
         .to(
-          inner,
+          root,
           {
-            rotateY: 0,
-            rotateX: -6,
-            duration: 0.7,
-            ease: "power2.inOut",
+            x: target.rect.left - from.rect.left,
+            y: target.rect.top - from.rect.top,
+            width: target.rect.width,
+            height: target.rect.height,
+            opacity: target.opacity,
+            perspectiveOrigin: `${target.perspectiveOrigin.x}% ${target.perspectiveOrigin.y}%`,
           },
           0
         )
         .to(
-          root,
+          inner,
           {
-            filter: "drop-shadow(-12px 22px 36px rgba(0,0,0,0.45))",
-            duration: 0.5,
-            ease: "power1.out",
+            rotateX: target.rotateX,
+            rotateY: target.rotateY,
+            "--spine-thickness": `${target.thickness}px`,
           },
-          0.1
+          0
         );
-      tlRef.current = tl;
-      return;
-    }
-
-    const tl = gsap.timeline({ onComplete: onRest });
-    gsap.set(root, {
-      x: previousRect.left + previousRect.width / 2 - startCenterX,
-      y: previousRect.top + previousRect.height / 2 - startCenterY,
-      scale: previousScale,
-      filter: "drop-shadow(-12px 22px 36px rgba(0,0,0,0.45))",
-    });
-    tl.to(
-      root,
-      {
-        x: 0,
-        y: 0,
-        scale: 1,
-        duration: 0.55,
-        ease: "power2.inOut",
-      },
-      0
-    )
-      .to(
-        inner,
-        {
-          rotateY: 90,
-          rotateX: 0,
-          duration: 0.55,
-          ease: "power2.inOut",
-        },
-        0
-      )
-      .to(
-        root,
-        {
-          filter: "drop-shadow(0 0 0 rgba(0,0,0,0))",
-          duration: 0.3,
-          ease: "power1.out",
-        },
-        0
-      );
-    tlRef.current = tl;
-  }, [fromRect, metrics, mounted, onRest, open]);
-
-  useEffect(() => {
-    return () => {
-      tlRef.current?.kill();
     };
-  }, []);
+    // Let restored shelves finish their responsive layout before measuring.
+    frame = requestAnimationFrame(() => {
+      frame = requestAnimationFrame(launch);
+    });
+    // End at the live destination if the layout changes during a flight.
+    window.addEventListener("resize", finish, { once: true });
+    return () => {
+      cancelAnimationFrame(frame);
+      timeline?.kill();
+      window.removeEventListener("resize", finish);
+    };
+  }, [
+    book.slug,
+    flight,
+    metrics.coverWidth,
+    metrics.coverHeight,
+    from,
+    onRest,
+  ]);
 
-  if (!mounted || !fromRect) return null;
-
+  if (typeof document === "undefined") return null;
   return createPortal(
-    <div ref={rootRef} className="book-flight" aria-hidden={true}>
-      <Book3D book={book} lang={lang} metrics={metrics} innerRef={innerRef} />
+    <div
+      id={`book-flight-${book.slug}`}
+      ref={rootRef}
+      className="book-flight"
+      aria-hidden="true"
+      style={{
+        top: from.rect.top,
+        left: from.rect.left,
+        width: from.rect.width,
+        height: from.rect.height,
+        transformOrigin: "0 0",
+        perspective: 700,
+        perspectiveOrigin: "50% 40%",
+        zIndex: 80,
+      }}
+    >
+      <Book3D
+        book={book}
+        lang={lang}
+        metrics={metrics}
+        innerRef={innerRef}
+        style={{ width: "100%", height: "100%" }}
+      />
     </div>,
     document.body
   );

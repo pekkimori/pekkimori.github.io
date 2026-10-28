@@ -16,6 +16,7 @@ type Props = {
   open: (id: AppId) => void;
   theme: (value: string) => void;
   cat: () => void;
+  visitPage: (destination: string) => boolean;
 };
 const HOME = "/home/user";
 const STORAGE_KEY = "pekkimori-os-secrets-v1";
@@ -38,7 +39,13 @@ const COMMANDS = [
   "secret",
 ];
 
-export default function DesktopTerminal({ lang, open, theme, cat }: Props) {
+export default function DesktopTerminal({
+  lang,
+  open,
+  theme,
+  cat,
+  visitPage,
+}: Props) {
   const pt = lang === "pt";
   const [lines, setLines] = useState<string[]>([]);
   const [welcome, setWelcome] = useState(true);
@@ -75,12 +82,18 @@ export default function DesktopTerminal({ lang, open, theme, cat }: Props) {
     [`${HOME}/anime/favorites.txt`]: (pt ? ANIME_PT : ANIME)
       .map(a => `${a.title}\n${[a.tagline].flat().join("\n")}`)
       .join("\n\n"),
-    [`${HOME}/languages/languages.txt`]: (pt ? ATLAS_PT : ATLAS).languages
+    [`${HOME}/atlas/languages.txt`]: (pt ? ATLAS_PT : ATLAS).languages
       .map(l => `${l.name}: ${l.love.join(" · ")}`)
       .join("\n"),
     [`${HOME}/atlas/places.txt`]: (pt ? ATLAS_PT : ATLAS).places
       .map(p => `${p.city} [${p.kind}]`)
       .join("\n"),
+    [`${HOME}/portfolio/readme.txt`]: pt
+      ? "Abra meu portfólio: open ~/portfolio"
+      : "Open my portfolio: open ~/portfolio",
+    [`${HOME}/posts/readme.txt`]: pt
+      ? "Publicações, marcadores e busca: open ~/posts"
+      : "Posts, tags, and search: open ~/posts",
     ...Object.fromEntries(
       WEBSITE_PAGES.map(page => [
         `/site/${page}.url`,
@@ -113,6 +126,7 @@ export default function DesktopTerminal({ lang, open, theme, cat }: Props) {
       : null;
   };
   const visit = (destination: string) => {
+    if (visitPage(destination)) return;
     void navigate(destination).catch(() =>
       setLines(previous => [
         ...previous,
@@ -206,7 +220,7 @@ export default function DesktopTerminal({ lang, open, theme, cat }: Props) {
         case "clear":
         case "cls":
           setLines([]);
-          setWelcome(false);
+          setWelcome(true);
           return;
         case "theme":
           if (["light", "dark"].includes(arg)) {
@@ -293,7 +307,7 @@ export default function DesktopTerminal({ lang, open, theme, cat }: Props) {
             break;
           }
           if (path === `${HOME}/commands.txt` || arg === "commands")
-            open("commands");
+            output = help;
           else if (arg === "terminal") open("terminal");
           else if (
             (directories.includes(path) || Object.hasOwn(files, path)) &&
@@ -363,11 +377,12 @@ export default function DesktopTerminal({ lang, open, theme, cat }: Props) {
           inputRef.current?.focus({ preventScroll: true });
       }}
     >
-      <div className="retro-terminal-scroll" ref={scrollRef} data-lenis-prevent>
+      <div className="retro-terminal-scroll" ref={scrollRef}>
         {welcome && (
           <div className="retro-terminal-welcome">
             <div className="retro-terminal-hero">
               <div>
+                <p className="retro-terminal-intro">Hey, I'm</p>
                 <h2>
                   pekkimori<span aria-hidden="true">_</span>
                 </h2>
@@ -378,12 +393,6 @@ export default function DesktopTerminal({ lang, open, theme, cat }: Props) {
                 ? "Bem-vindo ao meu pequeno canto da internet."
                 : "Welcome to my little corner of the internet."}
             </p>
-            <div className="retro-directory-heading">
-              <span>
-                ~/ {pt ? "EXPLORE O DIRETÓRIO" : "EXPLORE THE DIRECTORY"}
-              </span>
-              <span>{pt ? "CLIQUE OU DIGITE" : "CLICK OR TYPE"} ↵</span>
-            </div>
             <nav
               className="retro-terminal-directory"
               aria-label={pt ? "Explorar pastas" : "Explore folders"}
@@ -403,15 +412,6 @@ export default function DesktopTerminal({ lang, open, theme, cat }: Props) {
                 <span aria-hidden="true">↗</span>
               </button>
             </nav>
-            <p className="retro-terminal-hint">
-              {pt ? "Digite" : "Type"}{" "}
-              <button onClick={() => run("ls")}>ls</button>{" "}
-              {pt ? "para explorar," : "to look around,"}{" "}
-              <button onClick={() => run("help")}>help</button>{" "}
-              {pt
-                ? "para se orientar. Há segredos por aqui."
-                : "to find your way. There are secrets here, too."}
-            </p>
           </div>
         )}
         <div className="retro-terminal-output" role="log" aria-live="polite">
@@ -495,7 +495,7 @@ export default function DesktopTerminal({ lang, open, theme, cat }: Props) {
             if (event.ctrlKey && event.key === "l") {
               event.preventDefault();
               setLines([]);
-              setWelcome(false);
+              setWelcome(true);
             }
             if (event.ctrlKey && event.key === "c") {
               event.preventDefault();

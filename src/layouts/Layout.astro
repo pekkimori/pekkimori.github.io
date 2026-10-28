@@ -5,10 +5,7 @@ import { SITE } from "@/config";
 import "@/styles/global.css";
 import "@fontsource-variable/fraunces";
 import "@fontsource-variable/fraunces/wght-italic.css";
-import "@fontsource-variable/inter";
-import "@fontsource-variable/inter/wght-italic.css";
 import "@fontsource-variable/jetbrains-mono";
-import "@fontsource-variable/roboto-flex";
 import { ShootingStars } from "@/components/ShootingStars";
 import { StarsBackground } from "@/components/Stars";
 
@@ -23,9 +20,11 @@ type Props = {
   modDatetime?: Date | null;
   scrollSmooth?: boolean;
   lang?: string;
+  starryBackground?: boolean;
 };
 
 const {
+  starryBackground = true,
   title = SITE.title,
   author = SITE.author,
   profile = SITE.profile,
@@ -58,21 +57,21 @@ const structuredData = {
 ---
 
 <!doctype html>
-<html
-  dir={SITE.dir}
-  lang={lang}
-  class={`${scrollSmooth && "scroll-smooth"}`}
->
+<html dir={SITE.dir} lang={lang} class={`${scrollSmooth && "scroll-smooth"}`}>
   <head>
     <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QT7PBT3LK0" is:inline></script>
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-QT7PBT3LK0"
+      is:inline></script>
     <script is:inline>
       window.dataLayer = window.dataLayer || [];
-      // eslint-disable-next-line prefer-rest-params
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
+      function gtag(...args) {
+        dataLayer.push(args);
+      }
+      gtag("js", new Date());
 
-      gtag('config', 'G-QT7PBT3LK0');
+      gtag("config", "G-QT7PBT3LK0");
     </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
@@ -159,14 +158,18 @@ const structuredData = {
   </head>
   <body>
     <slot />
-    <div
-      transition:persist
-      transition:name="stars-background"
-      style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1;"
-    >
-      <ShootingStars client:only="react" />
-      <StarsBackground client:only="react" />
-    </div>
+    {
+      starryBackground && (
+        <div
+          transition:persist
+          transition:name="stars-background"
+          style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1;"
+        >
+          <ShootingStars client:only="react" />
+          <StarsBackground client:only="react" />
+        </div>
+      )
+    }
   </body>
 </html>
 
@@ -187,72 +190,16 @@ const structuredData = {
     animation: 150ms ease-out both fade-in;
   }
   @keyframes fade-in {
-    from { opacity: 0; }
-    to   { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 </style>
 
-<script>
-  import "@/assets/scripts/lenisSmoothScroll.js";
-</script>
-
-<script is:inline data-astro-rerun>
-  /** Create a progress indicator at the top */
-  function createProgressBar() {
-    // Remove existing progress bar if it exists
-    const existingProgressContainer = document.querySelector(
-      ".progress-container"
-    );
-    if (existingProgressContainer) {
-      existingProgressContainer.remove();
-    }
-
-    // Create the main container div
-    const progressContainer = document.createElement("div");
-    progressContainer.className =
-      "progress-container fixed top-0 z-10 h-1 w-screen bg-background";
-
-    // Create the progress bar div
-    const progressBar = document.createElement("div");
-    progressBar.className = "progress-bar h-1 w-0 bg-accent";
-    progressBar.id = "myBar";
-
-    // Append the progress bar to the progress container
-    progressContainer.appendChild(progressBar);
-
-    // Append the progress container to the document body
-    document.body.appendChild(progressContainer);
-  }
-
-  /** Update the progress bar when user scrolls */
-  function updateScrollProgress() {
-    // Remove existing scroll listeners to prevent duplicates
-    if (window.scrollProgressHandler) {
-      document.removeEventListener("scroll", window.scrollProgressHandler);
-    }
-
-    // Create the scroll handler function
-    window.scrollProgressHandler = () => {
-      const winScroll =
-        document.body.scrollTop || document.documentElement.scrollTop;
-      const height =
-        document.documentElement.scrollHeight -
-        document.documentElement.clientHeight;
-      const scrolled = (winScroll / height) * 100;
-      const myBar = document.getElementById("myBar");
-      if (myBar) {
-        myBar.style.width = scrolled + "%";
-      }
-    };
-
-    // Add the event listener
-    document.addEventListener("scroll", window.scrollProgressHandler);
-  }
-
-  // Initialize everything
-  createProgressBar();
-  updateScrollProgress();
-
+<script is:inline>
   /* Go to page start after page swap */
   document.addEventListener("astro:after-swap", () =>
     window.scrollTo({ left: 0, top: 0, behavior: "instant" })

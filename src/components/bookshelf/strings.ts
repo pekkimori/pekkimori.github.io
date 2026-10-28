@@ -1,50 +1,59 @@
 import type { Lang } from "./types";
 
 export type Strings = {
-  prompt: string;
-  countsSuffix: (n: number, reading: number) => string;
+  sortLabel: string;
+  searchLabel: string;
+  searchPlaceholder: string;
+  clearSearch: string;
+  viewLabel: string;
+  spines: string;
+  covers: string;
+  noMatches: string;
   sortAZ: string;
   sortTheme: string;
   sortRating: string;
   empty: string;
-  footerHover: string;
-  footerTouch: string;
-  modalClose: string;
-  modalReviewLabel: string;
-  modalPagesSuffix: string;
-  modalFirstPublished: (year: number) => string;
+  reviewLabel: string;
+  pagesSuffix: string;
+  firstPublished: (year: number) => string;
   themeMarker: string;
 };
 
 export const STRINGS: Record<Lang, Strings> = {
   en: {
-    prompt: "$ cat ~/bookshelf/*",
-    countsSuffix: (n, r) => `${n} books · ${r} currently reading`,
+    sortLabel: "Sort",
+    searchLabel: "Find a book",
+    searchPlaceholder: "Title, author, or theme…",
+    clearSearch: "Clear search",
+    viewLabel: "Shelf view",
+    spines: "Spines",
+    covers: "Covers",
+    noMatches: "No matching books.",
     sortAZ: "A–Z",
     sortTheme: "by theme",
     sortRating: "by rating",
     empty: "# shelf empty",
-    footerHover: "# hover a spine to see the cover · click for review",
-    footerTouch: "# tap once to lift · tap again for review",
-    modalClose: "Close",
-    modalReviewLabel: "review:",
-    modalPagesSuffix: "pp",
-    modalFirstPublished: y => `first published ${y}`,
+    reviewLabel: "review:",
+    pagesSuffix: "pp",
+    firstPublished: y => `first published ${y}`,
     themeMarker: "//",
   },
   pt: {
-    prompt: "$ cat ~/estante/*",
-    countsSuffix: (n, r) => `${n} livros · ${r} lendo agora`,
+    sortLabel: "Ordenar",
+    searchLabel: "Encontrar um livro",
+    searchPlaceholder: "Título, autor ou tema…",
+    clearSearch: "Limpar busca",
+    viewLabel: "Visualização da estante",
+    spines: "Lombadas",
+    covers: "Capas",
+    noMatches: "Nenhum livro encontrado.",
     sortAZ: "A–Z",
     sortTheme: "por tema",
     sortRating: "por nota",
     empty: "# estante vazia",
-    footerHover: "# passe sobre uma lombada · clique para a resenha",
-    footerTouch: "# toque para girar · toque de novo para a resenha",
-    modalClose: "Fechar",
-    modalReviewLabel: "resenha:",
-    modalPagesSuffix: "pp",
-    modalFirstPublished: y => `publicado em ${y}`,
+    reviewLabel: "resenha:",
+    pagesSuffix: "pp",
+    firstPublished: y => `publicado em ${y}`,
     themeMarker: "//",
   },
 };

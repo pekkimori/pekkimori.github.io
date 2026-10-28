@@ -1,0 +1,12 @@
+---
+import TerminalPage from "@/components/terminal/TerminalPage.astro";
+export function getStaticPaths() {
+  return (["games", "music", "anime", "atlas"] as const).map(section => ({
+    params: { section },
+    props: { tab: section },
+  }));
+}
+const { tab } = Astro.props;
+---
+
+<TerminalPage lang="pt" initialTab={tab} />

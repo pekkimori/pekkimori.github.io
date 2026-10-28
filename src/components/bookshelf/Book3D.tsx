@@ -1,23 +1,32 @@
 import type { CSSProperties, Ref } from "react";
-import type { Lang, LocalizedBook, ResolvedCover } from "./types";
+import type { Lang, LocalizedBook, ShelfView } from "./types";
 
 const DESKTOP_PROFILES = [
-  { coverHeight: 232 },
-  { coverHeight: 244 },
-  { coverHeight: 238 },
-  { coverHeight: 228 },
+  { coverHeight: 248 },
+  { coverHeight: 264 },
+  { coverHeight: 256 },
+  { coverHeight: 240 },
 ] as const;
 
 const MOBILE_PROFILES = [
-  { coverHeight: 174 },
-  { coverHeight: 184 },
-  { coverHeight: 179 },
-  { coverHeight: 171 },
+  { coverHeight: 156 },
+  { coverHeight: 168 },
+  { coverHeight: 162 },
+  { coverHeight: 150 },
 ] as const;
 
 const PAGE_RANGE = { min: 150, max: 650 } as const;
 const SPINE_RANGE_DESKTOP = { min: 26, max: 44 } as const;
 const SPINE_RANGE_MOBILE = { min: 20, max: 32 } as const;
+const BINDING_TEXTURES = ["linen", "laid", "twill", "grain"] as const;
+
+function getBindingTexture(slug: string) {
+  // Stable across SSR, shelf, flight, and review; no random texture swaps.
+  let seed = 0;
+  for (const character of slug)
+    seed = (Math.imul(seed, 31) + character.charCodeAt(0)) >>> 0;
+  return BINDING_TEXTURES[(seed >>> 8) % BINDING_TEXTURES.length];
+}
 
 export type BookMetrics = {
   spineWidth: number;
@@ -58,38 +67,29 @@ export function getBookMetrics(
   return { spineWidth, coverWidth, coverHeight, spineOffsetX };
 }
 
-function getSpinePalette(color?: string): { ink: string; ornament: string } {
-  if (!color?.startsWith("#") || ![4, 7].includes(color.length)) {
-    return {
-      ink: "rgba(248, 249, 255, 0.94)",
-      ornament: "rgba(248, 249, 255, 0.34)",
-    };
-  }
+export function getShelfBookMetrics(
+  small: boolean,
+  slug: string,
+  pageCount: number,
+  view: ShelfView
+): BookMetrics {
+  const base = getBookMetrics(small, slug, pageCount);
+  const scale = view === "spines" ? (small ? 1 : 0.8) : small ? 0.76 : 0.62;
+  const spineWidth = Math.round(base.spineWidth * scale);
+  return {
+    spineWidth,
+    coverWidth: Math.round(base.coverWidth * scale),
+    coverHeight: Math.round(base.coverHeight * scale),
+    spineOffsetX: spineWidth / 2,
+  };
+}
 
-  const expanded =
-    color.length === 4
-      ? color
-          .slice(1)
-          .split("")
-          .map(char => char + char)
-          .join("")
-      : color.slice(1);
-  const channels = [0, 2, 4].map(
-    offset => Number.parseInt(expanded.slice(offset, offset + 2), 16) / 255
-  );
-  const luminance =
-    channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
-
-  return luminance > 0.58
-    ? { ink: "rgba(27, 29, 36, 0.92)", ornament: "rgba(27, 29, 36, 0.3)" }
-    : {
-        ink: "rgba(248, 249, 255, 0.94)",
-        ornament: "rgba(248, 249, 255, 0.34)",
-      };
+export function getShelfSlotWidth(metrics: BookMetrics, view: ShelfView) {
+  return view === "spines" ? metrics.spineWidth + 4 : metrics.coverWidth + 8;
 }
 
 type Props = {
-  book: LocalizedBook & { cover: ResolvedCover };
+  book: LocalizedBook;
   lang: Lang;
   metrics: BookMetrics;
   innerRef?: Ref<HTMLDivElement>;
@@ -104,106 +104,43 @@ export default function Book3D({
   className,
   style,
 }: Props) {
-  const spineBg =
-    book.spineColor ??
-    "color-mix(in srgb, var(--accent) 70%, var(--background))";
-  const variant = getBookVariant(book.slug);
-  const palette = getSpinePalette(book.spineColor);
   const titleLength = Array.from(book.title).length;
-  const titleSize = titleLength > 23 ? 8.5 : titleLength > 17 ? 9.5 : 10.5;
 
   return (
     <div
       ref={innerRef}
       className={["book-3d", className].filter(Boolean).join(" ")}
+      data-binding-texture={getBindingTexture(book.slug)}
       style={{
         width: metrics.coverWidth,
         height: metrics.coverHeight,
         left: 0,
         right: "auto",
-        transformOrigin: `calc(${metrics.spineWidth / 2}px) 50%`,
+        transformOrigin: "50% 50%",
         ["--spine-thickness" as never]: `${metrics.spineWidth}px`,
-        ["--spine-offset-x" as never]: `${metrics.spineOffsetX}px`,
-        ["--spine-ink" as never]: palette.ink,
-        ["--spine-ornament" as never]: palette.ornament,
-        ["--spine-title-size" as never]: `${titleSize}px`,
-        ["--book-tone" as never]: spineBg,
+        ["--spine-offset-x" as never]: "calc(var(--spine-thickness) / 2)",
+        ["--spine-title-size" as never]: `${Math.min(5.4, 110 / titleLength)}cqh`,
         ...style,
       }}
       aria-hidden={true}
     >
-      <div className="book-face book-face-front" data-cover-variant={variant}>
-        {book.cover ? (
-          <div className="book-cover-art">
-            <img
-              className="book-cover-image"
-              src={book.cover.src}
-              srcSet={book.cover.srcSet}
-              width={book.cover.width}
-              height={book.cover.height}
-              alt=""
-              loading="lazy"
-              decoding="async"
-            />
-          </div>
-        ) : (
-          <div
-            className="book-cover-fallback flex h-full w-full flex-col items-center justify-center gap-2 p-3 text-center font-mono"
-            style={{ color: "rgba(255,255,255,0.92)" }}
-          >
-            <span className="text-xs leading-snug">{book.title}</span>
-            <span className="text-[10px] opacity-80">// {book.author}</span>
-          </div>
-        )}
-        <span className="book-cover-hinge" aria-hidden="true" />
-        {book.status === "reading" && (
-          <div
-            aria-hidden="true"
-            className="absolute top-0 right-0 left-0 h-[3px] bg-accent"
-          />
-        )}
+      <div className="book-face book-face-front">
+        <div className="book-cover-type">
+          <span className="book-cover-author">{book.author}</span>
+          <span className="book-cover-title">{book.title}</span>
+          <span className="book-cover-year">{book.originalYear}</span>
+        </div>
       </div>
 
       <div className="book-face book-face-back" />
       <div className="book-face book-face-top" />
       <div className="book-face book-face-bottom" />
+      <div className="book-face book-face-pages" />
 
-      <div
-        className="book-face book-face-spine"
-        data-spine-variant={variant}
-        style={{
-          backgroundColor: spineBg,
-        }}
-      >
-        <span
-          className="book-spine-rule book-spine-rule-top"
-          aria-hidden="true"
-        />
-        <span
-          className="book-spine-rule book-spine-rule-bottom"
-          aria-hidden="true"
-        />
+      <div className="book-face book-face-spine">
         <div className="book-spine-label">
-          <span
-            className="book-spine-title"
-            data-text-orient="mixed"
-          >
-            {book.title}
-          </span>
-          <span className="book-spine-divider" aria-hidden="true" />
-          <span
-            className="book-spine-author"
-            data-text-orient="mixed"
-          >
-            {book.author}
-          </span>
+          <span className="book-spine-title">{book.title}</span>
         </div>
-        {book.status === "reading" && (
-          <div
-            aria-hidden="true"
-            className="absolute top-0 right-0 left-0 h-[3px] bg-accent"
-          />
-        )}
       </div>
     </div>
   );

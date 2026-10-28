@@ -1,52 +1,29 @@
 import { useState, useEffect } from "react";
 
+// The site theme script owns the preference. React views follow the same
+// attribute whether it changes through the header, terminal, or system setting.
 export function useTheme() {
-  const [theme, setTheme] = useState(() => {
-    if (typeof window === "undefined") {
-      return "light";
-    }
-    const currentTheme = localStorage.getItem("theme");
-    const browserTheme = window.matchMedia("(prefers-color-scheme: dark)")
-      .matches
-      ? "dark"
-      : "light";
-
-    return currentTheme || browserTheme;
-  });
+  const [theme, setTheme] = useState(() =>
+    typeof document === "undefined"
+      ? "light"
+      : (document.documentElement.dataset.theme ?? "light")
+  );
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const handleChange = ({ matches }: MediaQueryListEvent) => {
-      setTheme(matches ? "dark" : "light");
+    const root = document.documentElement;
+    const sync = () => {
+      const value = root.dataset.theme ?? "light";
+      setTheme(value);
+      root.classList.toggle("dark", value === "dark");
     };
-
-    mediaQuery.addEventListener("change", handleChange);
-
-    return () => mediaQuery.removeEventListener("change", handleChange);
+    sync();
+    const observer = new MutationObserver(sync);
+    observer.observe(root, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
+    return () => observer.disconnect();
   }, []);
-
-  useEffect(() => {
-    const themeButton = document.querySelector("#theme-btn");
-    const handleClick = () => {
-      setTheme(prevTheme => {
-        const newTheme = prevTheme === "dark" ? "light" : "dark";
-        localStorage.setItem("theme", newTheme);
-        return newTheme;
-      });
-    };
-
-    themeButton?.addEventListener("click", handleClick);
-
-    return () => themeButton?.removeEventListener("click", handleClick);
-  }, []);
-
-  useEffect(() => {
-    if (theme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, [theme]);
 
   return theme;
 }
