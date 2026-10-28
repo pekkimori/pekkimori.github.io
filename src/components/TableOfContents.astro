@@ -34,59 +34,85 @@ const translatedHeadings = headings.map(h =>
 const toc = generateToc(translatedHeadings);
 ---
 
-<!-- Mobile TOC Button -->
-<div
-  id="toc-btn-container"
-  class:list={[
-    "fixed end-4 bottom-24 z-50 lg:hidden",
-    "translate-y-14 opacity-0 transition duration-500",
-  ]}
->
-  <button
-    id="toc-mobile-btn"
-    class="group relative flex size-14 items-center justify-center rounded-full bg-background shadow-xl"
-    aria-label="Show Table of Contents"
-    type="button"
-  >
-    <svg class="size-6 text-accent" viewBox="0 0 24 24" fill="none">
-      <rect x="4" y="6" width="16" height="2" rx="1" fill="currentColor"></rect>
-      <rect x="4" y="11" width="16" height="2" rx="1" fill="currentColor"
-      ></rect>
-      <rect x="4" y="16" width="16" height="2" rx="1" fill="currentColor"
-      ></rect>
-    </svg>
-    <span class="sr-only text-sm group-hover:text-accent"
-      >Table of Contents</span
-    >
-  </button>
-</div>
+{
+  toc.length > 0 && (
+    <>
+      <div
+        id="toc-btn-container"
+        class:list={[
+          "fixed end-4 bottom-24 z-50 lg:hidden",
+          "translate-y-14 opacity-0 transition duration-500",
+        ]}
+      >
+        <button
+          id="toc-mobile-btn"
+          class="group relative flex size-14 items-center justify-center rounded-full bg-background shadow-xl"
+          aria-label="Show Table of Contents"
+          type="button"
+        >
+          <svg class="size-6 text-accent" viewBox="0 0 24 24" fill="none">
+            <rect
+              x="4"
+              y="6"
+              width="16"
+              height="2"
+              rx="1"
+              fill="currentColor"
+            />
+            <rect
+              x="4"
+              y="11"
+              width="16"
+              height="2"
+              rx="1"
+              fill="currentColor"
+            />
+            <rect
+              x="4"
+              y="16"
+              width="16"
+              height="2"
+              rx="1"
+              fill="currentColor"
+            />
+          </svg>
+          <span class="sr-only text-sm group-hover:text-accent">
+            Table of Contents
+          </span>
+        </button>
+      </div>
 
-<!-- Mobile TOC Overlay -->
-<div
-  id="toc-mobile-overlay"
-  class="pointer-events-none fixed end-4 bottom-36 z-50 opacity-0 transition-opacity duration-300 lg:hidden"
-  style="max-width: 22rem;"
->
-  <div
-    class="relative flex w-full flex-col rounded-2xl bg-background/90 p-4 shadow-2xl backdrop-blur-lg"
-    style="max-height: 70vh; overflow-y: auto;"
-  >
-    <toc-heading class="w-full" {...props}>
-      <h2 class="mb-4 text-center font-semibold">{tocLabel}</h2>
-      <ul class="text-card-foreground">
-        {toc.map(heading => <TOCHeading heading={heading} />)}
-      </ul>
-    </toc-heading>
-  </div>
-</div>
+      <div
+        id="toc-mobile-overlay"
+        class="pointer-events-none fixed end-4 bottom-36 z-50 opacity-0 transition-opacity duration-300 lg:hidden"
+        style="max-width: 22rem;"
+      >
+        <div
+          class="relative flex w-full flex-col rounded-2xl bg-background/90 p-4 shadow-2xl backdrop-blur-lg"
+          style="max-height: 70vh; overflow-y: auto;"
+        >
+          <toc-heading class="w-full" {...props}>
+            <h2 class="mb-4 text-center font-semibold">{tocLabel}</h2>
+            <ul class="text-card-foreground">
+              {toc.map(heading => (
+                <TOCHeading heading={heading} />
+              ))}
+            </ul>
+          </toc-heading>
+        </div>
+      </div>
 
-<!-- Desktop TOC -->
-<toc-heading class={className} {...props}>
-  <h2 class="font-semibold">{tocLabel}</h2>
-  <ul class="text-card-foreground mt-4">
-    {toc.map(heading => <TOCHeading heading={heading} />)}
-  </ul>
-</toc-heading>
+      <toc-heading class={className} {...props}>
+        <h2 class="font-semibold">{tocLabel}</h2>
+        <ul class="mt-4 text-card-foreground">
+          {toc.map(heading => (
+            <TOCHeading heading={heading} />
+          ))}
+        </ul>
+      </toc-heading>
+    </>
+  )
+}
 
 <script>
   // This script tag is useful only if you want to display the TOC alongside the blog post...
@@ -228,7 +254,10 @@ const toc = generateToc(translatedHeadings);
     }
 
     // Cache DOM elements for toggleSubheadings to avoid per-frame queries
-    _toggleCache: Map<HTMLAnchorElement, { childrenUl: Element; chevron: Element | null }> = new Map();
+    _toggleCache: Map<
+      HTMLAnchorElement,
+      { childrenUl: Element; chevron: Element | null }
+    > = new Map();
 
     toggleSubheadings(linkEl: HTMLAnchorElement, force?: boolean) {
       let cached = this._toggleCache.get(linkEl);
@@ -258,9 +287,16 @@ const toc = generateToc(translatedHeadings);
       let cached = this._childSlugCache.get(slug);
       if (cached) return cached;
       const li = linkEl.closest("li");
-      if (!li) { this._childSlugCache.set(slug, []); return []; }
-      const childLinks = li.querySelectorAll(":scope > .toc-children a[href^=\"#\"]");
-      cached = Array.from(childLinks).map(c => (c.getAttribute("href") || "").substring(1));
+      if (!li) {
+        this._childSlugCache.set(slug, []);
+        return [];
+      }
+      const childLinks = li.querySelectorAll(
+        ':scope > .toc-children a[href^="#"]'
+      );
+      cached = Array.from(childLinks).map(c =>
+        (c.getAttribute("href") || "").substring(1)
+      );
       this._childSlugCache.set(slug, cached);
       return cached;
     }
@@ -279,7 +315,9 @@ const toc = generateToc(translatedHeadings);
     getParentLinks() {
       if (this._parentLinks) return this._parentLinks;
       this._parentLinks = this.tocLinks
-        .filter(({ element: el }) => el.getAttribute("data-has-children") === "true")
+        .filter(
+          ({ element: el }) => el.getAttribute("data-has-children") === "true"
+        )
         .map(({ element, slug }) => ({ element, slug }));
       return this._parentLinks;
     }
@@ -308,9 +346,11 @@ const toc = generateToc(translatedHeadings);
             heading => heading.id === link.slug
           );
           if (directHeading) {
-            const lenis = (window as Window & {
-              __lenis?: { scrollTo: (target: Element) => void };
-            }).__lenis;
+            const lenis = (
+              window as Window & {
+                __lenis?: { scrollTo: (target: Element) => void };
+              }
+            ).__lenis;
             if (lenis) {
               lenis.scrollTo(directHeading);
             } else {
