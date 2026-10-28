@@ -74,11 +74,7 @@ export const PUBLIC_COMMANDS = [
   ["echo <text>", "Print something", "Escrever algo"],
   ["history", "Show this session’s commands", "Ver comandos desta sessão"],
   ["clear / cls", "Clear the terminal", "Limpar o terminal"],
-  [
-    "theme <site | night | teal>",
-    "Change the workspace tint",
-    "Trocar o tom da área de trabalho",
-  ],
+  ["theme <light | dark>", "Change the website theme", "Trocar o tema do site"],
   [
     "secret add <name> <message>",
     "Create a secret on this browser",
@@ -89,7 +85,6 @@ export const PUBLIC_COMMANDS = [
     "Manage your browser’s secrets",
     "Gerenciar os segredos deste navegador",
   ],
-  ["exit", "Close the terminal", "Fechar o terminal"],
 ] as const;
 
 export const WEBSITE_PAGES = [

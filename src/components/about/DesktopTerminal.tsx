@@ -14,8 +14,6 @@ import {
 type Props = {
   lang: "en" | "pt";
   open: (id: AppId) => void;
-  discover: (id: AppId) => void;
-  close: () => void;
   theme: (value: string) => void;
   cat: () => void;
 };
@@ -38,27 +36,12 @@ const COMMANDS = [
   "cls",
   "theme",
   "secret",
-  "exit",
 ];
 
-export default function DesktopTerminal({
-  lang,
-  open,
-  discover,
-  close,
-  theme,
-  cat,
-}: Props) {
+export default function DesktopTerminal({ lang, open, theme, cat }: Props) {
   const pt = lang === "pt";
-  const [lines, setLines] = useState<string[]>([
-    pt
-      ? "Um pequeno universo, ainda por descobrir."
-      : "A small universe, waiting to be discovered.",
-    pt
-      ? 'Comece com "ls". Para ajuda: open commands.txt'
-      : 'Begin with "ls". For a guide: open commands.txt',
-    "",
-  ]);
+  const [lines, setLines] = useState<string[]>([]);
+  const [welcome, setWelcome] = useState(true);
   const [input, setInput] = useState("");
   const [cwd, setCwd] = useState(HOME);
   const [history, setHistory] = useState<string[]>([]);
@@ -129,10 +112,6 @@ export default function DesktopTerminal({
       ? (folder as AppId)
       : null;
   };
-  const reveal = (path: string) => {
-    const id = folderFor(path);
-    if (id) discover(id);
-  };
   const visit = (destination: string) => {
     void navigate(destination).catch(() =>
       setLines(previous => [
@@ -170,7 +149,8 @@ export default function DesktopTerminal({
       inputRef.current?.focus({ preventScroll: true });
   }, [storageReady]);
   useEffect(() => {
-    scrollRef.current?.scrollTo(0, scrollRef.current.scrollHeight);
+    if (lines.length)
+      scrollRef.current?.scrollTo(0, scrollRef.current.scrollHeight);
   }, [lines]);
   const saveSecrets = (next: Record<string, string>) => {
     setSecrets(next);
@@ -183,8 +163,8 @@ export default function DesktopTerminal({
         : "Available this session; browser storage is unavailable.";
     }
   };
-  const run = () => {
-    const raw = input.trim();
+  const run = (value = input) => {
+    const raw = value.trim();
     if (!raw) return;
     setInput("");
     setHistory(previous => [...previous, raw]);
@@ -197,7 +177,7 @@ export default function DesktopTerminal({
     if (secret) {
       output = secret.output[lang];
       if (secret.effect === "cat") cat();
-      if (secret.effect === "night") theme("night");
+      if (secret.effect === "night") theme("dark");
     } else if (
       Object.hasOwn(secrets, raw.toLowerCase()) &&
       !COMMANDS.includes(command.toLowerCase())
@@ -210,7 +190,6 @@ export default function DesktopTerminal({
           break;
         case "whoami":
           output = intro;
-          discover("about");
           break;
         case "pwd":
           output = cwd;
@@ -227,15 +206,13 @@ export default function DesktopTerminal({
         case "clear":
         case "cls":
           setLines([]);
+          setWelcome(false);
           return;
-        case "exit":
-          close();
-          break;
         case "theme":
-          if (["site", "teal", "night"].includes(arg)) {
+          if (["light", "dark"].includes(arg)) {
             theme(arg);
             output = `${pt ? "Tema" : "Theme"}: ${arg}`;
-          } else output = "theme <site | night | teal>";
+          } else output = "theme <light | dark>";
           break;
         case "ls":
         case "dir": {
@@ -269,7 +246,6 @@ export default function DesktopTerminal({
           const path = resolve(arg || "~");
           if (directories.includes(path)) {
             setCwd(path);
-            reveal(path);
           } else
             output = `cd: ${arg}: ${pt ? "pasta não encontrada" : "directory not found"}`;
           break;
@@ -278,7 +254,6 @@ export default function DesktopTerminal({
           const path = resolve(arg);
           if (Object.hasOwn(files, path)) {
             output = files[path];
-            reveal(path);
           } else
             output = `cat: ${arg}: ${pt ? "arquivo não encontrado" : "file not found"}`;
           break;
@@ -380,20 +355,77 @@ export default function DesktopTerminal({
   return (
     <div
       className="retro-terminal"
-      ref={scrollRef}
-      data-lenis-prevent
       onClick={event => {
         if (
-          !(event.target as HTMLElement).closest("input") &&
+          !(event.target as HTMLElement).closest("input, button, a") &&
           !window.getSelection()?.toString()
         )
           inputRef.current?.focus({ preventScroll: true });
       }}
     >
-      <div className="retro-terminal-output" role="log" aria-live="polite">
-        {lines.map((line, i) => (
-          <pre key={i}>{line || " "}</pre>
-        ))}
+      <div className="retro-terminal-scroll" ref={scrollRef} data-lenis-prevent>
+        {welcome && (
+          <div className="retro-terminal-welcome">
+            <div className="retro-terminal-hero">
+              <div>
+                <h2>
+                  pekkimori<span aria-hidden="true">_</span>
+                </h2>
+              </div>
+            </div>
+            <p className="retro-terminal-greeting">
+              {pt
+                ? "Bem-vindo ao meu pequeno canto da internet."
+                : "Welcome to my little corner of the internet."}
+            </p>
+            <div className="retro-directory-heading">
+              <span>
+                ~/ {pt ? "EXPLORE O DIRETÓRIO" : "EXPLORE THE DIRECTORY"}
+              </span>
+              <span>{pt ? "CLIQUE OU DIGITE" : "CLICK OR TYPE"} ↵</span>
+            </div>
+            <nav
+              className="retro-terminal-directory"
+              aria-label={pt ? "Explorar pastas" : "Explore folders"}
+            >
+              {DESKTOP_FOLDERS.map((folder, i) => (
+                <button key={folder} onClick={() => run(`open ~/${folder}`)}>
+                  <span className="retro-directory-index">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span>{folder}/</span>
+                  <span aria-hidden="true">↗</span>
+                </button>
+              ))}
+              <button onClick={() => run("help")}>
+                <span className="retro-directory-index">?</span>
+                <span>help</span>
+                <span aria-hidden="true">↗</span>
+              </button>
+            </nav>
+            <p className="retro-terminal-hint">
+              {pt ? "Digite" : "Type"}{" "}
+              <button onClick={() => run("ls")}>ls</button>{" "}
+              {pt ? "para explorar," : "to look around,"}{" "}
+              <button onClick={() => run("help")}>help</button>{" "}
+              {pt
+                ? "para se orientar. Há segredos por aqui."
+                : "to find your way. There are secrets here, too."}
+            </p>
+          </div>
+        )}
+        <div className="retro-terminal-output" role="log" aria-live="polite">
+          {lines.map((line, i) => (
+            <pre
+              key={i}
+              className={
+                line.startsWith("user@pekkimori:") ? "retro-command-echo" : ""
+              }
+            >
+              {line || " "}
+            </pre>
+          ))}
+        </div>
       </div>
       <form
         className="retro-prompt"
@@ -430,8 +462,7 @@ export default function DesktopTerminal({
               setHistoryIndex(next);
               setInput(history[next] ?? draft);
             }
-            if (event.key === "Tab") {
-              event.preventDefault();
+            if (event.key === "Tab" && !event.shiftKey && input) {
               const parts = input.split(" ");
               const last = parts.pop() ?? "";
               const directory = last.includes("/")
@@ -456,12 +487,15 @@ export default function DesktopTerminal({
               const matches = [...new Set(options)].filter(option =>
                 option.startsWith(prefix)
               );
-              if (matches.length === 1)
+              if (matches.length === 1) {
+                event.preventDefault();
                 setInput([...parts, `${directory}${matches[0]}`].join(" "));
+              }
             }
             if (event.ctrlKey && event.key === "l") {
               event.preventDefault();
               setLines([]);
+              setWelcome(false);
             }
             if (event.ctrlKey && event.key === "c") {
               event.preventDefault();

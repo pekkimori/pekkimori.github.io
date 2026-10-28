@@ -2,7 +2,8 @@
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
-import RetroDesktop from "@/components/about/RetroDesktop";
+import AboutTerminal from "@/components/about/AboutTerminal";
+import { appVersion } from "@/utils/appVersion";
 import KonamiCat from "@/components/about/KonamiCat";
 ---
 
@@ -10,7 +11,7 @@ import KonamiCat from "@/components/about/KonamiCat";
   <Header />
   <main id="main-content" data-layout="about">
     <h1 class="sr-only">About Rafael Mori</h1>
-    <RetroDesktop client:load lang="en" />
+    <AboutTerminal client:load lang="en" version={appVersion} />
     <KonamiCat client:idle />
   </main>
   <Footer />

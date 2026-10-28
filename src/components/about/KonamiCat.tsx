@@ -42,7 +42,7 @@ export default function KonamiCat() {
 
   return (
     <img
-      src="/gifs/about/konami-cat.gif"
+      src="/gifs/about/hero-cat.gif"
       alt=""
       aria-hidden="true"
       onAnimationEnd={() => setTriggered(false)}

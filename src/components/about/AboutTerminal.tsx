@@ -17,25 +17,20 @@ import {
   STEAM_PROFILE_URL,
 } from "@/data/about";
 import { ANIME_PT, ATLAS_PT } from "@/data/about-pt";
-import {
-  DESKTOP_FOLDERS,
-  PUBLIC_COMMANDS,
-  type AppId,
-} from "@/data/about-commands";
+import { PUBLIC_COMMANDS, type AppId } from "@/data/about-commands";
 import GlobeCard from "./GlobeCard";
 import DesktopTerminal from "./DesktopTerminal";
-import "./retro-desktop.css";
+import "./about-terminal.css";
 
+type WindowId = Exclude<AppId, "terminal">;
 type WindowState = {
-  id: AppId;
+  id: WindowId;
   x: number;
   y: number;
   minimized: boolean;
   maximized: boolean;
 };
 type Lang = "en" | "pt";
-const DISCOVERY_KEY = "pekkimori-discoveries-v1";
-const STARTING_APPS: AppId[] = ["terminal", "commands"];
 const NAMES: Record<Lang, Record<AppId, string>> = {
   en: {
     about: "About me",
@@ -94,77 +89,60 @@ function Icon({ id, small = false }: { id: AppId; small?: boolean }) {
   );
 }
 
-export default function RetroDesktop({ lang = "en" }: { lang?: Lang }) {
+export default function AboutTerminal({
+  lang = "en",
+  version,
+}: {
+  lang?: Lang;
+  version: string;
+}) {
   const pt = lang === "pt";
   const names = NAMES[lang];
-  const [windows, setWindows] = useState<WindowState[]>([
-    { id: "terminal", x: 128, y: 8, minimized: false, maximized: false },
-  ]);
-  const [discovered, setDiscovered] = useState<AppId[]>(STARTING_APPS);
-  const [discoveryReady, setDiscoveryReady] = useState(false);
-  const [wallpaper, setWallpaper] = useState("site");
-  const [startOpen, setStartOpen] = useState(false);
+  const [windows, setWindows] = useState<WindowState[]>([]);
   const [catVisible, setCatVisible] = useState(false);
-  const desktopRef = useRef<HTMLDivElement>(null);
+  const screenRef = useRef<HTMLDivElement>(null);
   const catTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const drag = useRef<{
-    id: AppId;
+    id: WindowId;
     x: number;
     y: number;
     initialX: number;
     initialY: number;
   } | null>(null);
-  const active = windows.filter(w => !w.minimized).at(-1)?.id;
+  const active = windows.filter(w => !w.minimized).at(-1)?.id ?? "terminal";
+  const focusInput = () =>
+    requestAnimationFrame(() =>
+      document.getElementById("retro-command")?.focus({ preventScroll: true })
+    );
+  const showTerminal = () => {
+    setWindows(previous => previous.map(w => ({ ...w, minimized: true })));
+    focusInput();
+  };
+  const setSiteTheme = (value: string) => {
+    if (document.documentElement.dataset.theme !== value)
+      document.getElementById("theme-btn")?.click();
+  };
   const showCat = () => {
     setCatVisible(true);
     if (catTimer.current) clearTimeout(catTimer.current);
     catTimer.current = setTimeout(() => setCatVisible(false), 6000);
   };
-  useEffect(() => {
-    try {
-      const stored: unknown = JSON.parse(
-        sessionStorage.getItem(DISCOVERY_KEY) ?? "[]"
-      );
-      if (Array.isArray(stored)) {
-        const allowed: string[] = [...DESKTOP_FOLDERS, ...STARTING_APPS];
-        setDiscovered([
-          ...new Set([
-            ...STARTING_APPS,
-            ...stored.filter(
-              (id): id is AppId =>
-                typeof id === "string" && allowed.includes(id)
-            ),
-          ]),
-        ]);
-      }
-    } catch {
-      /* Discovery still works when browser storage is unavailable. */
-    }
-    setDiscoveryReady(true);
-    return () => {
+  useEffect(
+    () => () => {
       if (catTimer.current) clearTimeout(catTimer.current);
-    };
-  }, []);
-  useEffect(() => {
-    if (!discoveryReady) return;
-    try {
-      sessionStorage.setItem(DISCOVERY_KEY, JSON.stringify(discovered));
-    } catch {
-      /* Keep discoveries for this visit. */
-    }
-  }, [discovered, discoveryReady]);
-  const discover = (id: AppId) =>
-    setDiscovered(previous =>
-      previous.includes(id) ? previous : [...previous, id]
-    );
-  const focus = (id: AppId) =>
+    },
+    []
+  );
+  const focus = (id: WindowId) =>
     setWindows(previous => {
       const item = previous.find(w => w.id === id);
       return item ? [...previous.filter(w => w.id !== id), item] : previous;
     });
   const open = (id: AppId) => {
-    discover(id);
-    setStartOpen(false);
+    if (id === "terminal") {
+      showTerminal();
+      return;
+    }
     setWindows(previous => {
       const item = previous.find(w => w.id === id);
       const n = previous.length;
@@ -175,29 +153,31 @@ export default function RetroDesktop({ lang = "en" }: { lang?: Lang }) {
           : {
               id,
               x: Math.min(
-                128 + n * 24,
-                Math.max(8, (desktopRef.current?.clientWidth ?? 1000) - 590)
+                64 + n * 24,
+                Math.max(8, (screenRef.current?.clientWidth ?? 1000) - 590)
               ),
-              y: 8 + (n % 4) * 24,
+              y: 58 + (n % 4) * 24,
               minimized: false,
-              maximized: false,
+              maximized: true,
             },
       ];
     });
     requestAnimationFrame(() => {
-      const target = document.getElementById(
-        id === "terminal" ? "retro-command" : `window-${id}`
-      );
+      const target = document.getElementById(`window-${id}`);
       target?.focus({ preventScroll: true });
     });
   };
-  const close = (id: AppId) => {
+  const close = (id: WindowId) => {
     setWindows(previous => previous.filter(w => w.id !== id));
-    requestAnimationFrame(() =>
-      document.getElementById(`desktop-${id}`)?.focus({ preventScroll: true })
-    );
+    focusInput();
   };
-  const update = (id: AppId, change: Partial<WindowState>) =>
+  const minimize = (id: WindowId) => {
+    setWindows(previous =>
+      previous.map(w => (w.id === id ? { ...w, minimized: true } : w))
+    );
+    focusInput();
+  };
+  const update = (id: WindowId, change: Partial<WindowState>) =>
     setWindows(previous =>
       previous.map(w => (w.id === id ? { ...w, ...change } : w))
     );
@@ -213,7 +193,7 @@ export default function RetroDesktop({ lang = "en" }: { lang?: Lang }) {
       {text} ↗
     </a>
   );
-  const content = (id: AppId): ReactNode => {
+  const content = (id: WindowId): ReactNode => {
     switch (id) {
       case "about":
         return (
@@ -277,8 +257,8 @@ export default function RetroDesktop({ lang = "en" }: { lang?: Lang }) {
           <div className="retro-notepad">
             <p>
               {pt
-                ? "Comece no terminal: ls mostra as pastas, cd entra nelas, cat lê arquivos e open abre janelas. Cada descoberta revela um ícone. Você pode arrastar, minimizar e reabrir as janelas descobertas."
-                : "Start in the terminal: ls lists folders, cd enters them, cat reads files, and open opens windows. Each discovery reveals an icon. Discovered windows can be dragged, minimized, and reopened."}
+                ? "Use ls para listar pastas, cd para navegar, cat para ler arquivos e open para abrir janelas. As abas permitem reabrir janelas minimizadas."
+                : "Use ls to list folders, cd to navigate, cat to read files, and open to open windows. Use the tabs to reopen minimized windows."}
             </p>
             <p>
               {pt
@@ -316,17 +296,6 @@ export default function RetroDesktop({ lang = "en" }: { lang?: Lang }) {
               {pt ? "Abrir terminal" : "Launch terminal"}
             </button>
           </div>
-        );
-      case "terminal":
-        return (
-          <DesktopTerminal
-            lang={lang}
-            open={open}
-            discover={discover}
-            close={() => close("terminal")}
-            theme={setWallpaper}
-            cat={showCat}
-          />
         );
       case "games":
         return (
@@ -491,193 +460,167 @@ export default function RetroDesktop({ lang = "en" }: { lang?: Lang }) {
     focus(w.id);
   };
   return (
-    <div
-      className={`retro-desktop wallpaper-${wallpaper}`}
-      ref={desktopRef}
-      aria-label={pt ? "Explore pelo terminal" : "Explore through the terminal"}
-    >
-      <nav
-        className="retro-desktop-icons"
-        aria-label={pt ? "Aplicativos" : "Desktop applications"}
+    <div className="retro-station app-layout">
+      <div
+        className="retro-screen"
+        ref={screenRef}
+        aria-label={
+          pt ? "Explore pelo terminal" : "Explore through the terminal"
+        }
       >
-        {discovered.map(id => (
-          <button
-            id={`desktop-${id}`}
-            className="retro-shortcut"
-            key={id}
-            onClick={() => open(id)}
-          >
-            <Icon id={id} />
-            <span>{names[id]}</span>
-          </button>
-        ))}
-      </nav>
-      {windows.map((w, i) => (
-        <div
-          id={`window-${w.id}`}
-          key={w.id}
-          role="region"
-          aria-labelledby={`title-${w.id}`}
-          tabIndex={-1}
-          hidden={w.minimized}
-          className={`retro-window ${active === w.id ? "is-active" : ""} ${w.maximized ? "is-maximized" : ""} ${w.id === "terminal" ? "is-terminal" : ""}`}
-          style={{
-            left: `clamp(8px, ${w.x}px, calc(100% - ${w.id === "terminal" ? 688 : 568}px))`,
-            top: w.y,
-            zIndex: i + 2,
-          }}
-          onPointerDown={() => focus(w.id)}
-          onFocusCapture={() => {
-            if (active !== w.id) focus(w.id);
-          }}
-          onKeyDown={e => {
-            if (e.key === "Escape") {
-              e.stopPropagation();
-              close(w.id);
-            }
-          }}
-        >
-          <div
-            className="retro-titlebar"
-            onPointerDown={e => pointerDown(e, w)}
-            onPointerMove={e => {
-              const d = drag.current;
-              if (!d || d.id !== w.id) return;
-              const width = desktopRef.current?.clientWidth ?? 1000;
-              const height = desktopRef.current?.clientHeight ?? 700;
-              const windowWidth =
-                e.currentTarget.parentElement?.offsetWidth ?? 560;
-              const windowHeight =
-                e.currentTarget.parentElement?.offsetHeight ?? 520;
-              update(w.id, {
-                x: Math.max(
-                  0,
-                  Math.min(width - windowWidth, d.initialX + e.clientX - d.x)
-                ),
-                y: Math.max(
-                  8,
-                  Math.min(
-                    height - windowHeight - 64,
-                    d.initialY + e.clientY - d.y
-                  )
-                ),
-              });
-            }}
-            onPointerUp={() => {
-              drag.current = null;
-            }}
-            onPointerCancel={() => {
-              drag.current = null;
-            }}
-            onDoubleClick={e => {
-              if (!(e.target as HTMLElement).closest("button"))
-                update(w.id, { maximized: !w.maximized });
-            }}
-          >
-            <Icon id={w.id} small />
-            <span id={`title-${w.id}`}>
-              {names[w.id]}
-              {w.id === "about" ? " — pekkimori" : ""}
-            </span>
-            <div className="retro-window-controls">
-              <button
-                aria-label={`${pt ? "Minimizar" : "Minimize"} ${names[w.id]}`}
-                onClick={() => {
-                  update(w.id, { minimized: true });
-                  document.getElementById(`task-${w.id}`)?.focus();
-                }}
-              >
-                _
-              </button>
-              <button
-                aria-label={`${w.maximized ? (pt ? "Restaurar" : "Restore") : pt ? "Maximizar" : "Maximize"} ${names[w.id]}`}
-                onClick={() => update(w.id, { maximized: !w.maximized })}
-              >
-                {w.maximized ? "❐" : "□"}
-              </button>
-              <button
-                aria-label={`${pt ? "Fechar" : "Close"} ${names[w.id]}`}
-                onClick={() => close(w.id)}
-              >
-                ×
-              </button>
-            </div>
-          </div>
-          {w.id !== "terminal" && w.id !== "commands" && (
-            <div className="retro-address">
-              <code>/home/user/{w.id}</code>
-            </div>
-          )}
-          <div
-            className={`retro-window-body ${w.id === "terminal" ? "terminal-body" : ""}`}
-            data-lenis-prevent
-          >
-            {content(w.id)}
-          </div>
-        </div>
-      ))}
-      {catVisible && (
-        <img
-          className="retro-secret-cat"
-          src="/gifs/about/konami-cat.gif"
-          alt={
-            pt ? "Você encontrou o gato secreto!" : "You found the secret cat!"
-          }
-        />
-      )}
-      {startOpen && (
-        <>
-          <button
-            className="retro-menu-dismiss"
-            aria-label={pt ? "Fechar menu" : "Close menu"}
-            onClick={() => setStartOpen(false)}
-          />
+        <div className="retro-screen-toolbar">
           <nav
-            className="retro-start-menu"
-            aria-label={pt ? "Menu iniciar" : "Start menu"}
+            className="retro-tabs"
+            aria-label={pt ? "Abas abertas" : "Open tabs"}
           >
-            <div>
-              {discovered.map(id => (
-                <button key={id} onClick={() => open(id)}>
-                  <Icon id={id} small />
-                  {names[id]}
-                </button>
-              ))}
-            </div>
-          </nav>
-        </>
-      )}
-      <div className="retro-taskbar">
-        <button
-          className="retro-button retro-start"
-          aria-label={
-            pt ? "Aplicativos descobertos" : "Discovered applications"
-          }
-          aria-expanded={startOpen}
-          onClick={() => setStartOpen(!startOpen)}
-          onKeyDown={e => {
-            if (e.key === "Escape") setStartOpen(false);
-          }}
-        >
-          <span aria-hidden="true">⊞</span>
-        </button>
-        <div className="retro-tasks">
-          {windows.map(w => (
             <button
-              id={`task-${w.id}`}
-              key={w.id}
-              className={`retro-button ${active === w.id ? "is-selected" : ""}`}
-              aria-pressed={active === w.id}
-              onClick={() => {
-                if (active === w.id) update(w.id, { minimized: true });
-                else open(w.id);
+              className={active === "terminal" ? "is-selected" : ""}
+              aria-pressed={active === "terminal"}
+              aria-label={names.terminal}
+              onClick={showTerminal}
+            >
+              ~/
+            </button>
+            {windows.map(w => (
+              <button
+                key={w.id}
+                id={`tab-${w.id}`}
+                className={active === w.id ? "is-selected" : ""}
+                aria-pressed={active === w.id}
+                onClick={() => (active === w.id ? minimize(w.id) : open(w.id))}
+              >
+                {names[w.id]}
+              </button>
+            ))}
+          </nav>
+          <span
+            className="retro-version"
+            title={pt ? "Versão + número de commits" : "Version + commit count"}
+          >
+            {version}
+          </span>
+        </div>
+        <div
+          className="retro-terminal-view"
+          role="region"
+          aria-label={names.terminal}
+        >
+          <DesktopTerminal
+            lang={lang}
+            open={open}
+            theme={setSiteTheme}
+            cat={showCat}
+          />
+        </div>
+        {windows.map((w, i) => (
+          <div
+            id={`window-${w.id}`}
+            key={w.id}
+            role="region"
+            aria-labelledby={`title-${w.id}`}
+            tabIndex={-1}
+            hidden={w.minimized}
+            className={`retro-window ${active === w.id ? "is-active" : ""} ${w.maximized ? "is-maximized" : ""}`}
+            style={{
+              left: `clamp(8px, ${w.x}px, calc(100% - 568px))`,
+              top: w.y,
+              zIndex: i + 2,
+            }}
+            onPointerDown={() => focus(w.id)}
+            onFocusCapture={() => {
+              if (active !== w.id) focus(w.id);
+            }}
+            onKeyDown={e => {
+              if (e.key === "Escape") {
+                e.stopPropagation();
+                close(w.id);
+              }
+            }}
+          >
+            <div
+              className="retro-titlebar"
+              onPointerDown={e => pointerDown(e, w)}
+              onPointerMove={e => {
+                const d = drag.current;
+                if (!d || d.id !== w.id) return;
+                const width = screenRef.current?.clientWidth ?? 1000;
+                const height = screenRef.current?.clientHeight ?? 700;
+                const windowWidth =
+                  e.currentTarget.parentElement?.offsetWidth ?? 560;
+                const windowHeight =
+                  e.currentTarget.parentElement?.offsetHeight ?? 520;
+                update(w.id, {
+                  x: Math.max(
+                    0,
+                    Math.min(width - windowWidth, d.initialX + e.clientX - d.x)
+                  ),
+                  y: Math.max(
+                    52,
+                    Math.min(
+                      height - windowHeight - 8,
+                      d.initialY + e.clientY - d.y
+                    )
+                  ),
+                });
+              }}
+              onPointerUp={() => {
+                drag.current = null;
+              }}
+              onPointerCancel={() => {
+                drag.current = null;
+              }}
+              onDoubleClick={e => {
+                if (!(e.target as HTMLElement).closest("button"))
+                  update(w.id, { maximized: !w.maximized });
               }}
             >
               <Icon id={w.id} small />
-              <span>{names[w.id]}</span>
-            </button>
-          ))}
-        </div>
+              <span id={`title-${w.id}`}>
+                {names[w.id]}
+                {w.id === "about" ? " — pekkimori" : ""}
+              </span>
+              <div className="retro-window-controls">
+                <button
+                  aria-label={`${pt ? "Minimizar" : "Minimize"} ${names[w.id]}`}
+                  onClick={() => minimize(w.id)}
+                >
+                  _
+                </button>
+                <button
+                  aria-label={`${w.maximized ? (pt ? "Restaurar" : "Restore") : pt ? "Maximizar" : "Maximize"} ${names[w.id]}`}
+                  onClick={() => update(w.id, { maximized: !w.maximized })}
+                >
+                  {w.maximized ? "❐" : "□"}
+                </button>
+                <button
+                  aria-label={`${pt ? "Fechar" : "Close"} ${names[w.id]}`}
+                  onClick={() => close(w.id)}
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+            {w.id !== "commands" && (
+              <div className="retro-address">
+                <code>/home/user/{w.id}</code>
+              </div>
+            )}
+            <div className="retro-window-body" data-lenis-prevent>
+              {content(w.id)}
+            </div>
+          </div>
+        ))}
+        {catVisible && (
+          <img
+            className="retro-secret-cat"
+            src="/gifs/about/hero-cat.gif"
+            alt={
+              pt
+                ? "Você encontrou o gato secreto!"
+                : "You found the secret cat!"
+            }
+          />
+        )}
       </div>
     </div>
   );
