@@ -2,7 +2,7 @@
 // Videos load only after a visitor selects an item; no media is rehosted.
 export const ANIME_TAPES = [
   {
-    videoId: "K7t1wzST580",
+    videoId: "KIIpm6pBEHM",
     scene: "A heart made fullmetal",
     scenePt: "Um coração de aço",
     episode: "Brotherhood · 64",

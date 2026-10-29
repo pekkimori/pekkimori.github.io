@@ -26,6 +26,11 @@
   overflow: hidden;
   contain: paint;
 }
+/* Keep one screen treatment above both the desktop and portaled 3D media. */
+.crt-surface.crt-viewport {
+  position: fixed;
+  z-index: 10000;
+}
 .crt-raster {
   opacity: 0.2;
   background-image:

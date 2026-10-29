@@ -1,3 +1,4 @@
+import { EGGS } from "./easter-eggs";
 // Hidden from help and commands.txt. Add a command here to publish an Easter egg.
 // These are playful discoveries, not passwords: browser source is public.
 export type SecretCommand = {
@@ -7,6 +8,13 @@ export type SecretCommand = {
 };
 
 export const SECRET_COMMANDS: SecretCommand[] = [
+  ...EGGS.map(egg => ({
+    name: egg.answer,
+    output: {
+      en: `${egg.glyph} ${egg.reward.en}\n${egg.next ? `Next clue: cat ~/.riddles/${egg.next}.txt` : "Trail complete. Other doors: purr, root, seed, moon."}`,
+      pt: `${egg.glyph} ${egg.reward.pt}\n${egg.next ? `Próxima pista: cat ~/.riddles/${egg.next}.txt` : "Trilha completa. Outras portas: purr, root, seed, moon."}`,
+    },
+  })),
   {
     name: "meow",
     output: {

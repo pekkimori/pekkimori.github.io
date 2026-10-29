@@ -1,3 +1,4 @@
+import { EGGS } from "@/data/easter-eggs";
 import { useEffect, useRef, useState } from "react";
 import { navigate } from "astro:transitions/client";
 import { ANIME, ATLAS, FAVORITE_SONGS, PINNED_GAMES } from "@/data/about";
@@ -65,11 +66,17 @@ export default function DesktopTerminal({
     ? "rafael mori\npolímata · INTJ 145 · verdade · energia · amor\nconstruindo sistemas, explorando cérebros."
     : "rafael mori\npolymath · INTJ 145 · truth · energy · love\nbuilding systems, exploring brains.";
   const files: Record<string, string> = {
+    ...Object.fromEntries(
+      EGGS.map(egg => [`${HOME}/.riddles/${egg.id}.txt`, egg.riddle[lang]])
+    ),
+    [`${HOME}/.trail`]: pt
+      ? "cd ~/.riddles → ls → cat moon.txt\nArquivos reais também escondem pistas: /secrets/observatory.txt"
+      : "cd ~/.riddles → ls → cat moon.txt\nReal files hide clues too: /secrets/observatory.txt",
     [`${HOME}/about/intro.txt`]: intro,
     [`${HOME}/commands.txt`]: help,
     [`${HOME}/.hint`]: pt
-      ? "Alguns arquivos ficam ocultos. Alguns comandos também.\nO gato tem algo a dizer: meow"
-      : "Some files are hidden. Some commands are too.\nThe cat has something to say: meow",
+      ? "Alguns arquivos ficam ocultos. Alguns comandos também.\nO gato tem algo a dizer: meow\nLeia .trail para explorar mais."
+      : "Some files are hidden. Some commands are too.\nThe cat has something to say: meow\nRead .trail to explore further.",
     [`${HOME}/games/favorites.txt`]: PINNED_GAMES.map(
       g => `${g.title} — ${g.label}`
     ).join("\n"),
@@ -106,6 +113,7 @@ export default function DesktopTerminal({
     "/home",
     HOME,
     "/site",
+    `${HOME}/.riddles`,
     ...DESKTOP_FOLDERS.map(f => `${HOME}/${f}`),
   ];
   const resolve = (raw: string) => {
@@ -240,6 +248,9 @@ export default function DesktopTerminal({
             ...directories
               .filter(
                 p => p !== path && p.slice(0, p.lastIndexOf("/")) === parent
+              )
+              .filter(
+                p => args.includes("-a") || !p.split("/").pop()?.startsWith(".")
               )
               .map(p => `${p.split("/").pop()}/`),
             ...Object.keys(files)

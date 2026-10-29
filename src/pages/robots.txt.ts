@@ -4,6 +4,9 @@ const getRobotsTxt = (sitemapURL: URL) => `
 User-agent: *
 Allow: /
 
+# Curious humans: /secrets/observatory.txt
+# Humanos curiosos: /secrets/observatory.txt
+
 Sitemap: ${sitemapURL.href}
 `;
 

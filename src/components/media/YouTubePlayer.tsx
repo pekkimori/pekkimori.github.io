@@ -162,8 +162,8 @@ export default function YouTubePlayer({
       {error && (
         <p className="media-playback-error" role="status">
           {lang === "pt"
-            ? "Vídeo indisponível aqui. Abra no YouTube pelo link abaixo."
-            : "This video cannot play here. Open it on YouTube using the link below."}
+            ? "Este vídeo está indisponível neste reprodutor."
+            : "This video is unavailable in this player."}
         </p>
       )}
     </div>

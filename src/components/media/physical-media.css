@@ -1,0 +1,415 @@
+/* A floating aperture overlays the display without changing its dimensions. */
+.screen-media-dock {
+  --slot-width: 228px;
+  --slot-height: 34px;
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  width: max-content;
+  height: 48px;
+  z-index: 90;
+  pointer-events: none;
+  animation: dock-appear 250ms ease both;
+}
+.dock-games {
+  --slot-width: 146px;
+  --slot-height: 32px;
+}
+.dock-music {
+  --slot-width: 184px;
+  --slot-height: 6px;
+}
+.screen-media-slot {
+  display: grid;
+  place-items: center;
+  width: var(--slot-fit-width, var(--slot-width));
+  max-width: calc(100vw - 40px);
+  height: 48px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  pointer-events: auto;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.slot-mouth {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: var(--slot-fit-height, var(--slot-height));
+  border: 3px solid;
+  border-color: color-mix(in srgb, var(--background) 75%, #000) var(--border)
+    var(--muted) var(--border);
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--background) 65%, #000);
+  box-shadow:
+    inset 0 4px 6px #000,
+    0 1px 0 color-mix(in srgb, var(--foreground) 20%, transparent),
+    0 9px 22px #0007;
+  transition:
+    border-color 180ms,
+    box-shadow 180ms;
+}
+.dock-anime .slot-mouth::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 5px;
+  background: linear-gradient(var(--secondary), var(--background));
+  border-bottom: 1px solid var(--border);
+}
+.dock-games .slot-mouth::after {
+  content: "";
+  position: absolute;
+  bottom: 2px;
+  left: 9px;
+  right: 9px;
+  height: 2px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--accent) 0 3px,
+    transparent 3px 8px
+  );
+  opacity: 0.65;
+}
+.dock-music .slot-mouth {
+  border-width: 1px;
+  border-radius: 4px;
+  box-shadow:
+    inset 0 1px 2px #000,
+    0 1px color-mix(in srgb, var(--foreground) 25%, transparent),
+    0 6px 15px #0007;
+}
+.screen-media-slot[data-over="true"] .slot-mouth,
+.screen-media-slot:focus-visible .slot-mouth {
+  border-color: var(--accent);
+  box-shadow:
+    0 0 0 5px color-mix(in srgb, var(--accent) 8%, transparent),
+    0 0 24px color-mix(in srgb, var(--accent) 35%, transparent),
+    inset 0 0 5px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+.is-inserting .slot-mouth {
+  animation: dock-read 220ms steps(2) infinite;
+}
+.physical-collection {
+  position: relative;
+}
+.physical-reset {
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 5px;
+  color: var(--muted) !important;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+.physical-reset:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.physical-media-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: 22px;
+  row-gap: 30px;
+}
+.physical-place {
+  min-width: 0;
+}
+.physical-anchor {
+  position: relative;
+  width: 100%;
+  height: 190px;
+  display: grid;
+  place-items: center;
+  border-bottom: 1px solid var(--control-border);
+  background: radial-gradient(
+    ellipse at 50% 85%,
+    color-mix(in srgb, var(--foreground) 3%, transparent),
+    transparent 65%
+  );
+}
+.physical-anchor::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  height: 10px;
+  width: 57%;
+  bottom: 20px;
+  border-radius: 50%;
+  filter: blur(10px);
+  background: #0003;
+  pointer-events: none;
+}
+.is-inserted .physical-anchor::after {
+  opacity: 0;
+}
+.physical-inserted-label {
+  position: absolute;
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  padding: 7px 12px;
+  border: 1px dashed var(--control-border);
+}
+.physical-caption {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 13px 4px;
+}
+.physical-caption > span {
+  flex: none;
+  font-size: 7px;
+  color: var(--muted);
+  opacity: 0.65;
+}
+.physical-caption strong {
+  display: block;
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+.physical-caption small {
+  display: block;
+  margin-top: 4px;
+  font-size: 8px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.physical-world {
+  position: fixed;
+  z-index: 400;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.physical-canvas {
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  inset: 0;
+  pointer-events: none;
+}
+.physical-hit {
+  position: fixed;
+  left: 0;
+  top: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  touch-action: none;
+  user-select: none;
+  pointer-events: auto;
+  cursor: grab;
+  -webkit-tap-highlight-color: transparent;
+}
+.physical-hit.is-held {
+  cursor: grabbing;
+  z-index: 2;
+}
+.physical-hit:focus-visible {
+  outline: 1px dashed var(--accent);
+  outline-offset: 9px;
+  background: color-mix(in srgb, var(--accent) 3%, transparent);
+}
+.physical-fallback {
+  position: relative;
+  z-index: 1;
+  width: 80%;
+  max-width: 190px;
+  min-height: 115px;
+  padding: 18px 12px;
+  color: var(--foreground);
+  border: 4px solid var(--border);
+  border-radius: 5px;
+  background: var(--secondary);
+  box-shadow: 5px 6px #0004;
+  text-align: left;
+  cursor: grab;
+  transform: perspective(600px) rotateX(-8deg) rotateY(-15deg);
+}
+.physical-fallback > span {
+  display: block;
+  font-size: 7px;
+  letter-spacing: 0.2em;
+  margin-bottom: 18px;
+  opacity: 0.7;
+}
+.physical-fallback strong {
+  display: block;
+  font-size: 12px;
+  font-weight: 400;
+}
+/* The browser's top-layer dialog takes over the display, never the music player. */
+.media-playback {
+  --control-border: var(--border);
+  --control-hover: var(--secondary);
+  position: fixed;
+  inset: 0;
+  width: 100dvw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: var(--foreground);
+  background: var(--background);
+  font: 12px/1.6 var(--font-mono);
+  overflow: hidden;
+}
+.media-playback[open] {
+  display: flex;
+  flex-direction: column;
+}
+.media-playback::backdrop {
+  background: var(--background);
+}
+.media-playback .playback-eject {
+  position: fixed;
+  top: max(16px, env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  max-width: calc(100% - 24px);
+  margin: 0;
+  padding: 10px 15px;
+  color: var(--foreground);
+  font: 10px/1.4 var(--font-mono);
+  background: color-mix(in srgb, var(--background) 92%, transparent);
+  border: 1px solid var(--border);
+  box-shadow: 0 5px 18px #0004;
+  backdrop-filter: blur(6px);
+}
+.playback-stage {
+  flex: 1;
+  display: grid;
+  align-items: center;
+  min-height: 0;
+  overflow: auto;
+  padding: 64px 18px 18px;
+  background: radial-gradient(
+    ellipse at center,
+    color-mix(in srgb, var(--accent) 4%, transparent),
+    transparent 75%
+  );
+}
+.playback-anime .playback-stage {
+  display: block;
+  padding: 0;
+}
+.playback-anime .youtube-player {
+  height: 100%;
+  min-height: 0;
+}
+.playback-games .tetris-screen {
+  width: clamp(125px, calc((100dvh - 315px) / 2), 230px);
+}
+.playback-games .snake-grid {
+  max-width: min(390px, calc(100dvh - 320px));
+  margin-inline: auto;
+}
+.playback-games .mines-screen {
+  max-width: min(390px, calc(100dvh - 320px));
+  margin-inline: auto;
+}
+.playback-games .arcade-game {
+  align-self: center;
+}
+@keyframes dock-appear {
+  from {
+    opacity: 0;
+    translate: 0 6px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+@keyframes dock-read {
+  to {
+    opacity: 0.4;
+  }
+}
+@container (max-width: 580px) {
+  .physical-media-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px 14px;
+  }
+  .collection-games .physical-media-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .physical-anchor {
+    height: 155px;
+  }
+  .collection-games .physical-anchor {
+    height: 150px;
+  }
+  .physical-caption {
+    gap: 7px;
+    padding-inline: 0;
+  }
+  .physical-caption strong {
+    font-size: 9px;
+  }
+  .physical-caption small {
+    font-size: 7px;
+  }
+  .physical-caption > span {
+    display: none;
+  }
+}
+@media (max-width: 640px) {
+  .screen-media-dock {
+    bottom: 18px;
+  }
+  .media-playback .playback-eject {
+    top: max(12px, env(safe-area-inset-top));
+    font-size: 9px;
+    padding: 8px 11px;
+  }
+  .playback-stage {
+    padding: 56px 12px 12px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .screen-media-dock,
+  .screen-media-dock * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Playback surfaces share the site's light and dark palette. */
+.media-playback .game-screen {
+  background: var(--background);
+  color: var(--foreground);
+  border-color: var(--border);
+}
+.media-playback .game-overlay {
+  background: color-mix(in srgb, var(--background) 92%, transparent);
+  color: var(--foreground);
+}
+.media-playback .game-overlay .media-button {
+  background: var(--accent);
+  color: var(--background);
+  border-color: var(--accent);
+}
+.music-player .music-player-video {
+  background: var(--background);
+  color: var(--foreground);
+}
+.music-player .music-preview {
+  color: var(--foreground);
+}

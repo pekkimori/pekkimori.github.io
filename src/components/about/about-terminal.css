@@ -811,21 +811,73 @@ html[data-theme="dark"] .retro-station {
   position: absolute;
   inset: 0;
   z-index: 0;
+  overflow: hidden;
   pointer-events: none;
-  opacity: 0.65;
-  /* Different tile sizes keep the static stars from forming a visible grid. */
-  background-image:
-    radial-gradient(1px 1px at 28px 47px, currentColor 45%, transparent 100%),
-    radial-gradient(1px 1px at 103px 79px, currentColor 30%, transparent 100%),
-    radial-gradient(
-      0.7px 0.7px at 61px 113px,
-      currentColor 45%,
-      transparent 100%
-    );
-  background-size:
-    173px 157px,
-    239px 211px,
-    293px 263px;
+}
+.terminal-sky-star {
+  position: absolute;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: var(--star-brightness);
+  animation: terminal-star-twinkle var(--twinkle-duration) ease-in-out
+    var(--twinkle-delay) infinite alternate;
+}
+@keyframes terminal-star-twinkle {
+  0%,
+  15% {
+    opacity: 0.12;
+    transform: scale(0.7);
+  }
+  75%,
+  100% {
+    opacity: var(--star-brightness);
+    transform: scale(1.15);
+  }
+}
+.terminal-sky-comet-path {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+.terminal-sky-comet {
+  position: absolute;
+  right: 0;
+  width: 110px;
+  height: 2px;
+  border-radius: 50%;
+  background: linear-gradient(90deg, transparent, currentColor);
+  filter: drop-shadow(0 0 3px currentColor);
+  opacity: 0;
+  animation: terminal-comet-flight var(--comet-duration) linear
+    var(--comet-delay) infinite;
+}
+@keyframes terminal-comet-flight {
+  0% {
+    opacity: 0;
+    transform: translateX(-120px);
+  }
+  2% {
+    opacity: 0.9;
+  }
+  12% {
+    opacity: 0.9;
+  }
+  18% {
+    opacity: 0;
+    transform: translateX(70vw);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(70vw);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .terminal-sky-star {
+    animation: none;
+  }
+  .terminal-sky-comet {
+    display: none;
+  }
 }
 .retro-workspace {
   z-index: 1;

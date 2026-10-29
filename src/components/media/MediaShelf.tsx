@@ -81,7 +81,7 @@ export function MediaObject({
   motif,
   showCaption = true,
 }: {
-  kind: "tape" | "cartridge" | "record";
+  kind: "tape" | "cartridge" | "record" | "disc";
   title: string;
   subtitle: string;
   index: number;
@@ -94,13 +94,27 @@ export function MediaObject({
     <button
       className={`media-item media-${kind} ${selected ? "is-loaded" : ""}`}
       onClick={onClick}
+      draggable
+      onDragStart={event => {
+        event.dataTransfer.effectAllowed = "move";
+        event.dataTransfer.setData(
+          "application/x-pekki-media",
+          JSON.stringify({
+            kind:
+              kind === "tape" ? "vhs" : kind === "cartridge" ? "console" : "cd",
+            index,
+          })
+        );
+      }}
       aria-pressed={!!selected}
       aria-label={showCaption ? undefined : `${title} — ${subtitle}`}
       style={{ "--media-tone": tones[index % tones.length] } as CSSProperties}
     >
       <span className="media-object" aria-hidden="true">
-        {kind === "record" && (
-          <span className="record-vinyl">
+        {(kind === "record" || kind === "disc") && (
+          <span
+            className={`record-vinyl ${kind === "disc" ? "compact-disc" : ""}`}
+          >
             <span>{String(index + 1).padStart(2, "0")}</span>
           </span>
         )}
@@ -110,7 +124,9 @@ export function MediaObject({
               ? "VHS / HI-FI"
               : kind === "cartridge"
                 ? "PEKKI / SOFT"
-                : "PEKKI RECORDS"}
+                : kind === "disc"
+                  ? "COMPACT DISC"
+                  : "PEKKI RECORDS"}
             <span>{String(index + 1).padStart(2, "0")}</span>
           </span>
           {kind === "tape" ? (
@@ -165,5 +181,33 @@ export function ShelfLabel({
       <span>{children}</span>
       <span>{String(count).padStart(2, "0")}</span>
     </div>
+  );
+}
+
+export function MediaProfileTag({
+  href,
+  avatar,
+  name,
+  detail,
+}: {
+  href: string;
+  avatar: string;
+  name: string;
+  detail: string;
+}) {
+  return (
+    <a
+      className="media-profile-tag"
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <img src={avatar} alt="" width={28} height={28} loading="lazy" />
+      <span>
+        <strong>{name}</strong>
+        <small>{detail}</small>
+      </span>
+      <span aria-hidden="true">↗</span>
+    </a>
   );
 }

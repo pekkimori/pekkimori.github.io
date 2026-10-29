@@ -83,7 +83,7 @@ export default function MusicPlayer({
   return (
     <aside
       className={`music-player ${expanded ? "is-expanded" : ""}`}
-      aria-label={pt ? "Toca-discos" : "Turntable"}
+      aria-label={pt ? "Reprodutor de CD" : "CD player"}
       style={
         { "--media-tone": tones[selected % tones.length] } as CSSProperties
       }
@@ -109,7 +109,7 @@ export default function MusicPlayer({
         </button>
         <button
           onClick={onClose}
-          aria-label={pt ? "Parar e ejetar disco" : "Stop and eject record"}
+          aria-label={pt ? "Parar e ejetar disco" : "Stop and eject disc"}
         >
           <X size={14} />
         </button>
@@ -162,7 +162,7 @@ export default function MusicPlayer({
                 onPlay();
               }}
               onPause={() => setState(2)}
-              onEnded={() => next(1)}
+              onEnded={() => setState(0)}
               onError={() => {
                 setAudioError(true);
                 setState(2);
@@ -182,24 +182,16 @@ export default function MusicPlayer({
               setState(value);
               if (value === 1) onPlay();
             }}
-            onEnded={() => next(1)}
+            onEnded={() => setState(0)}
             onError={() => setPreviewFor(record.videoId)}
           />
         )}
-        <a
-          className="music-source"
-          href={`https://www.youtube.com/watch?v=${record.videoId}`}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          {pt ? "Ouvir no YouTube" : "Listen on YouTube"} ↗
-        </a>
       </div>
       <div className="music-player-main">
         <button
           className={`mini-record ${playing ? "is-spinning" : ""}`}
           onClick={onOpenLibrary}
-          aria-label={pt ? "Abrir coleção de discos" : "Open record collection"}
+          aria-label={pt ? "Abrir coleção de discos" : "Open disc collection"}
         >
           <span />
         </button>
@@ -235,7 +227,7 @@ export default function MusicPlayer({
       <div className="music-player-transport">
         <button
           onClick={() => next(-1)}
-          aria-label={pt ? "Disco anterior" : "Previous record"}
+          aria-label={pt ? "Disco anterior" : "Previous disc"}
         >
           <SkipBack size={14} />
         </button>
@@ -258,7 +250,7 @@ export default function MusicPlayer({
         <span>{clock(duration)}</span>
         <button
           onClick={() => next(1)}
-          aria-label={pt ? "Próximo disco" : "Next record"}
+          aria-label={pt ? "Próximo disco" : "Next disc"}
         >
           <SkipForward size={14} />
         </button>

@@ -9,7 +9,7 @@ import {
   type MouseEvent,
   type ReactNode,
 } from "react";
-import { flushSync } from "react-dom";
+import { createPortal, flushSync } from "react-dom";
 import { ATLAS } from "@/data/about";
 import { ATLAS_PT } from "@/data/about-pt";
 import { DESKTOP_FOLDERS, type AppId } from "@/data/about-commands";
@@ -29,6 +29,9 @@ import type { LocalizedBook } from "../bookshelf/types";
 import BookReview from "../bookshelf/BookReview";
 import FlyingBook from "../bookshelf/FlyingBook";
 import { getBookPose, type BookFlight } from "../bookshelf/book-flight";
+import { useMediaMachine } from "../media/useMediaMachine";
+import MediaDock from "../media/MediaDock";
+import type { MediaKind } from "../media/media-catalog";
 import "./about-terminal.css";
 import "../terminal/crt-screen.css";
 
@@ -36,6 +39,7 @@ const AnimeArchive = lazy(() => import("../media/AnimeArchive"));
 const GameArchive = lazy(() => import("../media/GameArchive"));
 const MusicArchive = lazy(() => import("../media/MusicArchive"));
 const MusicPlayer = lazy(() => import("../media/MusicPlayer"));
+const MediaPlayback = lazy(() => import("../media/MediaPlayback"));
 const Bookshelf = lazy(() => import("../bookshelf/Bookshelf"));
 const Calendar = lazy(() => import("../Calendar"));
 const ConstellationMap = lazy(() => import("../ConstellationMap"));
@@ -151,7 +155,11 @@ export default function AboutTerminal({
   initialView?: PostsView;
   initialTag?: string;
 }) {
-  const [musicTrack, setMusicTrack] = useState<number | null>(null);
+  const musicDeck = useMediaMachine();
+  const animeDeck = useMediaMachine();
+  const gameDeck = useMediaMachine();
+  const mediaSlotRef = useRef<HTMLButtonElement>(null);
+  const musicTrack = musicDeck.loaded;
   const [musicPauseSignal, setMusicPauseSignal] = useState(0);
   const [animePauseSignal, setAnimePauseSignal] = useState(0);
   const pauseMusic = useCallback(
@@ -237,6 +245,23 @@ export default function AboutTerminal({
       });
   }, []);
   const active = windows.filter(w => !w.minimized).at(-1)?.id ?? "terminal";
+  const mediaKind: MediaKind | null =
+    active === "anime" || active === "games" || active === "music"
+      ? active
+      : null;
+  const deckFor = (kind: MediaKind) =>
+    kind === "anime" ? animeDeck : kind === "games" ? gameDeck : musicDeck;
+  const insertMedia = (kind: MediaKind, index: number) => {
+    deckFor(kind).insert(index);
+    if (kind === "games") pauseMusic();
+  };
+  const ejectPlayback = () => {
+    animeDeck.eject();
+    gameDeck.eject();
+    requestAnimationFrame(() =>
+      mediaSlotRef.current?.focus({ preventScroll: true })
+    );
+  };
   // Full-size windows keep the sky visible, so hide the layers they cover
   // instead of letting their transparent surface show other window content.
   const coveringWindowIndex = windows.reduce(
@@ -368,6 +393,8 @@ export default function AboutTerminal({
     });
   };
   const close = (id: WindowId) => {
+    if (id === "anime") animeDeck.eject();
+    if (id === "games") gameDeck.eject();
     if (id.startsWith("book:")) {
       const book = bookFor(id);
       if (!book) return;
@@ -806,7 +833,13 @@ export default function AboutTerminal({
               <p>{pt ? "Carregando cartuchos…" : "Loading cartridges…"}</p>
             }
           >
-            <GameArchive lang={lang} active={active === "games"} />
+            <GameArchive
+              lang={lang}
+              active={active === "games"}
+              deck={gameDeck}
+              dockRef={mediaSlotRef}
+              onInsert={index => insertMedia("games", index)}
+            />
           </Suspense>
         );
       case "bookshelf":
@@ -835,8 +868,10 @@ export default function AboutTerminal({
           >
             <MusicArchive
               lang={lang}
-              selected={musicTrack}
-              onSelect={setMusicTrack}
+              active={active === "music"}
+              deck={musicDeck}
+              dockRef={mediaSlotRef}
+              onInsert={index => insertMedia("music", index)}
             />
           </Suspense>
         );
@@ -848,8 +883,9 @@ export default function AboutTerminal({
             <AnimeArchive
               lang={lang}
               active={active === "anime"}
-              onPlay={pauseMusic}
-              pauseSignal={animePauseSignal}
+              deck={animeDeck}
+              dockRef={mediaSlotRef}
+              onInsert={index => insertMedia("anime", index)}
             />
           </Suspense>
         );
@@ -897,8 +933,11 @@ export default function AboutTerminal({
     focus(w.id);
   };
   return (
-    <div className="retro-station" onClick={interceptLink}>
-      <CRTScreenEffects />
+    <div
+      className={`retro-station ${mediaKind ? "has-media-slot" : ""}`}
+      onClick={interceptLink}
+    >
+      {mounted && createPortal(<CRTScreenEffects viewport />, document.body)}
       <div
         className="retro-screen"
         ref={screenRef}
@@ -1243,8 +1282,11 @@ export default function AboutTerminal({
             <MusicPlayer
               lang={lang}
               selected={musicTrack}
-              onSelect={setMusicTrack}
-              onClose={() => setMusicTrack(null)}
+              onSelect={index => {
+                musicDeck.choose(index);
+                open("music");
+              }}
+              onClose={musicDeck.eject}
               onOpenLibrary={() => open("music")}
               pauseSignal={musicPauseSignal}
               onPlay={() => setAnimePauseSignal(value => value + 1)}
@@ -1277,6 +1319,28 @@ export default function AboutTerminal({
           />
         )}
       </div>
+      {mediaKind && (
+        <MediaDock
+          kind={mediaKind}
+          lang={lang}
+          deck={deckFor(mediaKind)}
+          dockRef={mediaSlotRef}
+          onInsert={index => insertMedia(mediaKind, index)}
+          onEject={mediaKind === "music" ? musicDeck.eject : ejectPlayback}
+        />
+      )}
+      {(animeDeck.loaded !== null || gameDeck.loaded !== null) && (
+        <Suspense fallback={null}>
+          <MediaPlayback
+            kind={animeDeck.loaded !== null ? "anime" : "games"}
+            index={animeDeck.loaded ?? gameDeck.loaded ?? 0}
+            lang={lang}
+            onClose={ejectPlayback}
+            onPlay={pauseMusic}
+            pauseSignal={animePauseSignal}
+          />
+        </Suspense>
+      )}
     </div>
   );
 }
