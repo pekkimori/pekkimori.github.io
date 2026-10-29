@@ -1,22 +1,16 @@
-import { EGGS } from "./easter-eggs";
 // Hidden from help and commands.txt. Add a command here to publish an Easter egg.
 // These are playful discoveries, not passwords: browser source is public.
 export type SecretCommand = {
   name: string;
   output: { en: string; pt: string };
   effect?: "cat" | "night";
+  achievement?: string;
 };
 
 export const SECRET_COMMANDS: SecretCommand[] = [
-  ...EGGS.map(egg => ({
-    name: egg.answer,
-    output: {
-      en: `${egg.glyph} ${egg.reward.en}\n${egg.next ? `Next clue: cat ~/.riddles/${egg.next}.txt` : "Trail complete. Other doors: purr, root, seed, moon."}`,
-      pt: `${egg.glyph} ${egg.reward.pt}\n${egg.next ? `Próxima pista: cat ~/.riddles/${egg.next}.txt` : "Trilha completa. Outras portas: purr, root, seed, moon."}`,
-    },
-  })),
   {
     name: "meow",
+    achievement: "resident-cat",
     output: {
       en: " /\\_/\\\n( o.o )  You found the resident cat.\n > ^ <",
       pt: " /\\_/\\\n( o.o )  Você encontrou o gato residente.\n > ^ <",
@@ -25,6 +19,7 @@ export const SECRET_COMMANDS: SecretCommand[] = [
   },
   {
     name: "stardust",
+    achievement: "bottled-stardust",
     output: {
       en: "We are a way for the cosmos to know itself.\nNight mode unlocked.",
       pt: "Somos uma maneira de o cosmos conhecer a si mesmo.\nModo noturno desbloqueado.",
@@ -33,6 +28,7 @@ export const SECRET_COMMANDS: SecretCommand[] = [
   },
   {
     name: "sudo make me a sandwich",
+    achievement: "small-lunch",
     output: {
       en: "Okay. 🥪\nWith great power comes a very small lunch.",
       pt: "Claro. 🥪\nCom grandes poderes vem um pequeno almoço.",
@@ -51,7 +47,7 @@ export const DESKTOP_FOLDERS = [
   "music",
 ] as const;
 export type FolderId = (typeof DESKTOP_FOLDERS)[number];
-export type AppId = FolderId | "terminal";
+export type AppId = FolderId | "terminal" | "achievements";
 
 export const PUBLIC_COMMANDS = [
   ["help", "Show this command guide", "Mostrar este guia"],
@@ -129,19 +125,23 @@ export function websiteDestination(
   };
   target = aliases[target] ?? target;
   if (!target.startsWith("/")) {
-    if (!(WEBSITE_PAGES as readonly string[]).includes(target)) return null;
+    if (
+      target !== "achievements" &&
+      !(WEBSITE_PAGES as readonly string[]).includes(target)
+    )
+      return null;
     return target === "home" ? `/${lang}/` : `/${lang}/${target}`;
   }
   if (target === "/en" || target === "/pt") return `${target}/`;
   if (
-    /^\/(?:en|pt)\/(?:posts|tags|about|bookshelf|portfolio|search)(?:[?][^#\s]*)?$/.test(
+    /^\/(?:en|pt)\/(?:posts|tags|about|bookshelf|portfolio|search|achievements)(?:[?][^#\s]*)?$/.test(
       target
     ) ||
     /^\/(?:en|pt)\/(?:posts|tags)\/[a-z0-9/_-]+(?:[?][^#\s]*)?$/.test(target)
   )
     return target;
   if (
-    /^\/(?:posts|tags|about|bookshelf|portfolio|search)(?:[?][^#\s]*)?$/.test(
+    /^\/(?:posts|tags|about|bookshelf|portfolio|search|achievements)(?:[?][^#\s]*)?$/.test(
       target
     )
   )

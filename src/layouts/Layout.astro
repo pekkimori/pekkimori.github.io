@@ -11,6 +11,7 @@ import { StarsBackground } from "@/components/Stars";
 
 type Props = {
   title?: string;
+  noindex?: boolean;
   author?: string;
   profile?: string;
   description?: string;
@@ -24,6 +25,7 @@ type Props = {
 };
 
 const {
+  noindex = false,
   starryBackground = true,
   title = SITE.title,
   author = SITE.author,
@@ -84,6 +86,7 @@ const structuredData = {
     <meta name="title" content={title} />
     <meta name="description" content={description} />
     <meta name="author" content={author} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
     <link rel="sitemap" href="/sitemap-index.xml" />
 
     <!-- Open Graph / Facebook -->

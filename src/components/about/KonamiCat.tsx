@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { unlockAchievement } from "@/utils/achievements";
 
 const SEQUENCE = ["c", "a", "t"];
 
@@ -11,7 +12,6 @@ export default function KonamiCat() {
   const [triggered, setTriggered] = useState(false);
 
   useEffect(() => {
-    if (prefersReducedMotion()) return;
     let firedOnce = false;
     let cursor = 0;
 
@@ -26,7 +26,8 @@ export default function KonamiCat() {
         cursor += 1;
         if (cursor === SEQUENCE.length) {
           firedOnce = true;
-          setTriggered(true);
+          unlockAchievement("wandering-cat");
+          if (!prefersReducedMotion()) setTriggered(true);
         }
       } else {
         cursor = key === SEQUENCE[0] ? 1 : 0;

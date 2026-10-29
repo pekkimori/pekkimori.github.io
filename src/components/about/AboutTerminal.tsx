@@ -13,6 +13,10 @@ import { createPortal, flushSync } from "react-dom";
 import { ATLAS } from "@/data/about";
 import { ATLAS_PT } from "@/data/about-pt";
 import { DESKTOP_FOLDERS, type AppId } from "@/data/about-commands";
+import {
+  ACHIEVEMENT_EVENT,
+  type AchievementArrival,
+} from "@/utils/achievements";
 import GlobeCard from "./GlobeCard";
 import DesktopTerminal from "./DesktopTerminal";
 import { BookOpen, FileText, Moon, Sun, X } from "lucide-react";
@@ -40,6 +44,9 @@ const GameArchive = lazy(() => import("../media/GameArchive"));
 const MusicArchive = lazy(() => import("../media/MusicArchive"));
 const MusicPlayer = lazy(() => import("../media/MusicPlayer"));
 const MediaPlayback = lazy(() => import("../media/MediaPlayback"));
+const AchievementsShelf = lazy(
+  () => import("../achievements/AchievementsShelf")
+);
 const Bookshelf = lazy(() => import("../bookshelf/Bookshelf"));
 const Calendar = lazy(() => import("../Calendar"));
 const ConstellationMap = lazy(() => import("../ConstellationMap"));
@@ -74,6 +81,7 @@ const NAMES: Record<Lang, Record<AppId, string>> = {
     portfolio: "Portfolio",
     posts: "Posts",
     terminal: "Terminal",
+    achievements: "Achievements",
   },
   pt: {
     about: "Sobre mim",
@@ -85,6 +93,7 @@ const NAMES: Record<Lang, Record<AppId, string>> = {
     portfolio: "Portfólio",
     posts: "Publicações",
     terminal: "Terminal",
+    achievements: "Conquistas",
   },
 };
 
@@ -198,7 +207,7 @@ export default function AboutTerminal({
               x: 64,
               y: 12,
               minimized: false,
-              maximized: false,
+              maximized: initialTab === "achievements",
             },
           ]
   );
@@ -206,6 +215,7 @@ export default function AboutTerminal({
   const [selectedTag, setSelectedTag] = useState(initialTag);
   const [searchQuery, setSearchQuery] = useState("");
   const [catVisible, setCatVisible] = useState(false);
+  const [arrival, setArrival] = useState<AchievementArrival | null>(null);
   const [bookFlights, setBookFlights] = useState<BookFlight[]>([]);
   const nextBookFlightId = useRef(0);
   const screenRef = useRef<HTMLDivElement>(null);
@@ -313,7 +323,11 @@ export default function AboutTerminal({
       destination.replace(/\/$/, "")
     )
       window.history.pushState(null, "", destination);
-    sessionStorage.setItem("backUrl", destination);
+    try {
+      sessionStorage.setItem("backUrl", destination);
+    } catch {
+      /* Navigation also works when browser storage is blocked. */
+    }
   };
   const showTerminal = () => {
     routeTo("terminal");
@@ -392,6 +406,22 @@ export default function AboutTerminal({
       target?.focus({ preventScroll: true });
     });
   };
+  const openRef = useRef(open);
+  openRef.current = open;
+  useEffect(() => {
+    const found = (event: Event) => {
+      const discovery = (event as CustomEvent<AchievementArrival>).detail;
+      setArrival(discovery);
+      openRef.current("achievements");
+      setWindows(previous =>
+        previous.map(w =>
+          w.id === "achievements" ? { ...w, maximized: true } : w
+        )
+      );
+    };
+    window.addEventListener(ACHIEVEMENT_EVENT, found);
+    return () => window.removeEventListener(ACHIEVEMENT_EVENT, found);
+  }, []);
   const close = (id: WindowId) => {
     if (id === "anime") animeDeck.eject();
     if (id === "games") gameDeck.eject();
@@ -539,7 +569,8 @@ export default function AboutTerminal({
           ? `post:${article.href}`
           : section === "tags" || section === "search"
             ? "posts"
-            : (DESKTOP_FOLDERS as readonly string[]).includes(section)
+            : section === "achievements" ||
+                (DESKTOP_FOLDERS as readonly string[]).includes(section)
               ? (section as AppId)
               : "terminal";
       if (section === "search")
@@ -572,10 +603,16 @@ export default function AboutTerminal({
               },
         ];
       });
-      sessionStorage.setItem(
-        "backUrl",
-        window.location.pathname + window.location.search + window.location.hash
-      );
+      try {
+        sessionStorage.setItem(
+          "backUrl",
+          window.location.pathname +
+            window.location.search +
+            window.location.hash
+        );
+      } catch {
+        /* The current URL still restores the selected window. */
+      }
     };
     restoreLocation();
     window.addEventListener("popstate", restoreLocation);
@@ -638,7 +675,10 @@ export default function AboutTerminal({
       if (!book) return false;
       openBook(book);
     } else if (!section) showTerminal();
-    else if ((DESKTOP_FOLDERS as readonly string[]).includes(section))
+    else if (
+      section === "achievements" ||
+      (DESKTOP_FOLDERS as readonly string[]).includes(section)
+    )
       open(section as AppId);
     else return false;
     return true;
@@ -839,6 +879,20 @@ export default function AboutTerminal({
               deck={gameDeck}
               dockRef={mediaSlotRef}
               onInsert={index => insertMedia("games", index)}
+            />
+          </Suspense>
+        );
+      case "achievements":
+        return (
+          <Suspense
+            fallback={
+              <p>{pt ? "Abrindo o armário…" : "Opening the cabinet…"}</p>
+            }
+          >
+            <AchievementsShelf
+              lang={lang}
+              active={active === "achievements"}
+              arrival={arrival}
             />
           </Suspense>
         );

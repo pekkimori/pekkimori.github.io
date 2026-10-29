@@ -1,5 +1,15 @@
-import { EGGS } from "@/data/easter-eggs";
+import {
+  currentRiddle,
+  normalizeAnswer,
+  parseRiddleProgress,
+  riddleNote,
+  RIDDLE_STORAGE_KEY,
+  RIDDLE_TRAILS,
+  type RiddleProgress,
+  type TrailId,
+} from "@/utils/riddles";
 import { useEffect, useRef, useState } from "react";
+import { unlockAchievement } from "@/utils/achievements";
 import { navigate } from "astro:transitions/client";
 import { ANIME, ATLAS, FAVORITE_SONGS, PINNED_GAMES } from "@/data/about";
 import { ANIME_PT, ATLAS_PT } from "@/data/about-pt";
@@ -57,6 +67,10 @@ export default function DesktopTerminal({
   const [draft, setDraft] = useState("");
   const [secrets, setSecrets] = useState<Record<string, string>>({});
   const [storageReady, setStorageReady] = useState(false);
+  const [progress, setProgress] = useState<RiddleProgress>(() =>
+    parseRiddleProgress(null)
+  );
+  const [activeTrail, setActiveTrail] = useState<TrailId | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const help = PUBLIC_COMMANDS.map(
@@ -67,16 +81,16 @@ export default function DesktopTerminal({
     : "rafael mori\npolymath · INTJ 145 · truth · energy · love\nbuilding systems, exploring brains.";
   const files: Record<string, string> = {
     ...Object.fromEntries(
-      EGGS.map(egg => [`${HOME}/.riddles/${egg.id}.txt`, egg.riddle[lang]])
+      RIDDLE_TRAILS.map(trail => [
+        `${HOME}/${trail.path}`,
+        riddleNote(trail.id, progress, lang),
+      ])
     ),
-    [`${HOME}/.trail`]: pt
-      ? "cd ~/.riddles → ls → cat moon.txt\nArquivos reais também escondem pistas: /secrets/observatory.txt"
-      : "cd ~/.riddles → ls → cat moon.txt\nReal files hide clues too: /secrets/observatory.txt",
     [`${HOME}/about/intro.txt`]: intro,
     [`${HOME}/commands.txt`]: help,
     [`${HOME}/.hint`]: pt
-      ? "Alguns arquivos ficam ocultos. Alguns comandos também.\nO gato tem algo a dizer: meow\nLeia .trail para explorar mais."
-      : "Some files are hidden. Some commands are too.\nThe cat has something to say: meow\nRead .trail to explore further.",
+      ? "Pastas também guardam notas nas margens.\nExperimente ls -a dentro de uma pasta.\ncat lê o que a área de trabalho não mostra."
+      : "Folders keep notes in their margins, too.\nTry ls -a inside a folder.\ncat reads what the desktop does not show.",
     [`${HOME}/games/favorites.txt`]: PINNED_GAMES.map(
       g => `${g.title} — ${g.label}`
     ).join("\n"),
@@ -113,7 +127,6 @@ export default function DesktopTerminal({
     "/home",
     HOME,
     "/site",
-    `${HOME}/.riddles`,
     ...DESKTOP_FOLDERS.map(f => `${HOME}/${f}`),
   ];
   const resolve = (raw: string) => {
@@ -164,6 +177,15 @@ export default function DesktopTerminal({
     } catch {
       /* Commands remain available for this visit if storage is blocked. */
     }
+    try {
+      setProgress(
+        parseRiddleProgress(
+          JSON.parse(localStorage.getItem(RIDDLE_STORAGE_KEY) ?? "null")
+        )
+      );
+    } catch {
+      /* Malformed or unavailable storage starts a fresh set of notes. */
+    }
     setStorageReady(true);
   }, []);
   useEffect(() => {
@@ -174,6 +196,14 @@ export default function DesktopTerminal({
     if (lines.length)
       scrollRef.current?.scrollTo(0, scrollRef.current.scrollHeight);
   }, [lines]);
+  useEffect(() => {
+    if (!storageReady) return;
+    try {
+      localStorage.setItem(RIDDLE_STORAGE_KEY, JSON.stringify(progress));
+    } catch {
+      /* Puzzle progress remains available for this session. */
+    }
+  }, [progress, storageReady]);
   const saveSecrets = (next: Record<string, string>) => {
     setSecrets(next);
     try {
@@ -195,18 +225,59 @@ export default function DesktopTerminal({
     let output = "";
     const [command, ...args] = raw.split(/\s+/);
     const arg = args.join(" ").replace(/^(["'])(.*)\1$/, "$2");
+    const egg = activeTrail ? currentRiddle(activeTrail, progress) : undefined;
+    const guess = command.toLowerCase() === "answer" ? arg : raw;
+    const correct =
+      egg && normalizeAnswer(guess) === normalizeAnswer(egg.answer);
     const secret = SECRET_COMMANDS.find(s => s.name === raw.toLowerCase());
-    if (secret) {
+    if (correct && activeTrail) {
+      const trail = RIDDLE_TRAILS.find(t => t.id === activeTrail)!;
+      const next = { ...progress, [activeTrail]: progress[activeTrail] + 1 };
+      setProgress(next);
+      setActiveTrail(null);
+      unlockAchievement(egg.id);
+      output = `${egg.glyph} ${egg.reward[lang]}\n\n${
+        currentRiddle(activeTrail, next)
+          ? `${pt ? "A nota mudou. Leia de novo:" : "The note has changed. Read it again:"} cat ~/${trail.path}`
+          : pt
+            ? "Trilha completa. Outras pastas podem guardar mais notas."
+            : "Trail complete. Other folders may hold more notes."
+      }`;
+    } else if (secret) {
       output = secret.output[lang];
       if (secret.effect === "cat") cat();
       if (secret.effect === "night") theme("dark");
+      if (secret.achievement) unlockAchievement(secret.achievement);
     } else if (
       Object.hasOwn(secrets, raw.toLowerCase()) &&
-      !COMMANDS.includes(command.toLowerCase())
+      ![...COMMANDS, "answer", "hint", "achievements"].includes(
+        command.toLowerCase()
+      )
     )
       output = secrets[raw.toLowerCase()];
     else
       switch (command.toLowerCase()) {
+        case "achievements":
+          open("achievements");
+          break;
+        case "answer":
+          output = !egg
+            ? pt
+              ? "Leia uma nota escondida com cat antes de responder."
+              : "Read a hidden note with cat before answering."
+            : !arg
+              ? "answer <answer>"
+              : pt
+                ? "A nota permanece igual. Tente novamente ou digite hint."
+                : "The note stays unchanged. Try again, or type hint.";
+          break;
+        case "hint":
+          output = egg
+            ? egg.hint[lang]
+            : pt
+              ? "Leia uma nota escondida com cat primeiro."
+              : "Read a hidden note with cat first.";
+          break;
         case "help":
           output = help;
           break;
@@ -279,6 +350,8 @@ export default function DesktopTerminal({
           const path = resolve(arg);
           if (Object.hasOwn(files, path)) {
             output = files[path];
+            const trail = RIDDLE_TRAILS.find(t => `${HOME}/${t.path}` === path);
+            if (trail) setActiveTrail(trail.id);
           } else
             output = `cat: ${arg}: ${pt ? "arquivo não encontrado" : "file not found"}`;
           break;
@@ -319,7 +392,7 @@ export default function DesktopTerminal({
           }
           if (path === `${HOME}/commands.txt` || arg === "commands")
             output = help;
-          else if (arg === "terminal") open("terminal");
+          else if (arg === "terminal" || arg === "achievements") open(arg);
           else if (
             (directories.includes(path) || Object.hasOwn(files, path)) &&
             folderFor(path)
@@ -344,6 +417,9 @@ export default function DesktopTerminal({
           ) {
             output = [
               ...COMMANDS,
+              "answer",
+              "hint",
+              "achievements",
               ...SECRET_COMMANDS.map(s => s.name),
             ].includes(name)
               ? pt
@@ -495,8 +571,10 @@ export default function DesktopTerminal({
                         .map(p => p.split("/").pop()!),
                     ];
               const options = parts.length ? candidates : COMMANDS;
-              const matches = [...new Set(options)].filter(option =>
-                option.startsWith(prefix)
+              const matches = [...new Set(options)].filter(
+                option =>
+                  option.startsWith(prefix) &&
+                  (!option.startsWith(".") || prefix.startsWith("."))
               );
               if (matches.length === 1) {
                 event.preventDefault();

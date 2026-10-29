@@ -335,6 +335,7 @@ html[data-theme="dark"] .retro-station {
   margin-inline: auto;
   overflow-wrap: anywhere;
 }
+.retro-window[data-app="achievements"] .retro-window-content,
 .retro-window[data-app="bookshelf"] .retro-window-content,
 .retro-window[data-app="portfolio"] .retro-window-content {
   max-width: 1120px;

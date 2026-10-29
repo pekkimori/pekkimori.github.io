@@ -22,7 +22,11 @@ export default defineConfig({
   redirects: {
     "/en/posts/preface-and-premises": "/en/posts/magnum-opus/",
   },
-  integrations: [sitemap(), react(), mdx()],
+  integrations: [
+    sitemap({ filter: page => !/\/achievements\/?$/.test(page) }),
+    react(),
+    mdx(),
+  ],
   markdown: {
     remarkPlugins: [
       remarkMath,
