@@ -118,7 +118,7 @@ export default function PhysicalMediaCollection({
                       ? "VHS"
                       : kind === "games"
                         ? "16 BIT"
-                        : "CD"}
+                        : "VINYL"}
                   </span>
                   <strong>{item.title}</strong>
                 </button>

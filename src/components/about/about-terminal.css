@@ -842,33 +842,27 @@ html[data-theme="dark"] .retro-station {
 .terminal-sky-comet {
   position: absolute;
   right: 0;
-  width: 110px;
-  height: 2px;
+  width: var(--comet-length);
+  height: 1px;
   border-radius: 50%;
   background: linear-gradient(90deg, transparent, currentColor);
-  filter: drop-shadow(0 0 3px currentColor);
   opacity: 0;
-  animation: terminal-comet-flight var(--comet-duration) linear
-    var(--comet-delay) infinite;
+  animation: terminal-comet-flight var(--comet-duration) linear both;
 }
 @keyframes terminal-comet-flight {
   0% {
     opacity: 0;
-    transform: translateX(-120px);
-  }
-  2% {
-    opacity: 0.9;
-  }
-  12% {
-    opacity: 0.9;
+    transform: translateX(0);
   }
   18% {
-    opacity: 0;
-    transform: translateX(70vw);
+    opacity: var(--comet-brightness);
+  }
+  45% {
+    opacity: var(--comet-brightness);
   }
   100% {
     opacity: 0;
-    transform: translateX(70vw);
+    transform: translateX(var(--comet-distance));
   }
 }
 @media (prefers-reduced-motion: reduce) {

@@ -71,10 +71,11 @@ export function createMediaPhysics({
   const renderer = new THREE.WebGLRenderer({
     canvas,
     alpha: true,
-    antialias: true,
+    antialias: false,
     powerPreference: "low-power",
   });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  // One rendered pixel spans two CSS pixels, including on Retina displays.
+  renderer.setPixelRatio(0.5);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.setClearColor(0x000000, 0);
   const scene = new THREE.Scene();
@@ -102,7 +103,9 @@ export function createMediaPhysics({
   let dirty = true;
   let previousClip = "";
   const bodies: Body[] = items.map((item, i) => {
-    const { group, dimensions } = makeMediaObject(kind, item);
+    const { group, dimensions } = makeMediaObject(kind, item, undefined, () => {
+      dirty = true;
+    });
     scene.add(group);
     return {
       item,
@@ -135,7 +138,9 @@ export function createMediaPhysics({
     for (const body of bodies) {
       scene.remove(body.mesh);
       disposeMediaScene(body.mesh);
-      body.mesh = makeMediaObject(kind, body.item).group;
+      body.mesh = makeMediaObject(kind, body.item, undefined, () => {
+        dirty = true;
+      }).group;
       scene.add(body.mesh);
     }
     dirty = true;

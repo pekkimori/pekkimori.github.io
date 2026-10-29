@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 
 // A stable seed keeps server rendering and hydration in agreement, without tiles.
 let seed = 48271;
@@ -14,15 +14,54 @@ const stars = Array.from({ length: 180 }, () => ({
   delay: `${-random() * 10}s`,
   brightness: 0.45 + random() * 0.55,
 }));
-const comets = Array.from({ length: 4 }, (_, index) => ({
-  left: `${12 + random() * 70}%`,
-  top: `${5 + random() * 48}%`,
-  duration: `${9 + random() * 7}s`,
-  delay: `${index * 2.7}s`,
-  angle: `${25 + random() * 25}deg`,
-}));
+interface Comet {
+  id: number;
+  style: CSSProperties;
+}
 
 export default function TerminalSky() {
+  const [comet, setComet] = useState<Comet | null>(null);
+
+  useEffect(() => {
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let timeout: ReturnType<typeof setTimeout>;
+
+    const schedule = () => {
+      clearTimeout(timeout);
+      setComet(null);
+      if (document.hidden || reducedMotion.matches) return;
+
+      // Quiet intervals apply on arrival too, so a meteor feels like a chance sighting.
+      timeout = setTimeout(
+        () => {
+          setComet({
+            id: Date.now(),
+            style: {
+              left: `${15 + Math.random() * 70}%`,
+              top: `${12 + Math.random() * 65}%`,
+              transform: `rotate(${Math.random() * 360}deg)`,
+              "--comet-duration": `${0.6 + Math.random() * 0.4}s`,
+              "--comet-length": `${26 + Math.random() * 30}px`,
+              "--comet-distance": `${100 + Math.random() * 130}px`,
+              "--comet-brightness": 0.18 + Math.random() * 0.14,
+            } as CSSProperties,
+          });
+          timeout = setTimeout(schedule, 1000);
+        },
+        35000 + Math.random() * 60000
+      );
+    };
+
+    schedule();
+    document.addEventListener("visibilitychange", schedule);
+    reducedMotion.addEventListener("change", schedule);
+    return () => {
+      clearTimeout(timeout);
+      document.removeEventListener("visibilitychange", schedule);
+      reducedMotion.removeEventListener("change", schedule);
+    };
+  }, []);
+
   return (
     <div className="terminal-sky" aria-hidden="true">
       {stars.map((star, index) => (
@@ -42,23 +81,15 @@ export default function TerminalSky() {
           }
         />
       ))}
-      {comets.map((comet, index) => (
+      {comet && (
         <span
-          key={index}
+          key={comet.id}
           className="terminal-sky-comet-path"
-          style={
-            {
-              left: comet.left,
-              top: comet.top,
-              transform: `rotate(${comet.angle})`,
-              "--comet-duration": comet.duration,
-              "--comet-delay": comet.delay,
-            } as CSSProperties
-          }
+          style={comet.style}
         >
           <span className="terminal-sky-comet" />
         </span>
-      ))}
+      )}
     </div>
   );
 }

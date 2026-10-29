@@ -1,5 +1,6 @@
 import type { CSSProperties, Ref } from "react";
 import type { Lang, LocalizedBook, ShelfView } from "./types";
+import PixelCover from "./PixelCover";
 
 const DESKTOP_PROFILES = [
   { coverHeight: 248 },
@@ -111,6 +112,7 @@ export default function Book3D({
       ref={innerRef}
       className={["book-3d", className].filter(Boolean).join(" ")}
       data-binding-texture={getBindingTexture(book.slug)}
+      data-binding={book.binding ?? "cloth"}
       style={{
         width: metrics.coverWidth,
         height: metrics.coverHeight,
@@ -120,6 +122,11 @@ export default function Book3D({
         ["--spine-thickness" as never]: `${metrics.spineWidth}px`,
         ["--spine-offset-x" as never]: "calc(var(--spine-thickness) / 2)",
         ["--spine-title-size" as never]: `${Math.min(5.4, 110 / titleLength)}cqh`,
+        ["--book-tone" as never]:
+          book.palette?.cloth ?? book.spineColor ?? "#42635b",
+        ["--book-ink" as never]: book.palette?.ink ?? "#f5e7c9",
+        ["--book-accent" as never]: book.palette?.accent ?? "#cfab68",
+        ["--book-paper" as never]: book.palette?.paper ?? "#e7d7b5",
         ...style,
       }}
       aria-hidden={true}
@@ -130,6 +137,7 @@ export default function Book3D({
           <span className="book-cover-title">{book.title}</span>
           <span className="book-cover-year">{book.originalYear}</span>
         </div>
+        {book.cover && <PixelCover cover={book.cover} />}
       </div>
 
       <div className="book-face book-face-back" />
@@ -137,11 +145,31 @@ export default function Book3D({
       <div className="book-face book-face-bottom" />
       <div className="book-face book-face-pages" />
 
+      {/* Separate board edges overhang the recessed page block. */}
+      {(["front", "back"] as const).map(side => (
+        <div key={side} className={`book-board-rims book-board-rims-${side}`}>
+          <span className="book-board-rim book-board-rim-top" />
+          <span className="book-board-rim book-board-rim-bottom" />
+          <span className="book-board-rim book-board-rim-fore" />
+        </div>
+      ))}
+
       <div className="book-face book-face-spine">
         <div className="book-spine-label">
           <span className="book-spine-title">{book.title}</span>
         </div>
       </div>
+      <span className="book-spine-bevel book-spine-bevel-front" />
+      <span className="book-spine-bevel book-spine-bevel-back" />
+      {[0.12, 0.88].map(position => (
+        <span
+          key={position}
+          className="book-raised-band"
+          style={{ top: `${position * 100}%` }}
+        />
+      ))}
+      <span className="book-headband" />
+      <span className="book-ribbon" />
     </div>
   );
 }

@@ -7,6 +7,7 @@ export type PhysicalMedia = {
   title: string;
   subtitle: string;
   motif?: string;
+  thumbnail?: string;
 };
 export const CARTRIDGES = [
   {
@@ -41,6 +42,7 @@ export function mediaCatalog(
       index,
       title: item.title,
       subtitle: pt ? ANIME_TAPES[index].scenePt : ANIME_TAPES[index].scene,
+      thumbnail: `https://i.ytimg.com/vi/${ANIME_TAPES[index].videoId}/mqdefault.jpg`,
     }));
   if (kind === "games")
     return CARTRIDGES.map((item, index) => ({
@@ -53,6 +55,7 @@ export function mediaCatalog(
     index,
     title: song.title,
     subtitle: song.artist,
+    thumbnail: `https://i.ytimg.com/vi/${RECORDS[index].videoId}/mqdefault.jpg`,
   }));
 }
 export function searchMedia(item: PhysicalMedia, query: string) {

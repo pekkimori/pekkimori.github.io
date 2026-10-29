@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import {
-  ChevronDown,
-  ChevronUp,
+  Disc3,
+  DiscAlbum,
+  ListMusic,
   Pause,
   Play,
   SkipBack,
@@ -40,11 +41,29 @@ export default function MusicPlayer({
   const [audioError, setAudioError] = useState(false);
   const preview = previewFor === record.videoId;
   const previewTrack = RECORD_PREVIEWS[selected];
-  const [expanded, setExpanded] = useState(true),
+  const menu = useRef<HTMLDivElement>(null);
+  const trigger = useRef<HTMLButtonElement>(null);
+  const panel = useRef<HTMLElement>(null);
+  const panelId = useId();
+  const [expanded, setExpanded] = useState(false),
     [state, setState] = useState(-1),
     [time, setTime] = useState(0),
     [duration, setDuration] = useState(0),
     [volume, setVolume] = useState(65);
+  const dismiss = () => {
+    setExpanded(false);
+    trigger.current?.focus();
+  };
+  useEffect(() => {
+    if (!expanded) return;
+    panel.current?.focus();
+    const outsideClick = (event: globalThis.PointerEvent) => {
+      if (event.target instanceof Node && !menu.current?.contains(event.target))
+        setExpanded(false);
+    };
+    document.addEventListener("pointerdown", outsideClick);
+    return () => document.removeEventListener("pointerdown", outsideClick);
+  }, [expanded]);
   const volumeRef = useRef(volume);
   volumeRef.current = volume;
   const lastPause = useRef(pauseSignal);
@@ -81,181 +100,207 @@ export default function MusicPlayer({
     `${Math.floor(n / 60)}:${String(Math.floor(n % 60)).padStart(2, "0")}`;
   const playing = state === 1;
   return (
-    <aside
-      className={`music-player ${expanded ? "is-expanded" : ""}`}
-      aria-label={pt ? "Reprodutor de CD" : "CD player"}
+    <div
+      ref={menu}
+      className="music-menu"
+      onKeyDown={event => {
+        if (event.key === "Escape" && expanded) {
+          event.preventDefault();
+          event.stopPropagation();
+          dismiss();
+        }
+      }}
+      onBlur={event => {
+        if (!event.currentTarget.contains(event.relatedTarget))
+          setExpanded(false);
+      }}
       style={
         { "--media-tone": tones[selected % tones.length] } as CSSProperties
       }
     >
-      <div className="music-player-top">
-        <span>
-          <i className={`status-light ${playing ? "is-on" : ""}`} />
-          {pt ? "TOCANDO NO SEU CANTO" : "SOUNDTRACK TO YOUR CORNER"}
-        </span>
-        <button
-          onClick={() => setExpanded(v => !v)}
-          aria-label={
-            expanded
+      <button
+        ref={trigger}
+        type="button"
+        className={`music-menu-trigger ${playing ? "is-playing" : ""}`}
+        aria-label={pt ? "Controles da música" : "Song controls"}
+        title={`${song.title} — ${song.artist}`}
+        aria-expanded={expanded}
+        aria-controls={panelId}
+        aria-haspopup="dialog"
+        onClick={() => setExpanded(value => !value)}
+      >
+        <Disc3 size={16} aria-hidden="true" />
+        {playing && <i className="music-menu-indicator" aria-hidden="true" />}
+      </button>
+      <section
+        ref={panel}
+        id={panelId}
+        className="music-player"
+        role="dialog"
+        aria-label={pt ? "Controles da música" : "Song controls"}
+        tabIndex={-1}
+        hidden={!expanded}
+      >
+        <div className="music-player-top">
+          <span>
+            <i className={`status-light ${playing ? "is-on" : ""}`} />
+            {playing
               ? pt
-                ? "Recolher player"
-                : "Collapse player"
+                ? "TOCANDO AGORA"
+                : "NOW PLAYING"
               : pt
-                ? "Expandir player"
-                : "Expand player"
-          }
-        >
-          {expanded ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
-        </button>
-        <button
-          onClick={onClose}
-          aria-label={pt ? "Parar e ejetar disco" : "Stop and eject disc"}
-        >
-          <X size={14} />
-        </button>
-      </div>
-      <div className="music-player-video" hidden={!expanded}>
-        {preview ? (
-          <div className="music-preview">
-            <span
-              className={`preview-vinyl ${playing ? "is-spinning" : ""}`}
-              aria-hidden="true"
-            >
-              <i />
-            </span>
-            <strong>
-              {pt ? "Prévia do Apple Music" : "Apple Music preview"}
-            </strong>
-            <span role="status">
-              {audioError
-                ? pt
-                  ? "Prévia indisponível. Abra a música pelo link abaixo."
-                  : "Preview unavailable. Open the song using the link below."
-                : pt
-                  ? "Faixa completa indisponível neste player."
-                  : "Full track unavailable in this player."}
-            </span>
-            <a
-              href={previewTrack.href}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {pt
-                ? "Música completa no Apple Music"
-                : "Full song on Apple Music"}{" "}
-              ↗
-            </a>
-            <audio
-              key={previewTrack.src}
-              ref={audio}
-              src={previewTrack.src}
-              autoPlay
-              preload="metadata"
-              onLoadedMetadata={() => {
-                if (audio.current) {
-                  audio.current.volume = volumeRef.current / 100;
-                  setDuration(audio.current.duration);
-                }
+                ? "REPRODUTOR DE MÚSICA"
+                : "MUSIC PLAYER"}
+          </span>
+          <button
+            type="button"
+            onClick={dismiss}
+            aria-label={pt ? "Fechar controles" : "Close song controls"}
+          >
+            <X size={14} />
+          </button>
+        </div>
+        <div className="music-player-video">
+          {preview ? (
+            <div className="music-preview">
+              <span
+                className={`preview-vinyl ${playing ? "is-spinning" : ""}`}
+                aria-hidden="true"
+              >
+                <i />
+              </span>
+              <strong>
+                {pt ? "Prévia do Apple Music" : "Apple Music preview"}
+              </strong>
+              <span role="status">
+                {audioError
+                  ? pt
+                    ? "Prévia indisponível. Abra a música pelo link abaixo."
+                    : "Preview unavailable. Open the song using the link below."
+                  : pt
+                    ? "Faixa completa indisponível neste player."
+                    : "Full track unavailable in this player."}
+              </span>
+              <a
+                href={previewTrack.href}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {pt
+                  ? "Música completa no Apple Music"
+                  : "Full song on Apple Music"}{" "}
+                ↗
+              </a>
+              <audio
+                key={previewTrack.src}
+                ref={audio}
+                src={previewTrack.src}
+                autoPlay
+                preload="metadata"
+                onLoadedMetadata={() => {
+                  if (audio.current) {
+                    audio.current.volume = volumeRef.current / 100;
+                    setDuration(audio.current.duration);
+                  }
+                }}
+                onPlay={() => {
+                  setState(1);
+                  onPlay();
+                }}
+                onPause={() => setState(2)}
+                onEnded={() => setState(0)}
+                onError={() => {
+                  setAudioError(true);
+                  setState(2);
+                }}
+              />
+            </div>
+          ) : (
+            <YouTubePlayer
+              videoId={record.videoId}
+              title={`${song.title} — ${song.artist}`}
+              lang={lang}
+              onReady={p => {
+                player.current = p;
+                p?.setVolume(volumeRef.current);
               }}
-              onPlay={() => {
-                setState(1);
-                onPlay();
+              onState={value => {
+                setState(value);
+                if (value === 1) onPlay();
               }}
-              onPause={() => setState(2)}
               onEnded={() => setState(0)}
-              onError={() => {
-                setAudioError(true);
-                setState(2);
-              }}
+              onError={() => setPreviewFor(record.videoId)}
             />
-          </div>
-        ) : (
-          <YouTubePlayer
-            videoId={record.videoId}
-            title={`${song.title} — ${song.artist}`}
-            lang={lang}
-            onReady={p => {
-              player.current = p;
-              p?.setVolume(volumeRef.current);
+          )}
+        </div>
+        <div className="music-player-main">
+          <button
+            className={`mini-record ${playing ? "is-spinning" : ""}`}
+            onClick={onOpenLibrary}
+            aria-label={pt ? "Abrir coleção de discos" : "Open disc collection"}
+          >
+            <span />
+          </button>
+          <button className="music-now-playing" onClick={onOpenLibrary}>
+            <strong>{song.title}</strong>
+            <small>
+              {song.artist}
+              {preview ? (pt ? " · prévia" : " · preview") : ""}
+            </small>
+          </button>
+          <button
+            className="music-toggle"
+            aria-label={
+              playing
+                ? pt
+                  ? "Pausar música"
+                  : "Pause music"
+                : pt
+                  ? "Reproduzir música"
+                  : "Play music"
+            }
+            onClick={() => {
+              if (preview && audio.current) {
+                if (playing) audio.current.pause();
+                else void audio.current.play().catch(() => setState(2));
+              } else if (playing) player.current?.pauseVideo();
+              else player.current?.playVideo();
             }}
-            onState={value => {
-              setState(value);
-              if (value === 1) onPlay();
+          >
+            {playing ? <Pause size={18} /> : <Play size={18} />}
+          </button>
+        </div>
+        <div className="music-player-transport">
+          <button
+            onClick={() => next(-1)}
+            aria-label={pt ? "Disco anterior" : "Previous disc"}
+          >
+            <SkipBack size={14} />
+          </button>
+          <span>{clock(time)}</span>
+          <input
+            type="range"
+            min={0}
+            max={duration || 1}
+            step={1}
+            value={Math.min(time, duration || 1)}
+            disabled={!duration}
+            onChange={e => {
+              const t = Number(e.target.value);
+              setTime(t);
+              if (preview && audio.current) audio.current.currentTime = t;
+              else player.current?.seekTo(t, true);
             }}
-            onEnded={() => setState(0)}
-            onError={() => setPreviewFor(record.videoId)}
+            aria-label={pt ? "Posição da música" : "Song position"}
           />
-        )}
-      </div>
-      <div className="music-player-main">
-        <button
-          className={`mini-record ${playing ? "is-spinning" : ""}`}
-          onClick={onOpenLibrary}
-          aria-label={pt ? "Abrir coleção de discos" : "Open disc collection"}
-        >
-          <span />
-        </button>
-        <button className="music-now-playing" onClick={onOpenLibrary}>
-          <strong>{song.title}</strong>
-          <small>
-            {song.artist}
-            {preview ? (pt ? " · prévia" : " · preview") : ""}
-          </small>
-        </button>
-        <button
-          className="music-toggle"
-          aria-label={
-            playing
-              ? pt
-                ? "Pausar música"
-                : "Pause music"
-              : pt
-                ? "Reproduzir música"
-                : "Play music"
-          }
-          onClick={() => {
-            if (preview && audio.current) {
-              if (playing) audio.current.pause();
-              else void audio.current.play().catch(() => setState(2));
-            } else if (playing) player.current?.pauseVideo();
-            else player.current?.playVideo();
-          }}
-        >
-          {playing ? <Pause size={18} /> : <Play size={18} />}
-        </button>
-      </div>
-      <div className="music-player-transport">
-        <button
-          onClick={() => next(-1)}
-          aria-label={pt ? "Disco anterior" : "Previous disc"}
-        >
-          <SkipBack size={14} />
-        </button>
-        <span>{clock(time)}</span>
-        <input
-          type="range"
-          min={0}
-          max={duration || 1}
-          step={1}
-          value={Math.min(time, duration || 1)}
-          disabled={!duration}
-          onChange={e => {
-            const t = Number(e.target.value);
-            setTime(t);
-            if (preview && audio.current) audio.current.currentTime = t;
-            else player.current?.seekTo(t, true);
-          }}
-          aria-label={pt ? "Posição da música" : "Song position"}
-        />
-        <span>{clock(duration)}</span>
-        <button
-          onClick={() => next(1)}
-          aria-label={pt ? "Próximo disco" : "Next disc"}
-        >
-          <SkipForward size={14} />
-        </button>
-      </div>
-      {expanded && (
+          <span>{clock(duration)}</span>
+          <button
+            onClick={() => next(1)}
+            aria-label={pt ? "Próximo disco" : "Next disc"}
+          >
+            <SkipForward size={14} />
+          </button>
+        </div>
         <div className="music-player-detail">
           <span>
             {record.album} / {record.year}
@@ -277,7 +322,23 @@ export default function MusicPlayer({
             />
           </label>
         </div>
-      )}
-    </aside>
+        <div className="music-player-actions">
+          <button
+            type="button"
+            onClick={() => {
+              dismiss();
+              onOpenLibrary();
+            }}
+          >
+            <ListMusic size={13} aria-hidden="true" />
+            {pt ? "Coleção" : "Collection"}
+          </button>
+          <button type="button" onClick={onClose}>
+            <DiscAlbum size={13} aria-hidden="true" />
+            {pt ? "Ejetar disco" : "Eject disc"}
+          </button>
+        </div>
+      </section>
+    </div>
   );
 }

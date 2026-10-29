@@ -1,0 +1,32 @@
+---
+// Sample a regular grid, then expand each sample into a crisp three-pixel block.
+const grid = `data:image/svg+xml,${encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"><defs><pattern id="grid" width="3" height="3" patternUnits="userSpaceOnUse"><rect x="1" y="1" width="1" height="1" fill="white"/></pattern></defs><rect width="100%" height="100%" fill="url(#grid)"/></svg>'
+)}`;
+const surfaces = [
+  { id: "pixel-surface", x: "0", y: "0", width: "100%", height: "100%" },
+  // Leave room for the insertion slot's stepped shadow and focus outline.
+  { id: "pixel-slot", x: "-10%", y: "-100%", width: "120%", height: "300%" },
+];
+---
+
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="0"
+  height="0"
+  aria-hidden="true"
+  focusable="false"
+  style="position: absolute; pointer-events: none;"
+>
+  <defs>
+    {
+      surfaces.map(surface => (
+        <filter {...surface} color-interpolation-filters="sRGB">
+          <feImage href={grid} result="grid" />
+          <feComposite in="SourceGraphic" in2="grid" operator="in" />
+          <feMorphology operator="dilate" radius="1" />
+        </filter>
+      ))
+    }
+  </defs>
+</svg>

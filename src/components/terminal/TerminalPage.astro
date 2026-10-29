@@ -2,6 +2,7 @@
 import { getCollection, type CollectionEntry } from "astro:content";
 import { getImage } from "astro:assets";
 import PostArticle from "./PostArticle.astro";
+import PixelSurfaceFilter from "./PixelSurfaceFilter.astro";
 import { getPostVersions } from "@/utils/getPostVersions";
 import { SITE } from "@/config";
 import Layout from "@/layouts/Layout.astro";
@@ -135,6 +136,7 @@ const title = initialPost
           : undefined))
     : undefined}
 >
+  <PixelSurfaceFilter />
   <a id="skip-to-content" href="#main-content" class="terminal-skip"
     >{lang === "pt" ? "Pular para o conteúdo" : "Skip to content"}</a
   >

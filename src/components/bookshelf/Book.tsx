@@ -48,7 +48,7 @@ export default memo(function Book({
       y: selected && !reduced ? -8 : 0,
       rotateY:
         selected && !reduced ? (view === "spines" ? 75 : 0) : restRotation,
-      rotateX: selected && view === "covers" && !reduced ? -4 : 0,
+      rotateX: view === "covers" ? (selected && !reduced ? -10 : -6) : 0,
       // Hidden shelf books must settle before a returning flight measures them.
       duration: reduced || changedView || isGhosted ? 0 : 0.25,
       ease: "power2.out",
@@ -97,7 +97,7 @@ export default memo(function Book({
               view === "spines"
                 ? -(metrics.coverWidth - metrics.spineWidth) / 2
                 : 0,
-            transform: `rotateY(${restRotation}deg)`,
+            transform: `rotateY(${restRotation}deg) rotateX(${view === "covers" ? -6 : 0}deg)`,
           }}
         />
         <button

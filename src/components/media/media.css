@@ -767,20 +767,50 @@
   padding: 25px;
   color: var(--muted);
 }
-/* A persistent turntable lives outside the desktop's disposable windows. */
+/* The toolbar player stays mounted when its controls are tucked away. */
+.music-menu {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.terminal-utilities .music-menu-trigger {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+}
+.music-menu-trigger[aria-expanded="true"],
+.music-menu-trigger.is-playing {
+  color: var(--accent);
+}
+.music-menu-indicator {
+  position: absolute;
+  right: 1px;
+  bottom: 3px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+}
 .music-player {
   position: absolute;
   z-index: 40;
-  top: 66px;
-  right: 20px;
+  top: calc(100% + 10px);
+  right: 0;
   width: 340px;
-  max-width: calc(100% - 24px);
+  max-width: calc(100vw - 24px);
+  max-height: calc(100dvh - 70px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   border: 1px solid var(--control-border);
   background: var(--background);
   box-shadow: 0 8px 30px #0003;
   font: 10px/1.5 var(--font-mono);
 }
-.music-player button {
+.music-player[hidden] {
+  display: none;
+}
+.terminal-utilities .music-player button {
   border: 0;
   background: transparent;
   cursor: pointer;
@@ -804,7 +834,7 @@
 .music-player-top .status-light {
   margin-right: 6px;
 }
-.music-player-top > button {
+.terminal-utilities .music-player-top > button {
   padding: 4px;
 }
 .music-player-video {
@@ -821,7 +851,7 @@
   align-items: center;
   padding: 13px 14px 8px;
 }
-.music-player .mini-record {
+.terminal-utilities .music-player .mini-record {
   flex: none;
   width: 38px;
   height: 38px;
@@ -838,7 +868,7 @@
 .mini-record.is-spinning {
   animation: record-spin 6s linear infinite;
 }
-.music-player .music-now-playing {
+.terminal-utilities .music-player .music-now-playing {
   flex: 1;
   min-width: 0;
   display: block;
@@ -861,7 +891,7 @@
   font-size: 9px;
   color: var(--muted);
 }
-.music-player .music-toggle {
+.terminal-utilities .music-player .music-toggle {
   width: 32px;
   height: 32px;
   border: 1px solid var(--control-border);
@@ -885,7 +915,7 @@
 .music-player-transport > input {
   flex: 1;
 }
-.music-player-transport > button {
+.terminal-utilities .music-player-transport > button {
   padding: 4px;
 }
 .music-player-detail {
@@ -909,6 +939,22 @@
   align-items: center;
   gap: 5px;
   flex: 0 0 70px;
+}
+.music-player-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid var(--control-border);
+  padding: 6px 12px;
+}
+.terminal-utilities .music-player-actions button {
+  gap: 6px;
+  font-size: 9px;
+  color: var(--muted);
+}
+.music-player .music-preview a {
+  font-size: inherit;
+  opacity: 1;
 }
 /* Handheld arcade: real boards, touch controls, and scoped keyboard input. */
 .console-idle {
@@ -1327,10 +1373,16 @@
   }
 }
 @media (max-width: 640px) {
+  .music-menu {
+    position: static;
+  }
   .music-player {
-    top: 98px;
-    right: 8px;
-    max-width: calc(100% - 16px);
+    top: 40px;
+    right: 12px;
+    left: 12px;
+    width: auto;
+    max-width: none;
+    max-height: calc(100dvh - 52px);
   }
   .music-player-video {
     height: 225px;

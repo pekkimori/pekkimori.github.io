@@ -13,6 +13,14 @@ export const BOOKS: Book[] = [
     pageCount: 624,
     status: "read",
     spineColor: "#8f2f35",
+    binding: "modern",
+    // Cloth and accent sampled from the existing cover artwork.
+    palette: {
+      cloth: "#e80928",
+      ink: "#fff1d5",
+      accent: "#04499b",
+      paper: "#eee2c7",
+    },
     i18n: {
       en: {
         title: "The Laws of Human Nature",
@@ -43,6 +51,13 @@ export const BOOKS: Book[] = [
     pageCount: 316,
     status: "read",
     spineColor: "#c59a35",
+    binding: "classic",
+    palette: {
+      cloth: "#f2b207",
+      ink: "#461c08",
+      accent: "#461c08",
+      paper: "#e5c98e",
+    },
     i18n: {
       en: {
         title: "The King in Yellow",
@@ -73,6 +88,13 @@ export const BOOKS: Book[] = [
     pageCount: 186,
     status: "read",
     spineColor: "#59402f",
+    binding: "cloth",
+    palette: {
+      cloth: "#4d2d0f",
+      ink: "#eee1c4",
+      accent: "#b1a794",
+      paper: "#dfcfad",
+    },
     i18n: {
       en: {
         title: "Motes and Beams",

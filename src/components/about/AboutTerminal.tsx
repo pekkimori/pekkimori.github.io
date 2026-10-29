@@ -999,7 +999,9 @@ export default function AboutTerminal({
           <div className="terminal-utilities">
             <nav
               className="terminal-preferences"
-              aria-label={pt ? "Idioma e tema" : "Language and theme"}
+              aria-label={
+                pt ? "Idioma, tema e música" : "Language, theme, and music"
+              }
             >
               <a
                 href={languageHref("en")}
@@ -1024,6 +1026,19 @@ export default function AboutTerminal({
                 <Sun className="terminal-sun" size={16} />
                 <Moon className="terminal-moon" size={16} />
               </button>
+              {musicTrack !== null && (
+                <Suspense fallback={null}>
+                  <MusicPlayer
+                    lang={lang}
+                    selected={musicTrack}
+                    onSelect={musicDeck.replaceLoaded}
+                    onClose={musicDeck.eject}
+                    onOpenLibrary={() => open("music")}
+                    pauseSignal={musicPauseSignal}
+                    onPlay={() => setAnimePauseSignal(value => value + 1)}
+                  />
+                </Suspense>
+              )}
             </nav>
             <nav
               className="terminal-socials"
@@ -1277,22 +1292,6 @@ export default function AboutTerminal({
             </div>
           ))}
         </div>
-        {musicTrack !== null && (
-          <Suspense fallback={null}>
-            <MusicPlayer
-              lang={lang}
-              selected={musicTrack}
-              onSelect={index => {
-                musicDeck.choose(index);
-                open("music");
-              }}
-              onClose={musicDeck.eject}
-              onOpenLibrary={() => open("music")}
-              pauseSignal={musicPauseSignal}
-              onPlay={() => setAnimePauseSignal(value => value + 1)}
-            />
-          </Suspense>
-        )}
         {bookFlights.map(flight => {
           const book = books.find(book => book.slug === flight.slug);
           return (

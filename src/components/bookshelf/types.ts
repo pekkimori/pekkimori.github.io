@@ -21,6 +21,13 @@ export type Book = {
   pageCount: number;
   status: BookStatus;
   spineColor?: string;
+  binding?: "cloth" | "classic" | "modern";
+  palette?: {
+    cloth: string;
+    ink: string;
+    accent: string;
+    paper: string;
+  };
   i18n: Record<Lang, BookI18n>;
 };
 

@@ -36,13 +36,20 @@ export function useMediaMachine() {
       window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 650
     );
   };
+  // Transport controls replace a loaded item without ejecting the player.
+  const replaceLoaded = (index: number) => {
+    if (phase !== "loaded") return;
+    cancel();
+    setSelected(index);
+    setLoaded(index);
+  };
   const eject = () => {
     cancel();
     setLoaded(null);
     setSelected(null);
     setPhase("empty");
   };
-  return { selected, loaded, phase, choose, insert, eject };
+  return { selected, loaded, phase, choose, insert, replaceLoaded, eject };
 }
 
 export type MediaMachineState = ReturnType<typeof useMediaMachine>;

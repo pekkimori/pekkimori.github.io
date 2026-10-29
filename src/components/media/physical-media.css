@@ -41,12 +41,13 @@
   border: 3px solid;
   border-color: color-mix(in srgb, var(--background) 75%, #000) var(--border)
     var(--muted) var(--border);
-  border-radius: 3px;
+  border-radius: 0;
   background: color-mix(in srgb, var(--background) 65%, #000);
   box-shadow:
-    inset 0 4px 6px #000,
-    0 1px 0 color-mix(in srgb, var(--foreground) 20%, transparent),
-    0 9px 22px #0007;
+    inset 0 4px 0 #000,
+    0 2px 0 color-mix(in srgb, var(--foreground) 20%, transparent),
+    0 6px 0 #0004;
+  filter: url("#pixel-slot");
   transition:
     border-color 180ms,
     box-shadow 180ms;
@@ -56,7 +57,7 @@
   position: absolute;
   inset: 0 0 auto;
   height: 5px;
-  background: linear-gradient(var(--secondary), var(--background));
+  background: linear-gradient(var(--secondary) 50%, var(--background) 50%);
   border-bottom: 1px solid var(--border);
 }
 .dock-games .slot-mouth::after {
@@ -75,19 +76,19 @@
 }
 .dock-music .slot-mouth {
   border-width: 1px;
-  border-radius: 4px;
+  border-radius: 0;
   box-shadow:
-    inset 0 1px 2px #000,
-    0 1px color-mix(in srgb, var(--foreground) 25%, transparent),
-    0 6px 15px #0007;
+    inset 0 2px 0 #000,
+    0 2px 0 color-mix(in srgb, var(--foreground) 25%, transparent),
+    0 4px 0 #0004;
 }
 .screen-media-slot[data-over="true"] .slot-mouth,
 .screen-media-slot:focus-visible .slot-mouth {
   border-color: var(--accent);
   box-shadow:
-    0 0 0 5px color-mix(in srgb, var(--accent) 8%, transparent),
-    0 0 24px color-mix(in srgb, var(--accent) 35%, transparent),
-    inset 0 0 5px color-mix(in srgb, var(--accent) 20%, transparent);
+    0 0 0 3px color-mix(in srgb, var(--accent) 35%, transparent),
+    0 0 0 6px color-mix(in srgb, var(--accent) 12%, transparent),
+    inset 0 2px 0 color-mix(in srgb, var(--accent) 20%, transparent);
 }
 .is-inserting .slot-mouth {
   animation: dock-read 220ms steps(2) infinite;
@@ -198,6 +199,7 @@
   height: 100%;
   inset: 0;
   pointer-events: none;
+  image-rendering: pixelated;
 }
 .physical-hit {
   position: fixed;
