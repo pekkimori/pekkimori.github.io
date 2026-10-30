@@ -135,8 +135,8 @@ export default function ConstellationMap() {
   }
 
   function tooltipPosition(clientX: number, clientY: number) {
-    const width = 280;
-    const height = 170;
+    const width = bubbleRef.current?.offsetWidth || 280;
+    const height = bubbleRef.current?.offsetHeight || 240;
     const gap = 16;
     const margin = 12;
 
@@ -205,7 +205,7 @@ export default function ConstellationMap() {
   return (
     <div className="w-full">
       <div
-        className="relative w-full overflow-hidden rounded-2xl border border-border"
+        className="relative w-full overflow-hidden"
         style={{ height: "clamp(380px, 58vh, 580px)" }}
         onMouseMove={e => {
           targetRef.current = tooltipPosition(e.clientX, e.clientY);
@@ -313,7 +313,6 @@ export default function ConstellationMap() {
                   window.location.assign(p.link);
                 }
               }}
-              title={p.title}
               aria-label={`${p.title}: open interactive portfolio demo`}
             >
               {isHovered && (
@@ -363,21 +362,6 @@ export default function ConstellationMap() {
           );
         })}
 
-        <div
-          className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap select-none"
-          style={{
-            fontSize: "9px",
-            letterSpacing: "0.18em",
-            textTransform: "uppercase",
-            color: "var(--muted)",
-            opacity: hovered === null ? 0.45 : 0,
-            transition: "opacity 0.3s ease",
-            fontFamily: "inherit",
-          }}
-        >
-          hover a star · click to open
-        </div>
-
         <style>{`
           @keyframes twinkle {
             0%, 100% { opacity: 0.75; transform: scale(1); }
@@ -406,11 +390,11 @@ export default function ConstellationMap() {
 function ProjectBubble({ project }: { project: Project }) {
   return (
     <div
-      className="overflow-hidden rounded-xl border border-border bg-background/95 px-3 py-2.5 shadow-lg backdrop-blur-sm"
-      style={{ minWidth: 180, maxWidth: 260 }}
+      className="overflow-hidden border border-border bg-background font-mono text-xs leading-relaxed"
+      style={{ width: 280, maxWidth: "calc(100vw - 24px)" }}
     >
-      <div className="flex items-center justify-between gap-2">
-        <span className="truncate font-mono text-xs font-semibold text-foreground">
+      <div className="flex items-start justify-between gap-3 border-b border-border bg-secondary px-3 py-2">
+        <span className="font-mono text-xs font-medium text-foreground">
           {project.title}
         </span>
         <span
@@ -425,38 +409,37 @@ function ProjectBubble({ project }: { project: Project }) {
           [{project.status ?? "wip"}]
         </span>
       </div>
-      {project.category && (
-        <div className="mt-0.5 font-mono text-[10px] tracking-[0.15em] text-accent uppercase">
-          {project.category}
-        </div>
-      )}
-      {project.description && (
-        <div className="mt-1.5 line-clamp-3 font-mono text-[11px] leading-relaxed text-muted">
-          {project.description}
-        </div>
-      )}
-      {project.tags && project.tags.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-1">
-          {project.tags.slice(0, 3).map(tag => (
-            <span
-              key={tag}
-              className="rounded border border-border px-1.5 py-0.5 font-mono text-[8px] tracking-wide text-muted uppercase"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-      )}
-      {project.officialLink && (
-        <div className="mt-2 font-mono text-[9px] text-muted">
-          Official · yourminervavibe.com ↗
-        </div>
-      )}
-      {project.link && (
-        <div className="mt-2 border-t border-border pt-2 font-mono text-[9px] tracking-[0.14em] text-accent uppercase">
-          Click to try the demo →
-        </div>
-      )}
+      <div className="px-3 py-3">
+        {project.category && (
+          <div className="font-mono text-[10px] tracking-[0.12em] text-accent uppercase">
+            {project.category}
+          </div>
+        )}
+        {project.description && (
+          <div className="mt-2 font-mono text-xs leading-relaxed text-muted">
+            {project.description}
+          </div>
+        )}
+        {project.tags && project.tags.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-x-2 gap-y-1">
+            {project.tags.slice(0, 3).map(tag => (
+              <span key={tag} className="font-mono text-[10px] text-muted">
+                [{tag}]
+              </span>
+            ))}
+          </div>
+        )}
+        {project.officialLink && (
+          <div className="mt-3 font-mono text-[10px] text-muted">
+            Official · yourminervavibe.com ↗
+          </div>
+        )}
+        {project.link && (
+          <div className="mt-3 border-t border-dashed border-border pt-2 font-mono text-[11px] text-accent">
+            Open interactive demo →
+          </div>
+        )}
+      </div>
     </div>
   );
 }

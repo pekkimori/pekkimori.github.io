@@ -245,9 +245,6 @@ export default function AchievementsShelf({ lang, active, arrival }: Props) {
       })}
       {(item || count === ACHIEVEMENTS.length) && (
         <footer className="keepsake-memory" aria-live="polite">
-          <span className="keepsake-memory-mark" aria-hidden="true">
-            ✧
-          </span>
           <div>
             <h3>
               {item

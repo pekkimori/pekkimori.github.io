@@ -415,3 +415,71 @@
 .music-player .music-preview {
   color: var(--foreground);
 }
+
+/* Reserve each object's space while artwork and the first frame prepare. */
+.physical-skeleton {
+  position: absolute;
+  width: 66%;
+  height: 100px;
+  overflow: hidden;
+  border: 1px solid var(--control-border);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--foreground) 6%, var(--background));
+  transform: rotate(-4deg);
+  transition: opacity 300ms ease;
+  pointer-events: none;
+}
+.collection-games .physical-skeleton {
+  width: 52%;
+  height: 115px;
+}
+.collection-music .physical-skeleton {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+}
+.physical-skeleton > span {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    110deg,
+    transparent 20%,
+    color-mix(in srgb, var(--foreground) 9%, transparent) 50%,
+    transparent 80%
+  );
+  animation: media-loading 1.6s ease-in-out infinite;
+}
+.physical-skeleton.is-hidden {
+  opacity: 0;
+}
+.physical-skeleton.is-hidden > span {
+  animation: none;
+}
+.physical-world .physical-canvas {
+  opacity: 0;
+  transition: opacity 350ms ease;
+}
+.physical-world.is-ready .physical-canvas {
+  opacity: 1;
+}
+.physical-world:not(.is-ready) .physical-hit {
+  visibility: hidden !important;
+  pointer-events: none;
+}
+@keyframes media-loading {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .physical-skeleton > span {
+    animation: none;
+  }
+  .physical-skeleton,
+  .physical-world .physical-canvas {
+    transition: none;
+  }
+}

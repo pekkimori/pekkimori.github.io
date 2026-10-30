@@ -76,22 +76,33 @@ function loadThumbnail(url: string) {
     const image = new Image();
     // Canvas/WebGL textures need a CORS-enabled image, even for public URLs.
     image.crossOrigin = "anonymous";
+    const timeout = window.setTimeout(() => {
+      image.onload = null;
+      image.onerror = null;
+      resolve(null);
+    }, 8000);
     image.onload = () => {
+      window.clearTimeout(timeout);
       // YouTube can return a small placeholder for an unavailable thumbnail.
       if (image.naturalWidth > 120) resolve(image);
       else {
-        thumbnails.delete(url);
         resolve(null);
       }
     };
     image.onerror = () => {
-      thumbnails.delete(url);
+      window.clearTimeout(timeout);
       resolve(null);
     };
     image.src = url;
   });
   thumbnails.set(url, loading);
   return loading;
+}
+/** Settle artwork before the scene's first visible frame, including failures. */
+export async function prepareMediaArtwork(items: PhysicalMedia[]) {
+  await Promise.all(
+    items.map(item => (item.thumbnail ? loadThumbnail(item.thumbnail) : null))
+  );
 }
 function artworkTexture(
   item: PhysicalMedia,

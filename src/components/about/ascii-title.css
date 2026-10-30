@@ -1,0 +1,17 @@
+.ascii-title {
+  width: 100%;
+  margin: 0;
+  padding: 0.75rem 0;
+  color: inherit;
+}
+
+.ascii-title canvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: 5 / 1;
+}
+
+.retro-terminal-hero .ascii-title {
+  max-width: 680px;
+  padding: 0;
+}

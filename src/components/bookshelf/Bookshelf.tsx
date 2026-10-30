@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -83,9 +84,10 @@ export default function Bookshelf({
   const [query, setQuery] = useState("");
   const [hoveredSlug, setHoveredSlug] = useState<string | null>(null);
   const [hasHover, setHasHover] = useState(true);
-  useEffect(() => {
+  useLayoutEffect(() => {
     const root = rootRef.current;
     if (!root) return;
+    if (root.clientWidth > 0) setWidth(Math.floor(root.clientWidth));
     const observer = new ResizeObserver(([entry]) => {
       if (entry.contentRect.width > 0)
         setWidth(Math.floor(entry.contentRect.width));

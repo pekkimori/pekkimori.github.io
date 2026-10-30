@@ -1,5 +1,5 @@
 .retro-station {
-  --crt-bloom: color-mix(in srgb, var(--foreground) 30%, transparent);
+  --crt-bloom: color-mix(in srgb, var(--foreground) 34%, transparent);
   position: relative;
   isolation: isolate;
   box-sizing: border-box;
@@ -10,9 +10,9 @@
 /* Glow is concentrated on the heading instead of every glyph on the page. */
 .retro-terminal-hero h2 {
   text-shadow:
-    -0.4px 0 #ff788218,
-    0.4px 0 #83dcff18,
-    0 0 12px var(--crt-bloom);
+    -0.45px 0 #ff788222,
+    0.45px 0 #83dcff22,
+    0 0 13px var(--crt-bloom);
 }
 .crt-surface,
 .crt-surface > div {
@@ -32,21 +32,33 @@
   z-index: 10000;
 }
 .crt-raster {
-  opacity: 0.2;
+  opacity: 0.26;
   background-image:
     repeating-linear-gradient(0deg, #00000050 0 1px, transparent 1px 3px),
-    url("/textures/crt-grain.png");
-  background-size:
-    auto,
-    64px 64px;
+    repeating-linear-gradient(
+      90deg,
+      #ff505008 0 1px,
+      #70ff7006 1px 2px,
+      #6090ff08 2px 3px
+    );
+  animation: crt-flicker 4.7s linear infinite;
+}
+.crt-raster::after {
+  content: "";
+  position: absolute;
+  inset: -64px;
+  background-image: url("/textures/crt-grain.png");
+  background-size: 64px 64px;
+  opacity: 0.45;
+  animation: crt-static 0.48s steps(1, end) infinite;
 }
 .crt-surface > .crt-beam {
   inset: -18% 0 auto;
   height: 18%;
   background: linear-gradient(
     transparent,
-    color-mix(in srgb, var(--foreground) 5%, transparent) 85%,
-    color-mix(in srgb, var(--foreground) 10%, transparent) 99%,
+    color-mix(in srgb, var(--foreground) 2%, transparent) 55%,
+    color-mix(in srgb, var(--foreground) 4%, transparent) 80%,
     transparent
   );
   /* Transform-only animation leaves the content and static glass untouched. */
@@ -56,17 +68,52 @@
   background:
     radial-gradient(
       ellipse at 50% 45%,
-      transparent 62%,
-      #00000008 82%,
-      #00000030 100%
+      transparent 58%,
+      #0000000c 82%,
+      #00000038 100%
     ),
     linear-gradient(
       125deg,
-      #ffffff0a,
+      transparent,
       transparent 35%,
       transparent 80%,
       #ffffff03
     );
+}
+@keyframes crt-flicker {
+  0%,
+  100% {
+    opacity: 0.26;
+  }
+  19%,
+  23%,
+  64% {
+    opacity: 0.25;
+  }
+  20%,
+  24%,
+  65% {
+    opacity: 0.27;
+  }
+  48%,
+  83% {
+    opacity: 0.26;
+  }
+}
+@keyframes crt-static {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(17px, -23px);
+  }
+  50% {
+    transform: translate(-31px, 11px);
+  }
+  75% {
+    transform: translate(9px, 37px);
+  }
 }
 @keyframes crt-beam {
   to {
@@ -74,6 +121,10 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
+  .crt-raster,
+  .crt-raster::after {
+    animation: none;
+  }
   .crt-beam {
     display: none;
   }

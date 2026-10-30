@@ -41,11 +41,16 @@ export default function PhysicalMediaCollection({
     setReady(false);
     setFallback(false);
     import("./media-physics")
-      .then(({ createMediaPhysics }) => {
+      .then(async ({ createMediaPhysics }) => {
+        const { prepareMediaArtwork } = await import("./media-objects");
+        await prepareMediaArtwork(items);
         if (cancelled || !canvas.current) return;
         try {
           engine.current = createMediaPhysics({
             canvas: canvas.current,
+            onReady: () => {
+              if (!cancelled) setReady(true);
+            },
             anchors: anchors.current.filter((el): el is HTMLDivElement => !!el),
             buttons: buttons.current.filter(
               (el): el is HTMLButtonElement => !!el
@@ -60,7 +65,6 @@ export default function PhysicalMediaCollection({
               insert: live.current.onInsert,
             }),
           });
-          setReady(true);
         } catch {
           setFallback(true);
         }
@@ -78,8 +82,14 @@ export default function PhysicalMediaCollection({
   return (
     <section
       className={`physical-collection collection-${kind} ${ready ? "is-ready" : ""}`}
+      aria-busy={!ready && !fallback}
       aria-label={pt ? "Coleção de mídias 3D" : "3D media collection"}
     >
+      {!ready && !fallback && (
+        <span className="sr-only" role="status">
+          {pt ? "Carregando coleção…" : "Loading collection…"}
+        </span>
+      )}
       <button
         className="physical-reset"
         onClick={() => engine.current?.reset()}
@@ -107,7 +117,15 @@ export default function PhysicalMediaCollection({
               className="physical-anchor"
               data-media-index={item.index}
             >
-              {(!ready || fallback) && (
+              {!fallback && (
+                <span
+                  className={`physical-skeleton ${ready ? "is-hidden" : ""}`}
+                  aria-hidden="true"
+                >
+                  <span />
+                </span>
+              )}
+              {fallback && (
                 <button
                   className="physical-fallback"
                   aria-label={`${item.title} — ${item.subtitle}`}
@@ -137,7 +155,10 @@ export default function PhysicalMediaCollection({
       {active &&
         mounted &&
         createPortal(
-          <div className="physical-world" data-kind={kind}>
+          <div
+            className={`physical-world ${ready ? "is-ready" : ""}`}
+            data-kind={kind}
+          >
             <canvas
               key={`${kind}:${lang}:${catalogKey}`}
               ref={canvas}

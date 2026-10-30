@@ -126,6 +126,7 @@ export default function PixelCover({
       ref={rootRef}
       className="pixel-cover"
       data-ready={ready}
+      data-failed={failed}
       role={alt ? "img" : undefined}
       aria-label={alt || undefined}
     >

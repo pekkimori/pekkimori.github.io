@@ -8,7 +8,14 @@ import {
   type RiddleProgress,
   type TrailId,
 } from "@/utils/riddles";
-import { useEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+  type Ref,
+} from "react";
+import AsciiTitle from "./AsciiTitle";
 import { unlockAchievement } from "@/utils/achievements";
 import { navigate } from "astro:transitions/client";
 import { ANIME, ATLAS, FAVORITE_SONGS, PINNED_GAMES } from "@/data/about";
@@ -22,7 +29,10 @@ import {
   type AppId,
 } from "@/data/about-commands";
 
+export type DesktopTerminalHandle = { showHelp: () => void };
+
 type Props = {
+  ref?: Ref<DesktopTerminalHandle>;
   lang: "en" | "pt";
   open: (id: AppId) => void;
   theme: (value: string) => void;
@@ -51,6 +61,7 @@ const COMMANDS = [
 ];
 
 export default function DesktopTerminal({
+  ref,
   lang,
   open,
   theme,
@@ -453,6 +464,8 @@ export default function DesktopTerminal({
       ].slice(-250)
     );
   };
+  useImperativeHandle(ref, () => ({ showHelp: () => run("help") }));
+
   return (
     <div
       className="retro-terminal"
@@ -468,18 +481,35 @@ export default function DesktopTerminal({
         {welcome && (
           <div className="retro-terminal-welcome">
             <div className="retro-terminal-hero">
-              <div>
-                <p className="retro-terminal-intro">Hey, I'm</p>
-                <h2>
-                  pekkimori<span aria-hidden="true">_</span>
-                </h2>
-              </div>
+              <p className="retro-terminal-intro">
+                <svg
+                  className="retro-welcome-comet"
+                  viewBox="0 0 32 32"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <g transform="rotate(45 16 16)">
+                    <path d="M3 16h10M6 10h6M6 22h6" opacity="0.65" />
+                    <path
+                      className="retro-welcome-comet-star"
+                      d="m29 16-5 3-1 5-4-4-5 1 2.5-5-2.5-5 5 1 4-4 1 5Z"
+                      fill="currentColor"
+                    />
+                  </g>
+                </svg>
+                {pt ? "oi, eu sou" : "hey welcome! i'm"}
+              </p>
+              <AsciiTitle
+                text="pekkimori_"
+                blinkCursor
+                align="start"
+                readable
+              />
             </div>
-            <p className="retro-terminal-greeting">
-              {pt
-                ? "Bem-vindo ao meu pequeno canto da internet."
-                : "Welcome to my little corner of the internet."}
-            </p>
             <nav
               className="retro-terminal-directory"
               aria-label={pt ? "Explorar pastas" : "Explore folders"}
@@ -493,11 +523,6 @@ export default function DesktopTerminal({
                   <span aria-hidden="true">↗</span>
                 </button>
               ))}
-              <button onClick={() => run("help")}>
-                <span className="retro-directory-index">?</span>
-                <span>help</span>
-                <span aria-hidden="true">↗</span>
-              </button>
             </nav>
           </div>
         )}

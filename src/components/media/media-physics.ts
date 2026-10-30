@@ -53,6 +53,7 @@ type Grab = {
 const clamp = THREE.MathUtils.clamp;
 export function createMediaPhysics({
   canvas,
+  onReady,
   anchors,
   buttons,
   items,
@@ -61,6 +62,7 @@ export function createMediaPhysics({
   state,
 }: {
   canvas: HTMLCanvasElement;
+  onReady: () => void;
   anchors: HTMLElement[];
   buttons: HTMLButtonElement[];
   items: PhysicalMedia[];
@@ -101,6 +103,7 @@ export function createMediaPhysics({
     lastSelected = state().selected;
   const listeners: (() => void)[] = [];
   let dirty = true;
+  let revealed = false;
   let previousClip = "";
   const bodies: Body[] = items.map((item, i) => {
     const { group, dimensions } = makeMediaObject(kind, item, undefined, () => {
@@ -685,6 +688,10 @@ export function createMediaPhysics({
         body.mesh.visible = visible[i];
       });
       dirty = false;
+      if (!revealed) {
+        revealed = true;
+        onReady();
+      }
     }
   }
   frame = requestAnimationFrame(tick);

@@ -171,7 +171,45 @@
   image-rendering: pixelated;
 }
 .pixel-cover:not([data-ready="true"]) canvas {
-  visibility: hidden;
+  opacity: 0;
+}
+.pixel-cover canvas,
+.pixel-cover img {
+  transition: opacity 300ms ease;
+}
+.pixel-cover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    110deg,
+    transparent 20%,
+    #ffffff20 50%,
+    transparent 80%
+  );
+  animation: cover-loading 1.6s ease-in-out infinite;
+  pointer-events: none;
+}
+.pixel-cover[data-ready="true"]::after,
+.pixel-cover[data-failed="true"]::after {
+  display: none;
+}
+@keyframes cover-loading {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pixel-cover::after {
+    animation: none;
+  }
+  .pixel-cover canvas,
+  .pixel-cover img {
+    transition: none;
+  }
 }
 /* A recessed hinge sits above the printed jacket, beside the spine. */
 .book-face-front::before {

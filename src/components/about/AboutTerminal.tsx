@@ -18,8 +18,8 @@ import {
   type AchievementArrival,
 } from "@/utils/achievements";
 import GlobeCard from "./GlobeCard";
-import DesktopTerminal from "./DesktopTerminal";
-import { BookOpen, FileText, Moon, Sun, X } from "lucide-react";
+import DesktopTerminal, { type DesktopTerminalHandle } from "./DesktopTerminal";
+import { Moon, Sun, X } from "lucide-react";
 import PostReader from "../terminal/PostReader";
 import TerminalSky from "../terminal/TerminalSky";
 import CRTScreenEffects from "../terminal/CRTScreenEffects";
@@ -50,7 +50,6 @@ const AchievementsShelf = lazy(
 const Bookshelf = lazy(() => import("../bookshelf/Bookshelf"));
 const Calendar = lazy(() => import("../Calendar"));
 const ConstellationMap = lazy(() => import("../ConstellationMap"));
-const TextPressure = lazy(() => import("../TextPressure"));
 
 type WindowId =
   | Exclude<AppId, "terminal">
@@ -96,48 +95,6 @@ const NAMES: Record<Lang, Record<AppId, string>> = {
     achievements: "Conquistas",
   },
 };
-
-function Icon({
-  id,
-  small = false,
-}: {
-  id: WindowId | "terminal";
-  small?: boolean;
-}) {
-  if (id.startsWith("book:"))
-    return (
-      <BookOpen
-        className={`retro-icon ${small ? "is-small" : ""}`}
-        aria-hidden="true"
-      />
-    );
-  return (
-    <svg
-      className={`retro-icon ${small ? "is-small" : ""}`}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.4"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      {id === "terminal" ? (
-        <>
-          <rect x="2" y="3" width="20" height="18" rx="3" />
-          <path d="m6 8 4 4-4 4m7 0h5" />
-        </>
-      ) : id === "about" ? (
-        <>
-          <rect x="3" y="3" width="18" height="14" rx="2" />
-          <path d="M8 21h8m-4-4v4M7 8h4m-4 4h10" />
-        </>
-      ) : (
-        <path d="M3 6h6l2 3h10v11H3V6Zm0 3V4h7l2 2h8v3" />
-      )}
-    </svg>
-  );
-}
 
 export default function AboutTerminal({
   lang = "en",
@@ -219,6 +176,7 @@ export default function AboutTerminal({
   const [bookFlights, setBookFlights] = useState<BookFlight[]>([]);
   const nextBookFlightId = useRef(0);
   const screenRef = useRef<HTMLDivElement>(null);
+  const terminalRef = useRef<DesktopTerminalHandle>(null);
   const catTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const drag = useRef<{
     id: WindowId;
@@ -854,15 +812,6 @@ export default function AboutTerminal({
               <p>{pt ? "Carregando portfólio…" : "Loading portfolio…"}</p>
             }
           >
-            <TextPressure
-              text={pt ? "Meu Portfólio" : "My Portfolio"}
-              flex
-              alpha={false}
-              width
-              weight={false}
-              italic
-              minFontSize={36}
-            />
             <ConstellationMap />
           </Suspense>
         );
@@ -1014,7 +963,6 @@ export default function AboutTerminal({
                 aria-pressed={active === "terminal"}
                 onClick={showTerminal}
               >
-                <Icon id="terminal" small />
                 <span className="retro-tab-label">{names.terminal}</span>
               </button>
             </div>
@@ -1032,11 +980,6 @@ export default function AboutTerminal({
                     title={windowName(w.id)}
                     onClick={() => open(w.id)}
                   >
-                    {w.id.startsWith("post:") ? (
-                      <FileText size={14} aria-hidden="true" />
-                    ) : (
-                      <Icon id={w.id} small />
-                    )}
                     <span className="retro-tab-label">{windowName(w.id)}</span>
                   </button>
                   <button
@@ -1054,9 +997,19 @@ export default function AboutTerminal({
             <nav
               className="terminal-preferences"
               aria-label={
-                pt ? "Idioma, tema e música" : "Language, theme, and music"
+                pt ? "Ajuda, idioma, tema e música" : "Help, language, theme, and music"
               }
             >
+              <button
+                title={pt ? "Ajuda" : "Help"}
+                aria-label={pt ? "Ajuda" : "Help"}
+                onClick={() => {
+                  showTerminal();
+                  terminalRef.current?.showHelp();
+                }}
+              >
+                <span aria-hidden="true">?</span>
+              </button>
               <a
                 href={languageHref("en")}
                 aria-current={!pt ? "page" : undefined}
@@ -1130,6 +1083,7 @@ export default function AboutTerminal({
             aria-label={names.terminal}
           >
             <DesktopTerminal
+              ref={terminalRef}
               lang={lang}
               open={open}
               theme={setSiteTheme}
@@ -1210,7 +1164,6 @@ export default function AboutTerminal({
                     toggleMaximize(w.id);
                 }}
               >
-                <Icon id={w.id} small />
                 <code
                   id={`title-${w.id}`}
                   title={
