@@ -171,7 +171,7 @@ export default function AchievementsShelf({ lang, active, arrival }: Props) {
                         else anchors.current.delete(object.id);
                       }}
                     >
-                      {discovered ? (
+                      {discovered && (
                         <button
                           className="keepsake-object"
                           aria-label={object.title[lang]}
@@ -230,13 +230,6 @@ export default function AchievementsShelf({ lang, active, arrival }: Props) {
                             </span>
                           )}
                         </button>
-                      ) : (
-                        <span
-                          className="keepsake-empty-mark"
-                          aria-hidden="true"
-                        >
-                          ·
-                        </span>
                       )}
                     </div>
                     <div className="keepsake-plaque">
@@ -271,13 +264,6 @@ export default function AchievementsShelf({ lang, active, arrival }: Props) {
                     ? "Você encontrou todos os 36 objetos. Cada um guarda uma história."
                     : "You found all 36 keepsakes. Every one holds a story."}
               </p>
-            )}
-            {item && (
-              <small>
-                {pt
-                  ? "Arraste para girar · Use ← → com o teclado"
-                  : "Drag to turn · Use ← → on the keyboard"}
-              </small>
             )}
           </div>
         </footer>

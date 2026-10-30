@@ -66,6 +66,14 @@ export function createTrinketScene({
   };
   const resize = new ResizeObserver(markDirty);
   resize.observe(panel);
+  // Moving the window changes anchor positions without resizing the panel.
+  const cabinet = panel.closest(".retro-window");
+  const windowPosition = new MutationObserver(markDirty);
+  if (cabinet)
+    windowPosition.observe(cabinet, {
+      attributes: true,
+      attributeFilter: ["style", "class"],
+    });
   window.addEventListener("resize", markDirty);
   window.addEventListener("scroll", markDirty, true);
   const theme = new MutationObserver(markDirty);
@@ -189,6 +197,7 @@ export function createTrinketScene({
       disposed = true;
       cancelAnimationFrame(frame);
       resize.disconnect();
+      windowPosition.disconnect();
       theme.disconnect();
       window.removeEventListener("resize", markDirty);
       window.removeEventListener("scroll", markDirty, true);

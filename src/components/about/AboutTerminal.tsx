@@ -415,7 +415,7 @@ export default function AboutTerminal({
       openRef.current("achievements");
       setWindows(previous =>
         previous.map(w =>
-          w.id === "achievements" ? { ...w, maximized: true } : w
+          w.id === "achievements" ? { ...w, maximized: false } : w
         )
       );
     };

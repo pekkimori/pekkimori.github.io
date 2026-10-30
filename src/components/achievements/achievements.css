@@ -1,17 +1,12 @@
 .keepsakes {
-  --shelf-edge: #a58968;
-  --shelf-shadow: #33241c26;
-  --shelf-wood: #c6b193;
+  --shelf-edge: var(--border);
+  --shelf-shadow: color-mix(in srgb, var(--foreground) 12%, transparent);
+  --shelf-surface: var(--secondary);
   width: min(100%, 1100px);
   margin: 0 auto;
   padding: 12px 16px 38px;
   font: 11px/1.6 var(--font-mono);
   container-type: inline-size;
-}
-[data-theme="dark"] .keepsakes {
-  --shelf-edge: #77634f;
-  --shelf-shadow: #08081075;
-  --shelf-wood: #8c755c;
 }
 .keepsake-section {
   width: 100%;
@@ -51,30 +46,24 @@
 .keepsake-anchor {
   position: relative;
   height: 126px;
-  border-bottom: 7px solid var(--shelf-wood);
+  border-bottom: 7px solid var(--shelf-surface);
   background: radial-gradient(
     ellipse at 50% 100%,
-    color-mix(in srgb, var(--shelf-wood) 10%, transparent),
+    color-mix(in srgb, var(--muted) 6%, transparent),
     transparent 70%
   );
   box-shadow:
     0 2px 0 var(--shelf-edge),
-    0 9px 9px -5px var(--shelf-shadow);
+    0 7px 8px -5px var(--shelf-shadow);
 }
 .keepsake-anchor::after {
   content: "";
   position: absolute;
   left: 0;
   right: 0;
-  bottom: -6px;
+  bottom: -1px;
   height: 1px;
-  opacity: 0.35;
-  background: repeating-linear-gradient(
-    90deg,
-    transparent 0 11px,
-    var(--shelf-edge) 12px 90px,
-    transparent 100px 120px
-  );
+  background: var(--shelf-edge);
 }
 .keepsake-place:first-child .keepsake-anchor {
   border-radius: 2px 0 0 0;
@@ -104,7 +93,7 @@
   right: 18%;
   bottom: 5px;
   height: 6px;
-  background: #0003;
+  background: var(--shelf-shadow);
   border-radius: 50%;
   filter: blur(4px);
 }
@@ -118,14 +107,6 @@
     color-mix(in srgb, var(--accent) 11%, transparent),
     transparent 70%
   );
-}
-.keepsake-empty-mark {
-  position: absolute;
-  left: 50%;
-  bottom: 11px;
-  color: var(--muted);
-  opacity: 0.45;
-  font-size: 24px;
 }
 .keepsake-plaque {
   display: flex;
