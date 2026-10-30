@@ -19,7 +19,7 @@ import {
 } from "@/utils/achievements";
 import GlobeCard from "./GlobeCard";
 import DesktopTerminal, { type DesktopTerminalHandle } from "./DesktopTerminal";
-import { Moon, Sun, X } from "lucide-react";
+import { ArrowDownToLine, ArrowUpRight, Moon, Sun, X } from "lucide-react";
 import PostReader from "../terminal/PostReader";
 import TerminalSky from "../terminal/TerminalSky";
 import CRTScreenEffects from "../terminal/CRTScreenEffects";
@@ -28,6 +28,7 @@ import AsciiCat from "../terminal/AsciiCat";
 import PostList from "../terminal/PostList";
 import PostsPanel from "../terminal/PostsPanel";
 import PanelErrorBoundary from "../terminal/PanelErrorBoundary";
+import ResumeDocument, { RESUME_PDF_URL } from "../portfolio/ResumeDocument";
 import type { TerminalPost, PostsView } from "../terminal/types";
 import type { LocalizedBook } from "../bookshelf/types";
 import BookReview from "../bookshelf/BookReview";
@@ -53,6 +54,7 @@ const ConstellationMap = lazy(() => import("../ConstellationMap"));
 
 type WindowId =
   | Exclude<AppId, "terminal">
+  | "resume"
   | `post:${string}`
   | `book:${string}`;
 const RESIZE_DIRECTIONS = ["n", "e", "s", "w", "ne", "se", "sw", "nw"] as const;
@@ -69,7 +71,7 @@ type WindowState = {
   maximized: boolean;
 };
 type Lang = "en" | "pt";
-const NAMES: Record<Lang, Record<AppId, string>> = {
+const NAMES: Record<Lang, Record<AppId | "resume", string>> = {
   en: {
     about: "About me",
     games: "Games",
@@ -78,6 +80,7 @@ const NAMES: Record<Lang, Record<AppId, string>> = {
     anime: "Anime",
     atlas: "Atlas",
     portfolio: "Portfolio",
+    resume: "Résumé",
     posts: "Posts",
     terminal: "Terminal",
     achievements: "Achievements",
@@ -90,6 +93,7 @@ const NAMES: Record<Lang, Record<AppId, string>> = {
     anime: "Anime",
     atlas: "Atlas",
     portfolio: "Portfólio",
+    resume: "Currículo",
     posts: "Publicações",
     terminal: "Terminal",
     achievements: "Conquistas",
@@ -197,7 +201,7 @@ export default function AboutTerminal({
   const bookFor = (id: WindowId | "terminal") =>
     books.find(book => `book:${book.slug}` === id);
   const windowName = (id: WindowId | "terminal") =>
-    bookFor(id)?.title ?? postFor(id)?.title ?? names[id as AppId];
+    bookFor(id)?.title ?? postFor(id)?.title ?? names[id as AppId | "resume"];
   const unavailableBookSlugs = [
     ...windows.filter(w => w.id.startsWith("book:")).map(w => w.id.slice(5)),
     ...bookFlights.map(flight => flight.slug),
@@ -268,7 +272,7 @@ export default function AboutTerminal({
           ? `/${lang}/`
           : id === "posts" && view !== "posts"
             ? `/${lang}/${view}${view === "tags" && tag ? `/${tag}` : ""}`
-            : `/${lang}/${id}`;
+            : `/${lang}/${id === "resume" ? "portfolio" : id}`;
     const destination =
       path +
       (id === "posts" && view === "search" && query
@@ -315,12 +319,34 @@ export default function AboutTerminal({
       return item ? [...previous.filter(w => w.id !== id), item] : previous;
     });
   };
+  const resumeWindow = (previous: WindowState[]): WindowState => {
+    const existing = previous.find(w => w.id === "resume");
+    if (existing) return { ...existing, minimized: false };
+    const screenWidth = screenRef.current?.clientWidth ?? 1280;
+    const width = Math.min(660, Math.max(320, screenWidth / 2 - 40));
+    return {
+      id: "resume",
+      tabOrder: Math.max(0, ...previous.map(w => w.tabOrder)) + 2,
+      x: Math.max(16, screenWidth - width - 24),
+      y: 12,
+      width,
+      height: Math.max(
+        300,
+        Math.min(900, (screenRef.current?.clientHeight ?? 900) - 110)
+      ),
+      minimized: false,
+      maximized: false,
+    };
+  };
   const open = (id: WindowId | "terminal") => {
     if (id === "terminal") {
       showTerminal();
       return;
     }
     routeTo(id);
+    const openWithResume =
+      id === "portfolio" &&
+      !windows.some(w => w.id === "portfolio" && !w.minimized);
     const element = document.getElementById(`window-${id}`);
     const titlebar = element
       ?.querySelector(".retro-titlebar")
@@ -338,7 +364,7 @@ export default function AboutTerminal({
     setWindows(previous => {
       const item = previous.find(w => w.id === id);
       const n = previous.length;
-      return [
+      const next: WindowState[] = [
         ...previous.filter(w => w.id !== id),
         item
           ? {
@@ -358,9 +384,14 @@ export default function AboutTerminal({
               maximized: false,
             },
       ];
+      return openWithResume
+        ? [...next.filter(w => w.id !== "resume"), resumeWindow(previous)]
+        : next;
     });
     requestAnimationFrame(() => {
-      const target = document.getElementById(`window-${id}`);
+      const target = document.getElementById(
+        `window-${openWithResume ? "resume" : id}`
+      );
       target?.focus({ preventScroll: true });
     });
   };
@@ -547,7 +578,7 @@ export default function AboutTerminal({
           .map(w => ({ ...w, minimized: true }));
         if (id === "terminal") return other;
         const existing = previous.find(w => w.id === id);
-        return [
+        const restored: WindowState[] = [
           ...other,
           existing
             ? { ...existing, minimized: false }
@@ -560,6 +591,9 @@ export default function AboutTerminal({
                 maximized: false,
               },
         ];
+        return id === "portfolio"
+          ? [...restored.filter(w => w.id !== "resume"), resumeWindow(previous)]
+          : restored;
       });
       try {
         sessionStorage.setItem(
@@ -678,7 +712,7 @@ export default function AboutTerminal({
         article.translations?.find(t => t.lang === locale)?.href ??
         `/${locale}/posts`
       );
-    return `/${locale}/${active === "terminal" ? "" : active === "posts" && postsView !== "posts" ? postsView : active}`;
+    return `/${locale}/${active === "terminal" ? "" : active === "resume" ? "portfolio" : active === "posts" && postsView !== "posts" ? postsView : active}`;
   };
   const atlas = pt ? ATLAS_PT : ATLAS;
   const content = (id: WindowId): ReactNode => {
@@ -707,6 +741,8 @@ export default function AboutTerminal({
         />
       );
     switch (id) {
+      case "resume":
+        return <ResumeDocument lang={lang} />;
       case "about":
         return (
           <div className="retro-about">
@@ -918,7 +954,7 @@ export default function AboutTerminal({
   };
   const pointerDown = (e: PointerEvent<HTMLDivElement>, w: WindowState) => {
     if (
-      (e.target as HTMLElement).closest("button") ||
+      (e.target as HTMLElement).closest("button, a") ||
       w.maximized ||
       e.button !== 0 ||
       window.matchMedia("(max-width: 640px)").matches
@@ -1160,7 +1196,7 @@ export default function AboutTerminal({
                   drag.current = null;
                 }}
                 onDoubleClick={e => {
-                  if (!(e.target as HTMLElement).closest("button"))
+                  if (!(e.target as HTMLElement).closest("button, a"))
                     toggleMaximize(w.id);
                 }}
               >
@@ -1171,16 +1207,45 @@ export default function AboutTerminal({
                       ? `/home/user/bookshelf/${w.id.slice(5)}`
                       : w.id.startsWith("post:")
                         ? w.id.slice(5)
-                        : `/home/user/${w.id}`
+                        : w.id === "resume"
+                          ? "/home/user/portfolio/resume.pdf"
+                          : `/home/user/${w.id}`
                   }
                 >
                   {w.id.startsWith("book:")
                     ? `/home/user/bookshelf/${w.id.slice(5)}`
                     : w.id.startsWith("post:")
                       ? w.id.slice(5)
-                      : `/home/user/${w.id}`}
+                      : w.id === "resume"
+                        ? "/home/user/portfolio/resume.pdf"
+                        : `/home/user/${w.id}`}
                 </code>
                 <div className="retro-window-controls">
+                  {w.id === "resume" && (
+                    <>
+                      <a
+                        href={RESUME_PDF_URL}
+                        download="Rafael-Mori-Resume.pdf"
+                        aria-label={
+                          pt ? "Baixar currículo em PDF" : "Download résumé PDF"
+                        }
+                        title={pt ? "Baixar PDF" : "Download PDF"}
+                      >
+                        <ArrowDownToLine size={15} aria-hidden="true" />
+                      </a>
+                      <a
+                        href={RESUME_PDF_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={
+                          pt ? "Abrir PDF em nova aba" : "Open PDF in new tab"
+                        }
+                        title={pt ? "Abrir PDF" : "Open PDF"}
+                      >
+                        <ArrowUpRight size={16} aria-hidden="true" />
+                      </a>
+                    </>
+                  )}
                   <button
                     aria-label={`${pt ? "Minimizar" : "Minimize"} ${windowName(w.id)}`}
                     onClick={() => minimize(w.id)}

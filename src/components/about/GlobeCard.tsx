@@ -25,8 +25,8 @@ function depth(lng: number, lat: number, rotation: [number, number, number]): nu
 
 export default function GlobeCard({ places, lang = "en" }: Props) {
   const labels = lang === "pt"
-    ? { interactive: "Globo interativo: arraste para girar", lived: "morei", visited: "visitei", future: "futuro", drag: "arraste para girar" }
-    : { interactive: "Interactive globe: drag to rotate", lived: "lived", visited: "visited", future: "future", drag: "drag to rotate" };
+    ? { interactive: "Globo interativo: arraste para girar", lived: "morei", visited: "visitei", future: "futuro" }
+    : { interactive: "Interactive globe: drag to rotate", lived: "lived", visited: "visited", future: "future" };
   const [countries, setCountries] = useState<GeoPermissibleObjects | null>(null);
   const [rotation, setRotation] = useState<[number, number, number]>([20, -20, 0]);
   const [tooltip, setTooltip] = useState<Tooltip | null>(null);
@@ -226,25 +226,7 @@ export default function GlobeCard({ places, lang = "en" }: Props) {
         </div>
       )}
 
-      {/* Legend */}
-      <div className="mt-1 flex flex-wrap gap-x-4 gap-y-2 font-mono text-[10px] text-muted">
-        <span className="flex items-center gap-1.5">
-          <span className="inline-block h-2.5 w-2.5 rounded-full bg-accent" />
-          {labels.lived}
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="inline-block h-2.5 w-2.5 rounded-full bg-muted" />
-          {labels.visited}
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span
-            className="inline-block h-2.5 w-2.5 rounded-full border-2"
-            style={{ borderColor: FUTURE_COLOR }}
-          />
-          {labels.future}
-        </span>
-        <span className="ml-auto opacity-50">{labels.drag}</span>
-      </div>
+
     </div>
   );
 }

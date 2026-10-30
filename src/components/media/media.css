@@ -698,44 +698,6 @@
   color: #eee9da;
   background: #1d241df0;
 }
-.anime-notes {
-  padding: 24px 0 0;
-  animation: media-arrive 250ms ease-out;
-}
-.retro-screen .anime-notes h3 {
-  margin: 12px 0 18px;
-  font-size: 18px;
-}
-.anime-notes blockquote {
-  display: flex;
-  gap: 16px;
-  border-left: 1px solid var(--control-border);
-  margin: 0;
-  padding: 12px 14px;
-  color: var(--muted);
-}
-.anime-notes blockquote.is-scene-quote {
-  border-left: 2px solid var(--accent);
-  color: var(--foreground);
-  background: var(--control-hover);
-}
-.anime-notes blockquote p {
-  margin: 0;
-  font-size: 11px;
-  line-height: 1.9;
-}
-.quote-index {
-  display: flex;
-  align-items: flex-start;
-  gap: 5px;
-  min-width: 30px;
-  font-size: 9px;
-  padding-top: 3px;
-  opacity: 0.55;
-}
-.quote-index svg {
-  margin-top: 3px;
-}
 .media-footnote {
   text-align: center;
   margin: 24px 0 0;
@@ -1360,13 +1322,6 @@
   .deck-bottomline {
     padding: 10px;
     font-size: 8px;
-  }
-  .anime-notes blockquote {
-    gap: 9px;
-    padding-inline: 9px;
-  }
-  .quote-index {
-    min-width: 20px;
   }
   .console-loaded {
     padding: 20px 12px 10px;

@@ -95,6 +95,10 @@
 }
 .physical-collection {
   position: relative;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
 }
 .physical-reset {
   position: absolute;
@@ -143,7 +147,7 @@
   z-index: 0;
   height: 10px;
   width: 57%;
-  bottom: 20px;
+  bottom: -3px;
   border-radius: 50%;
   filter: blur(10px);
   background: #0003;
@@ -482,4 +486,186 @@
   .physical-world .physical-canvas {
     transition: none;
   }
+}
+
+.physical-views {
+  display: flex;
+  gap: 4px;
+  margin: 0 32px 22px 0;
+}
+.physical-views button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 10px;
+  border: 1px solid var(--control-border);
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 10px;
+  cursor: pointer;
+}
+.physical-views button[aria-pressed="true"] {
+  color: var(--foreground);
+  background: var(--secondary);
+  border-color: var(--accent);
+}
+.physical-collection[data-view="spines"] .physical-media-grid {
+  display: flex;
+  flex-wrap: wrap;
+}
+.physical-collection[data-view="spines"] .physical-anchor {
+  height: var(--spine-height);
+  background: none;
+}
+.physical-collection {
+  --spine-width: 46px;
+  --spine-height: 182px;
+  --cover-height: 150px;
+  --cover-ratio: 1.45;
+}
+.collection-music {
+  --spine-width: 20px;
+  --spine-height: 190px;
+  --cover-height: 180px;
+  --cover-ratio: 0.95;
+}
+.collection-games {
+  --spine-width: 34px;
+  --spine-height: 190px;
+  --cover-height: 180px;
+  --cover-ratio: 0.78;
+}
+.physical-collection[data-view="spines"] .physical-place {
+  flex: 0 0 var(--spine-width);
+}
+.physical-collection[data-view="covers"] .physical-anchor {
+  height: auto;
+  max-height: var(--cover-height);
+  aspect-ratio: var(--cover-ratio);
+}
+.physical-collection[data-view="spines"] .physical-caption {
+  display: none;
+}
+.physical-collection[data-view="spines"] .physical-skeleton {
+  bottom: 0;
+  width: 28px;
+  height: 160px;
+  border-radius: 0;
+  transform: none;
+}
+/* Hit areas stay transparent: the printed spine belongs to the 3D case. */
+.physical-hit.is-spine {
+  border-radius: 0;
+}
+.physical-hit.is-spine:focus-visible {
+  outline: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  outline-offset: 3px;
+}
+.physical-collection[data-view="spines"] .physical-fallback {
+  align-self: end;
+  writing-mode: vertical-rl;
+  width: 34px;
+  height: 165px;
+  min-height: 0;
+  padding: 8px 4px;
+  transform: none;
+  overflow: hidden;
+}
+
+/* Collection chrome follows the bookshelf; profiles sit beneath the shelf. */
+.media-archive {
+  display: flex;
+  flex-direction: column;
+}
+.media-archive > .media-profile-tag {
+  order: 1;
+  margin: 16px 0 0 auto;
+}
+.physical-collection .physical-reset {
+  position: static;
+  margin-left: auto;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--control-border);
+}
+.physical-shelf-bay {
+  overflow: hidden;
+  border: 1px solid var(--archive-edge);
+}
+.physical-collection[data-view="covers"] .physical-anchor::before {
+  content: "";
+  position: absolute;
+  inset: auto -100vw -1px;
+  border-bottom: 1px solid var(--archive-edge);
+  pointer-events: none;
+}
+.physical-collection[data-view="spines"] .physical-shelf-bay {
+  width: fit-content;
+  max-width: 100%;
+}
+.physical-shelf-bay .bookshelf-empty {
+  margin: 0;
+  padding: 28px 24px;
+}
+.physical-collection .physical-media-grid {
+  padding: 16px 16px 0;
+  gap: 16px;
+}
+.physical-collection[data-view="spines"] .physical-media-grid {
+  padding: 12px 12px 0;
+  gap: 16px 3px;
+}
+.physical-collection[data-view="spines"] .physical-anchor {
+  border-bottom: 0;
+  box-shadow: none;
+}
+.physical-collection[data-view="spines"] .physical-media-grid {
+  background-image: linear-gradient(
+    to bottom,
+    transparent calc(100% - 1px),
+    var(--archive-edge) calc(100% - 1px)
+  );
+  background-size: 100% calc(var(--spine-height) + 16px);
+  background-position: left -4px;
+  background-repeat: repeat-y;
+}
+.physical-collection[data-view="spines"] .shelf-baseline {
+  border-top: 0;
+}
+.physical-collection[data-view="spines"] .physical-anchor::after {
+  display: none;
+}
+@container (max-width: 580px) {
+  .physical-collection .physical-media-grid,
+  .physical-collection[data-view="spines"] .physical-media-grid {
+    padding-inline: 12px;
+  }
+}
+
+/* A full-width action strip keeps profile and reset controls together. */
+.physical-collection .bookshelf-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  width: 100%;
+  min-height: 64px;
+  padding: 12px 0;
+}
+.physical-collection .bookshelf-controls .media-profile-tag {
+  margin: 0;
+}
+.physical-collection .physical-reset {
+  margin-left: 0;
+  flex-shrink: 0;
+}
+.physical-collection[data-view="spines"] .physical-shelf-bay {
+  width: 100%;
+}
+.physical-collection[data-view="spines"] .physical-skeleton {
+  bottom: 6px;
+}
+.physical-collection[data-view="spines"] .physical-fallback {
+  margin-bottom: 6px;
 }

@@ -106,7 +106,12 @@ export default memo(function Book({
           title={`${book.title} — ${book.author}`}
           onMouseEnter={hasHover ? () => onHoverChange(book.slug) : undefined}
           onMouseLeave={hasHover ? () => onHoverChange(null) : undefined}
-          onFocus={() => onHoverChange(book.slug)}
+          onFocus={event => {
+            // Returning books regain focus, but only keyboard focus should
+            // raise a book when the pointer is elsewhere.
+            if (event.currentTarget.matches(":focus-visible"))
+              onHoverChange(book.slug);
+          }}
           onBlur={() => onHoverChange(null)}
           onClick={() => {
             onOpenBook(book);

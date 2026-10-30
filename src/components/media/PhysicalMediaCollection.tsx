@@ -1,13 +1,23 @@
-import { useEffect, useRef, useState, type RefObject } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+  type RefObject,
+} from "react";
 import { createPortal } from "react-dom";
-import { RotateCcw } from "lucide-react";
+import { LayoutGrid, Rows3, RotateCcw, Search, X } from "lucide-react";
 import type { MediaMachineState } from "./useMediaMachine";
 import type { MediaKind, PhysicalMedia } from "./media-catalog";
 import type { createMediaPhysics } from "./media-physics";
+import { searchMedia } from "./media-catalog";
+import "../bookshelf/bookshelf.css";
 import "./physical-media.css";
 
 export type PhysicalCollectionProps = {
   kind: MediaKind;
+  profile?: ReactNode;
   lang: "en" | "pt";
   active: boolean;
   deck: MediaMachineState;
@@ -21,8 +31,31 @@ export default function PhysicalMediaCollection({
   deck,
   dockRef,
   onInsert,
-  items,
+  items: catalog,
+  profile,
 }: PhysicalCollectionProps & { items: PhysicalMedia[] }) {
+  const [query, setQuery] = useState("");
+  const items = useMemo(() => {
+    const matches = catalog.filter(item =>
+      kind === "music"
+        ? searchMedia(item, query)
+        : query
+            .normalize("NFD")
+            .replace(/\p{Diacritic}/gu, "")
+            .toLocaleLowerCase(lang)
+            .trim()
+            .split(/\s+/)
+            .every(term =>
+              `${item.title} ${item.subtitle}`
+                .normalize("NFD")
+                .replace(/\p{Diacritic}/gu, "")
+                .toLocaleLowerCase(lang)
+                .includes(term)
+            )
+    );
+    return matches.sort((a, b) => a.title.localeCompare(b.title, lang));
+  }, [catalog, kind, query, lang]);
+  const [view, setView] = useState<"spines" | "covers">("spines");
   const [mounted, setMounted] = useState(false),
     [fallback, setFallback] = useState(false),
     [ready, setReady] = useState(false);
@@ -57,6 +90,7 @@ export default function PhysicalMediaCollection({
             ),
             items,
             kind,
+            view,
             dock: () => dockRef.current,
             state: () => ({
               selected: live.current.deck.selected,
@@ -78,10 +112,11 @@ export default function PhysicalMediaCollection({
       engine.current = null;
     };
     // Item content is fixed by kind/language; filtering changes the index key.
-  }, [mounted, active, catalogKey, kind, lang, dockRef]);
+  }, [mounted, active, catalogKey, kind, lang, dockRef, view]);
   return (
     <section
-      className={`physical-collection collection-${kind} ${ready ? "is-ready" : ""}`}
+      className={`bookshelf-archive physical-collection collection-${kind} ${ready ? "is-ready" : ""}`}
+      data-view={view}
       aria-busy={!ready && !fallback}
       aria-label={pt ? "Coleção de mídias 3D" : "3D media collection"}
     >
@@ -90,67 +125,130 @@ export default function PhysicalMediaCollection({
           {pt ? "Carregando coleção…" : "Loading collection…"}
         </span>
       )}
-      <button
-        className="physical-reset"
-        onClick={() => engine.current?.reset()}
-        disabled={!ready}
-        aria-label={pt ? "Repor posições" : "Reset positions"}
-        title={pt ? "Repor posições" : "Reset positions"}
-      >
-        <RotateCcw size={12} />
-      </button>
+      <div className="bookshelf-toolbar">
+        <label className="bookshelf-search">
+          <Search size={14} aria-hidden="true" />
+          <input
+            type="search"
+            value={query}
+            aria-label={pt ? "Buscar na coleção" : "Search collection"}
+            placeholder={
+              kind === "music"
+                ? pt
+                  ? "Música, artista ou álbum…"
+                  : "Song, artist, or album…"
+                : pt
+                  ? "Título ou tema…"
+                  : "Title or theme…"
+            }
+            onChange={event => setQuery(event.target.value)}
+          />
+          {query && (
+            <button
+              type="button"
+              onClick={() => setQuery("")}
+              aria-label={pt ? "Limpar busca" : "Clear search"}
+            >
+              <X size={14} />
+            </button>
+          )}
+        </label>
+        <div
+          className="bookshelf-views"
+          role="group"
+          aria-label={pt ? "Visualização" : "Collection view"}
+        >
+          <button
+            type="button"
+            aria-pressed={view === "spines"}
+            onClick={() => setView("spines")}
+          >
+            <Rows3 size={13} aria-hidden="true" />
+            {pt ? "Lombadas" : "Spines"}
+          </button>
+          <button
+            type="button"
+            aria-pressed={view === "covers"}
+            onClick={() => setView("covers")}
+          >
+            <LayoutGrid size={13} aria-hidden="true" />
+            {pt ? "Capas" : "Covers"}
+          </button>
+        </div>
+      </div>
+      <div className="bookshelf-controls">
+        {profile}
+        <button
+          type="button"
+          className="physical-reset"
+          onClick={() => engine.current?.reset()}
+          disabled={!ready}
+          aria-label={pt ? "Repor posições" : "Reset positions"}
+          title={pt ? "Repor posições" : "Reset positions"}
+        >
+          <RotateCcw size={12} />
+        </button>
+      </div>
       <p className="sr-only">
         {pt
           ? "Teclado: Enter seleciona. Use Inserir na entrada abaixo. Setas movem, R gira e Esc devolve à coleção."
           : "Keyboard: Enter selects an item. Use Insert at the slot below. Arrow keys move, R rotates, Escape returns it to the collection."}
       </p>
-      <div className="physical-media-grid">
-        {items.map((item, i) => (
-          <div
-            className={`physical-place ${deck.loaded === item.index ? "is-inserted" : ""}`}
-            key={item.index}
-          >
+      <div className="physical-shelf-bay">
+        {!items.length && (
+          <p className="bookshelf-empty" role="status">
+            {pt ? "Nenhum resultado encontrado." : "No matches found."}
+          </p>
+        )}
+        <div className="physical-media-grid">
+          {items.map((item, i) => (
             <div
-              ref={el => {
-                anchors.current[i] = el;
-              }}
-              className="physical-anchor"
-              data-media-index={item.index}
+              className={`physical-place ${deck.loaded === item.index ? "is-inserted" : ""}`}
+              key={item.index}
             >
-              {!fallback && (
-                <span
-                  className={`physical-skeleton ${ready ? "is-hidden" : ""}`}
-                  aria-hidden="true"
-                >
-                  <span />
-                </span>
-              )}
-              {fallback && (
-                <button
-                  className="physical-fallback"
-                  aria-label={`${item.title} — ${item.subtitle}`}
-                  onClick={() => deck.choose(item.index)}
-                >
-                  <span>
-                    {kind === "anime"
-                      ? "VHS"
-                      : kind === "games"
-                        ? "16 BIT"
-                        : "VINYL"}
+              <div
+                ref={el => {
+                  anchors.current[i] = el;
+                }}
+                className="physical-anchor"
+                data-media-index={item.index}
+              >
+                {!fallback && (
+                  <span
+                    className={`physical-skeleton ${ready ? "is-hidden" : ""}`}
+                    aria-hidden="true"
+                  >
+                    <span />
                   </span>
+                )}
+                {fallback && (
+                  <button
+                    className="physical-fallback"
+                    aria-label={`${item.title} — ${item.subtitle}`}
+                    onClick={() => deck.choose(item.index)}
+                  >
+                    <span>
+                      {kind === "anime"
+                        ? "VHS"
+                        : kind === "games"
+                          ? "16 BIT"
+                          : "VINYL"}
+                    </span>
+                    <strong>{item.title}</strong>
+                  </button>
+                )}
+              </div>
+              <div className="physical-caption">
+                <span>{String(item.index + 1).padStart(2, "0")}</span>
+                <div>
                   <strong>{item.title}</strong>
-                </button>
-              )}
-            </div>
-            <div className="physical-caption">
-              <span>{String(item.index + 1).padStart(2, "0")}</span>
-              <div>
-                <strong>{item.title}</strong>
-                <small>{item.subtitle}</small>
+                  <small>{item.subtitle}</small>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
+        <div className="shelf-baseline" aria-hidden="true" />
       </div>
       {active &&
         mounted &&
@@ -158,9 +256,10 @@ export default function PhysicalMediaCollection({
           <div
             className={`physical-world ${ready ? "is-ready" : ""}`}
             data-kind={kind}
+            data-view={view}
           >
             <canvas
-              key={`${kind}:${lang}:${catalogKey}`}
+              key={`${kind}:${lang}:${catalogKey}:${view}`}
               ref={canvas}
               aria-hidden="true"
               className="physical-canvas"
@@ -176,8 +275,8 @@ export default function PhysicalMediaCollection({
                   aria-label={`${item.title} — ${item.subtitle}`}
                   aria-describedby={`physical-keyboard-${kind}`}
                   style={{ visibility: "hidden" }}
-                  title={item.title}
-                />
+                  title={`${item.title} — ${item.subtitle}`}
+                ></button>
               ))}
             <span id={`physical-keyboard-${kind}`} className="sr-only">
               {pt

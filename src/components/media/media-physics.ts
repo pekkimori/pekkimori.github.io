@@ -1,5 +1,9 @@
 import * as THREE from "three";
-import { makeMediaObject, disposeMediaScene } from "./media-objects";
+import {
+  makeMediaObject,
+  makeMusicSleeve,
+  disposeMediaScene,
+} from "./media-objects";
 import type { MediaKind, PhysicalMedia } from "./media-catalog";
 import type { MachinePhase } from "./useMediaMachine";
 
@@ -12,11 +16,16 @@ export type PhysicsState = {
 type Body = {
   item: PhysicalMedia;
   mesh: THREE.Group;
+  sleeve: THREE.Group | null;
+  turnStarted: number;
+  turnFrom: number;
+  turning: boolean;
   button: HTMLButtonElement;
   anchor: HTMLElement;
   w: number;
   h: number;
   d: number;
+  shelfBounds: THREE.Box3;
   scale: number;
   x: number;
   y: number;
@@ -58,6 +67,7 @@ export function createMediaPhysics({
   buttons,
   items,
   kind,
+  view = "covers",
   dock,
   state,
 }: {
@@ -67,17 +77,21 @@ export function createMediaPhysics({
   buttons: HTMLButtonElement[];
   items: PhysicalMedia[];
   kind: MediaKind;
+  view?: "spines" | "covers";
   dock: () => HTMLElement | null;
   state: () => PhysicsState;
 }) {
+  const spines = view === "spines";
+  const restRX = spines ? 0 : -0.12;
+  const restRY = spines ? Math.PI / 2 : -0.32;
   const renderer = new THREE.WebGLRenderer({
     canvas,
     alpha: true,
     antialias: false,
     powerPreference: "low-power",
   });
-  // One rendered pixel spans two CSS pixels, including on Retina displays.
-  renderer.setPixelRatio(0.5);
+  // Keep printed spines legible; cover mode retains the coarse pixel treatment.
+  renderer.setPixelRatio(spines ? 1 : 0.5);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.setClearColor(0x000000, 0);
   const scene = new THREE.Scene();
@@ -109,8 +123,18 @@ export function createMediaPhysics({
     const { group, dimensions } = makeMediaObject(kind, item, undefined, () => {
       dirty = true;
     });
+    const sleeve = spines && kind === "music" ? makeMusicSleeve(item) : null;
+    if (sleeve) group.add(sleeve);
+    const restRZ = spines ? 0 : ((item.index % 3) - 1) * 0.08;
+    group.rotation.set(restRX, restRY, restRZ);
+    // Include the rotated case, labels, and sleeve in the shelf footprint.
+    const shelfBounds = new THREE.Box3().setFromObject(group, true);
     scene.add(group);
     return {
+      sleeve,
+      turnStarted: 0,
+      turnFrom: restRY,
+      turning: false,
       item,
       mesh: group,
       button: buttons[i],
@@ -118,14 +142,15 @@ export function createMediaPhysics({
       w: dimensions.w,
       h: dimensions.h,
       d: dimensions.d,
+      shelfBounds,
       scale: 1,
       x: 0,
       y: 0,
       vx: 0,
       vy: 0,
-      rx: -0.12,
-      ry: -0.32,
-      rz: ((i % 3) - 1) * 0.08,
+      rx: restRX,
+      ry: restRY,
+      rz: restRZ,
       spin: 0,
       mode: "shelf",
       time: 0,
@@ -144,6 +169,9 @@ export function createMediaPhysics({
       body.mesh = makeMediaObject(kind, body.item, undefined, () => {
         dirty = true;
       }).group;
+      body.sleeve =
+        spines && kind === "music" ? makeMusicSleeve(body.item) : null;
+      if (body.sleeve) body.mesh.add(body.sleeve);
       scene.add(body.mesh);
     }
     dirty = true;
@@ -212,7 +240,7 @@ export function createMediaPhysics({
     )
       attach(g.body);
     else {
-      g.body.mode = "free";
+      g.body.mode = spines && !g.moved && !cancelled ? "held" : "free";
       if (cancelled || !g.moved) g.body.vx = g.body.vy = 0;
       if (!cancelled && !g.moved) state().choose(g.body.item.index);
     }
@@ -234,6 +262,13 @@ export function createMediaPhysics({
       event.stopPropagation();
       button.focus({ preventScroll: true });
       button.setPointerCapture(event.pointerId);
+      if (spines && body.mode === "shelf") {
+        body.turnStarted = performance.now();
+        body.turnFrom = body.ry;
+        body.startX = body.x;
+        body.startY = body.y;
+        body.turning = !(event.shiftKey || event.button === 2);
+      }
       body.mode = "held";
       body.vx = body.vy = 0;
       button.classList.add("is-held");
@@ -296,6 +331,14 @@ export function createMediaPhysics({
         return;
       }
       suppressClick = false;
+      if (spines && body.mode === "shelf") {
+        body.turnFrom = body.ry;
+        body.startX = body.x;
+        body.startY = body.y;
+        body.turnStarted = performance.now();
+        body.turning = true;
+        body.mode = "held";
+      }
       state().choose(body.item.index);
     };
     const keys = (event: KeyboardEvent) => {
@@ -315,10 +358,12 @@ export function createMediaPhysics({
       event.stopPropagation();
       dirty = true;
       if (event.key === "Escape") {
+        body.turning = false;
         body.mode = "shelf";
         body.vx = body.vy = 0;
-        body.rx = -0.12;
-        body.ry = -0.32;
+        body.rx = restRX;
+        body.ry = restRY;
+        body.rz = spines ? 0 : ((body.item.index % 3) - 1) * 0.08;
         return;
       }
       if (event.key.toLowerCase() === "r") {
@@ -370,11 +415,12 @@ export function createMediaPhysics({
   const reset = () => {
     release(true);
     for (const body of bodies) {
+      body.turning = false;
       body.mode = "shelf";
       body.vx = body.vy = body.spin = 0;
-      body.rx = -0.12;
-      body.ry = -0.32;
-      body.rz = ((body.item.index % 3) - 1) * 0.08;
+      body.rx = restRX;
+      body.ry = restRY;
+      body.rz = spines ? 0 : ((body.item.index % 3) - 1) * 0.08;
     }
     dirty = true;
   };
@@ -427,7 +473,8 @@ export function createMediaPhysics({
       const anchor = fittingBody.anchor.getBoundingClientRect();
       const scale = Math.min(
         kind === "music" ? 1.15 : 1.2,
-        (anchor.width - 14) / fittingBody.w,
+        (anchor.width - (spines ? 4 : 14)) /
+          (spines ? Math.max(fittingBody.d, 12) : fittingBody.w),
         (anchor.height - 12) / fittingBody.h
       );
       slot.style.setProperty(
@@ -459,6 +506,9 @@ export function createMediaPhysics({
         body.startX = body.x;
         body.startY = body.y;
         body.startScale = body.scale;
+        body.startRX = body.rx;
+        body.startRY = body.ry;
+        body.startRZ = body.rz;
         dirty = true;
       }
     }
@@ -471,6 +521,22 @@ export function createMediaPhysics({
         body.mode !== "docking"
       )
         animateDock(body);
+      if (
+        spines &&
+        body.mode === "held" &&
+        !grab &&
+        current.selected !== body.item.index &&
+        !body.turning
+      ) {
+        body.mode = "returning";
+        body.time = now;
+        body.startX = body.x;
+        body.startY = body.y;
+        body.startScale = body.scale;
+        body.startRX = body.rx;
+        body.startRY = body.ry;
+        body.startRZ = body.rz;
+      }
       const before = [
         body.x,
         body.y,
@@ -481,15 +547,23 @@ export function createMediaPhysics({
         body.mesh.visible,
       ].join();
       const anchor = body.anchor.getBoundingClientRect();
+      const bounds = body.shelfBounds;
+      const shelfWidth = bounds.max.x - bounds.min.x;
+      const shelfHeight = bounds.max.y - bounds.min.y;
       const baseScale = Math.min(
-        kind === "music" ? 1.15 : 1.2,
-        (anchor.width - 14) / body.w,
-        (anchor.height - 12) / body.h
+        spines ? 2 : kind === "music" ? 1.15 : 1.2,
+        (anchor.width - (spines ? 4 : 14)) / shelfWidth,
+        (anchor.height - 8) / shelfHeight
       );
+      const shelfX =
+        anchor.left +
+        anchor.width / 2 -
+        ((bounds.min.x + bounds.max.x) / 2) * baseScale;
+      const shelfY = anchor.bottom - 6 + bounds.min.y * baseScale;
       if (body.mode === "shelf") {
         body.scale = baseScale;
-        body.x = anchor.left + anchor.width / 2;
-        body.y = anchor.top + anchor.height / 2;
+        body.x = shelfX;
+        body.y = shelfY;
         body.mesh.visible =
           anchor.bottom > clip.top &&
           anchor.top < clip.bottom &&
@@ -501,11 +575,14 @@ export function createMediaPhysics({
         body.x += (grab.x + grab.ox - body.x) * follow;
         body.y += (grab.y + grab.oy - body.y) * follow;
         body.scale += (baseScale * 1.08 - body.scale) * follow;
-        if (!reduced.matches) {
+        if (!reduced.matches && !body.turning) {
+          const turnFollow = 1 - Math.exp(-4 * dt);
           body.rx +=
-            (-0.15 + clamp(body.vy * 0.00025, -0.6, 0.6) - body.rx) * follow;
+            (-0.15 + clamp(body.vy * 0.00025, -0.6, 0.6) - body.rx) *
+            turnFollow;
           body.ry +=
-            (-0.3 + clamp(body.vx * 0.0003, -0.65, 0.65) - body.ry) * follow;
+            (-0.3 + clamp(body.vx * 0.0003, -0.65, 0.65) - body.ry) *
+            turnFollow;
           body.rz += (clamp(body.vx * 0.00008, -0.2, 0.2) - body.rz) * follow;
         }
         body.mesh.visible = true;
@@ -529,24 +606,16 @@ export function createMediaPhysics({
       } else if (body.mode === "returning") {
         const t = reduced.matches ? 1 : clamp((now - body.time) / 900, 0, 1);
         const ease = t * t * (3 - 2 * t);
-        body.x = THREE.MathUtils.lerp(
-          body.startX,
-          anchor.left + anchor.width / 2,
-          ease
-        );
+        body.x = THREE.MathUtils.lerp(body.startX, shelfX, ease);
         body.y =
-          THREE.MathUtils.lerp(
-            body.startY,
-            anchor.top + anchor.height / 2,
-            ease
-          ) -
+          THREE.MathUtils.lerp(body.startY, shelfY, ease) -
           Math.sin(Math.PI * t) * 50;
         body.scale = THREE.MathUtils.lerp(body.startScale, baseScale, ease);
-        body.rx = THREE.MathUtils.lerp(insertionTilt, -0.12, ease);
-        body.ry = THREE.MathUtils.lerp(0, -0.32, ease);
+        body.rx = THREE.MathUtils.lerp(body.startRX, restRX, ease);
+        body.ry = THREE.MathUtils.lerp(body.startRY, restRY, ease);
         body.rz = THREE.MathUtils.lerp(
-          0,
-          ((body.item.index % 3) - 1) * 0.08,
+          body.startRZ,
+          spines ? 0 : ((body.item.index % 3) - 1) * 0.08,
           ease
         );
         body.mesh.visible = true;
@@ -589,6 +658,46 @@ export function createMediaPhysics({
         }
         body.mesh.visible = true;
       }
+      if (body.turning && (body.mode === "held" || body.mode === "free")) {
+        const t = reduced.matches
+          ? 1
+          : clamp((now - body.turnStarted) / 950, 0, 1);
+        const ease = t * t * (3 - 2 * t);
+        if (body.mode === "held" && !grab) {
+          const shelfRight = Math.max(
+            ...anchors.map(el => el.getBoundingClientRect().right)
+          );
+          const halfWidth = (body.w * body.scale) / 2;
+          const previewX = clamp(
+            shelfRight + halfWidth + 24,
+            clip.left + halfWidth + 12,
+            Math.max(clip.left + halfWidth + 12, clip.right - halfWidth - 12)
+          );
+          body.x = THREE.MathUtils.lerp(body.startX, previewX, ease);
+          body.y = THREE.MathUtils.lerp(
+            body.startY,
+            anchor.bottom - 22 - (body.h * body.scale) / 2,
+            ease
+          );
+        }
+        body.ry = THREE.MathUtils.lerp(body.turnFrom, -0.3, ease);
+        body.rx = THREE.MathUtils.lerp(restRX, -0.12, ease);
+        if (t === 1) body.turning = false;
+      }
+      if (body.sleeve) {
+        const opacity =
+          body.mode === "shelf" || body.mode === "returning"
+            ? 1
+            : clamp((Math.abs(body.ry) - 0.3) / 0.65, 0, 1);
+        body.sleeve.visible = opacity > 0;
+        body.sleeve.traverse(node => {
+          if (node instanceof THREE.Mesh) {
+            const material = node.material as THREE.MeshStandardMaterial;
+            material.opacity = opacity;
+            material.depthWrite = opacity > 0.95;
+          }
+        });
+      }
       if (current.selected === body.item.index && current.phase === "loaded") {
         body.mode = "hidden";
         body.mesh.visible = false;
@@ -600,9 +709,20 @@ export function createMediaPhysics({
       );
       body.mesh.rotation.set(body.rx, body.ry, body.rz);
       body.mesh.scale.setScalar(body.scale);
-      body.button.style.width = `${body.w * body.scale}px`;
+      const spineOnShelf = spines && body.mode === "shelf";
+      const projectedWidth =
+        (Math.abs(Math.cos(body.ry)) * body.w +
+          Math.abs(Math.sin(body.ry)) * Math.max(body.d, 12)) *
+        body.scale;
+      const hitWidth = spineOnShelf
+        ? anchor.width - 2
+        : spines
+          ? Math.max(24, projectedWidth)
+          : body.w * body.scale;
+      body.button.classList.toggle("is-spine", spineOnShelf);
+      body.button.style.width = `${hitWidth}px`;
       body.button.style.height = `${body.h * body.scale}px`;
-      body.button.style.transform = `translate3d(${body.x - (body.w * body.scale) / 2}px,${body.y - (body.h * body.scale) / 2}px,0) rotate(${-body.rz}rad)`;
+      body.button.style.transform = `translate3d(${body.x - hitWidth / 2}px,${body.y - (body.h * body.scale) / 2}px,0) rotate(${-body.rz}rad)`;
       body.button.style.visibility =
         body.mesh.visible && body.mode !== "docking" ? "visible" : "hidden";
       if (body.mode === "shelf") {
@@ -616,7 +736,7 @@ export function createMediaPhysics({
         ].map(([x, y]) => {
           const dx = x - body.x,
             dy = y - body.y;
-          return `${dx * cos + dy * sin + (body.w * body.scale) / 2}px ${dy * cos - dx * sin + (body.h * body.scale) / 2}px`;
+          return `${dx * cos + dy * sin + hitWidth / 2}px ${dy * cos - dx * sin + (body.h * body.scale) / 2}px`;
         });
         body.button.style.clipPath = `polygon(${points.join(",")})`;
       } else body.button.style.clipPath = "none";

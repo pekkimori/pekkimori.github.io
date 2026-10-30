@@ -401,6 +401,88 @@ function makeVhs(
     }
   group.add(rear);
 }
+/** A narrow piece of masking tape sits on the original shell's side. */
+function addSideTape(
+  group: THREE.Group,
+  item: PhysicalMedia,
+  { w, h, d }: { w: number; h: number; d: number }
+) {
+  const { canvas, ctx } = labelCanvas(128, 1024);
+  // Uneven ends keep the label looking like applied tape rather than a case.
+  ctx.fillStyle = "#d8d3c3";
+  ctx.beginPath();
+  ctx.moveTo(5, 8);
+  ctx.lineTo(37, 14);
+  ctx.lineTo(72, 5);
+  ctx.lineTo(121, 12);
+  ctx.lineTo(124, 1012);
+  ctx.lineTo(84, 1018);
+  ctx.lineTo(48, 1010);
+  ctx.lineTo(4, 1017);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = "#ffffff22";
+  ctx.fillRect(9, 18, 5, 985);
+  ctx.fillStyle = "#00000012";
+  ctx.fillRect(115, 18, 5, 985);
+  ctx.translate(68, 60);
+  ctx.rotate(Math.PI / 2);
+  ctx.fillStyle = "#292b2e";
+  ctx.font = "italic bold 76px monospace";
+  ctx.textBaseline = "middle";
+  ctx.scale(Math.min(1, 900 / ctx.measureText(item.title).width), 1);
+  ctx.fillText(item.title, 0, 0);
+  const map = new THREE.CanvasTexture(canvas);
+  map.colorSpace = THREE.SRGBColorSpace;
+  map.minFilter = THREE.LinearFilter;
+  map.generateMipmaps = false;
+  const label = new THREE.Mesh(
+    new THREE.PlaneGeometry(d * 0.72, h * 0.82),
+    new THREE.MeshStandardMaterial({
+      map,
+      transparent: true,
+      roughness: 1,
+      metalness: 0,
+      polygonOffset: true,
+      polygonOffsetFactor: -1,
+    })
+  );
+  label.name = "side-tape-label";
+  label.rotation.y = -Math.PI / 2;
+  label.position.x = -w / 2 - 0.2;
+  group.add(label);
+}
+
+/** Music needs a sleeve to remain visible when shelved edge-on. */
+export function makeMusicSleeve(item: PhysicalMedia) {
+  const w = 150,
+    h = 150,
+    d = 12;
+  const palette = mediaPalette();
+  const paper = palette.shell;
+  const group = new THREE.Group();
+  group.name = "shelf-case";
+  box(group, w + 2, h + 2, d, paper, 0, 0, 0, 0.7);
+  // Apply the same masking-tape label to the sleeve's actual outer edge.
+  addSideTape(group, item, { w: w + 2, h, d });
+  const front = new THREE.Mesh(
+    new THREE.PlaneGeometry(w - 8, h - 8),
+    new THREE.MeshStandardMaterial({
+      map: artworkTexture(item, 512, 512),
+      roughness: 0.9,
+    })
+  );
+  front.position.z = d / 2 + 0.1;
+  group.add(front);
+  group.traverse(node => {
+    if (node instanceof THREE.Mesh) {
+      const material = node.material as THREE.MeshStandardMaterial;
+      material.transparent = true;
+    }
+  });
+  return group;
+}
+
 export function makeMediaObject(
   kind: MediaKind,
   item: PhysicalMedia,
@@ -568,6 +650,7 @@ export function makeMediaObject(
       group.add(label);
     }
   }
+  if (kind !== "music") addSideTape(group, item, dimensions);
   // Facet the lighting without changing the underlying model geometry.
   group.traverse(object => {
     if (!(object instanceof THREE.Mesh)) return;

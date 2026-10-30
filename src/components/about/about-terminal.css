@@ -110,7 +110,7 @@ html[data-theme="dark"] .retro-station {
 .retro-tab.is-selected::before {
   content: "";
   position: absolute;
-  inset: 0 0 auto;
+  inset: auto 0 0;
   height: 2px;
   background: var(--accent);
   pointer-events: none;
